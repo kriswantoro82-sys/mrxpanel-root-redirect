@@ -1,16 +1,1873 @@
 <!doctype html>
-<html lang="en">
+<html lang="id">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="refresh" content="0;url=https://member.mrxpanel.com/">
-<link rel="canonical" href="https://member.mrxpanel.com/">
-<title>MRXPANEL</title>
-<script>
-window.location.replace("https://member.mrxpanel.com/");
-</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07111f">
+  <meta name="color-scheme" content="dark">
+  <title>MRXPANEL — Panel SMM Modern untuk Kebutuhan Sosial Media</title>
+  <meta name="description" content="MRXPANEL menyediakan beragam layanan sosial media melalui dashboard member yang praktis, cepat, dan transparan dari pemesanan hingga pemantauan status.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://mrxpanel.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MRXPANEL">
+  <meta property="og:title" content="MRXPANEL — Panel SMM Modern">
+  <meta property="og:description" content="Kelola kebutuhan sosial media dari satu dashboard member yang praktis dan mudah digunakan.">
+  <meta property="og:url" content="https://mrxpanel.com/">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg-2: #0a1627;
+      --surface: rgba(17, 31, 51, .72);
+      --surface-strong: #10223a;
+      --surface-soft: rgba(255,255,255,.045);
+      --line: rgba(148, 163, 184, .17);
+      --text: #f8fbff;
+      --muted: #9fb0c5;
+      --blue: #5b8cff;
+      --blue-2: #7aa2ff;
+      --cyan: #42d8f5;
+      --violet: #9b7cff;
+      --green: #50d890;
+      --shadow: 0 28px 90px rgba(0,0,0,.32);
+      --radius: 24px;
+      --max: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% -5%, rgba(91,140,255,.19), transparent 31rem),
+        radial-gradient(circle at 92% 16%, rgba(155,124,255,.13), transparent 27rem),
+        linear-gradient(180deg, #06101d 0%, #081321 47%, #06101d 100%);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    button, a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .container {
+      width: min(calc(100% - 40px), var(--max));
+      margin-inline: auto;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .skip-link {
+      position: fixed;
+      left: 16px;
+      top: -80px;
+      z-index: 999;
+      padding: 12px 16px;
+      background: #fff;
+      color: #07111f;
+      border-radius: 10px;
+      font-weight: 800;
+      transition: top .2s ease;
+    }
+
+    .skip-link:focus { top: 16px; }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(148,163,184,.09);
+      background: rgba(6,16,29,.78);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .nav-wrap {
+      height: 74px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      flex: 0 0 auto;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      font-size: 1.08rem;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--blue), var(--violet));
+      box-shadow: 0 12px 30px rgba(91,140,255,.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      right: -12px;
+      top: -11px;
+      background: rgba(255,255,255,.24);
+    }
+
+    .brand-mark svg { width: 22px; height: 22px; position: relative; z-index: 1; }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 26px;
+      margin-left: auto;
+    }
+
+    .nav-links a {
+      color: #c7d2df;
+      font-size: .92rem;
+      font-weight: 650;
+      transition: color .2s ease;
+    }
+
+    .nav-links a:hover { color: #fff; }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 46px;
+      padding: 0 18px;
+      border: 1px solid transparent;
+      border-radius: 13px;
+      font: inherit;
+      font-size: .93rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(135deg, #4d7fff, #7b67f7);
+      box-shadow: 0 12px 30px rgba(91,140,255,.24);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 16px 36px rgba(91,140,255,.32);
+    }
+
+    .btn-ghost {
+      color: #e7eef7;
+      background: rgba(255,255,255,.035);
+      border-color: var(--line);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255,255,255,.065);
+      border-color: rgba(148,163,184,.3);
+    }
+
+    .menu-btn {
+      display: none;
+      margin-left: auto;
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.04);
+      color: #fff;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .menu-btn svg { width: 23px; height: 23px; }
+
+    main { overflow: hidden; }
+
+    .hero {
+      position: relative;
+      padding: 98px 0 86px;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+      background-size: 54px 54px;
+      mask-image: linear-gradient(to bottom, #000, transparent 88%);
+    }
+
+    .hero-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1.02fr .98fr;
+      gap: 70px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 22px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(91,140,255,.25);
+      background: rgba(91,140,255,.08);
+      color: #cbd9ff;
+      font-size: .8rem;
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+
+    .eyebrow-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 5px rgba(80,216,144,.1);
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 760px;
+      font-size: clamp(2.8rem, 6vw, 5.25rem);
+      line-height: .98;
+      letter-spacing: -.055em;
+      font-weight: 900;
+    }
+
+    .gradient-text {
+      color: transparent;
+      background: linear-gradient(110deg, #8fb0ff 2%, #6be3fb 48%, #a88eff 92%);
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+
+    .hero-copy {
+      margin: 25px 0 0;
+      max-width: 680px;
+      color: var(--muted);
+      font-size: clamp(1rem, 1.6vw, 1.14rem);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    .hero-actions .btn { min-height: 52px; padding-inline: 21px; }
+
+    .hero-note {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-top: 24px;
+      color: #91a4b9;
+      font-size: .84rem;
+    }
+
+    .hero-note span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .hero-note svg { width: 15px; height: 15px; color: var(--green); }
+
+    .dashboard-shell {
+      position: relative;
+      border: 1px solid rgba(148,163,184,.18);
+      border-radius: 28px;
+      padding: 12px;
+      background: linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.025));
+      box-shadow: var(--shadow);
+      transform: perspective(1200px) rotateY(-3deg) rotateX(1deg);
+    }
+
+    .dashboard-shell::before {
+      content: "";
+      position: absolute;
+      inset: -40px -42px auto auto;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(91,140,255,.18);
+      filter: blur(58px);
+      z-index: -1;
+    }
+
+    .dashboard {
+      overflow: hidden;
+      border-radius: 19px;
+      border: 1px solid rgba(255,255,255,.055);
+      background: #0b1728;
+    }
+
+    .dash-top {
+      height: 52px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(148,163,184,.11);
+      background: #0d1b2d;
+    }
+
+    .dash-brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: .78rem;
+      font-weight: 900;
+    }
+
+    .mini-mark {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--blue), var(--violet));
+      display: grid;
+      place-items: center;
+      font-size: .58rem;
+    }
+
+    .dash-user {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #172a43;
+      color: #b7c6d8;
+      font-size: .68rem;
+      font-weight: 900;
+    }
+
+    .dash-body {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      min-height: 390px;
+    }
+
+    .dash-side {
+      padding: 14px 10px;
+      border-right: 1px solid rgba(148,163,184,.1);
+      background: #091522;
+    }
+
+    .side-line {
+      height: 31px;
+      border-radius: 8px;
+      margin-bottom: 7px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 9px;
+      color: #71869c;
+      font-size: .56rem;
+      font-weight: 700;
+    }
+
+    .side-line.active {
+      color: #dbe7f5;
+      background: rgba(91,140,255,.12);
+    }
+
+    .side-icon {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      background: currentColor;
+      opacity: .36;
+    }
+
+    .dash-content { padding: 18px; }
+
+    .dash-greeting {
+      margin-bottom: 13px;
+      color: #eff5fc;
+      font-size: .83rem;
+      font-weight: 850;
+    }
+
+    .dash-sub {
+      margin-top: 3px;
+      color: #71869c;
+      font-size: .55rem;
+      font-weight: 600;
+    }
+
+    .dash-cards {
+      display: grid;
+      grid-template-columns: 1.18fr 1fr 1fr;
+      gap: 9px;
+      margin-bottom: 13px;
+    }
+
+    .dash-card {
+      min-height: 82px;
+      padding: 12px;
+      border: 1px solid rgba(148,163,184,.1);
+      border-radius: 12px;
+      background: #0f1f33;
+    }
+
+    .dash-card.main {
+      background:
+        radial-gradient(circle at 90% 10%, rgba(107,227,251,.1), transparent 44%),
+        linear-gradient(135deg, #132d50, #142744);
+    }
+
+    .dash-label {
+      color: #8397ac;
+      font-size: .49rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-weight: 800;
+    }
+
+    .dash-value {
+      margin-top: 8px;
+      color: #f6f9fd;
+      font-size: .93rem;
+      font-weight: 900;
+      letter-spacing: -.03em;
+    }
+
+    .dash-card:not(.main) .dash-value { font-size: .82rem; }
+
+    .dash-table {
+      border: 1px solid rgba(148,163,184,.1);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #0e1c2e;
+    }
+
+    .dash-table-head,
+    .dash-row {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr .8fr;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+    }
+
+    .dash-table-head {
+      height: 36px;
+      color: #71869c;
+      font-size: .49rem;
+      font-weight: 800;
+      border-bottom: 1px solid rgba(148,163,184,.08);
+    }
+
+    .dash-row {
+      min-height: 42px;
+      color: #aebfd0;
+      font-size: .51rem;
+      border-bottom: 1px solid rgba(148,163,184,.06);
+    }
+
+    .dash-row:last-child { border-bottom: 0; }
+
+    .status-pill {
+      width: max-content;
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: rgba(80,216,144,.1);
+      color: #7ee4ad;
+      font-weight: 800;
+    }
+
+    .status-pill.wait {
+      color: #f8cb7c;
+      background: rgba(248,203,124,.09);
+    }
+
+    .trust-strip {
+      position: relative;
+      padding: 16px 0 0;
+    }
+
+    .trust-box {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.025);
+      overflow: hidden;
+    }
+
+    .trust-item {
+      min-height: 94px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      border-right: 1px solid var(--line);
+    }
+
+    .trust-item:last-child { border-right: 0; }
+
+    .trust-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      color: #b8cbff;
+      background: rgba(91,140,255,.09);
+      border: 1px solid rgba(91,140,255,.14);
+    }
+
+    .trust-icon svg { width: 19px; height: 19px; }
+
+    .trust-title {
+      font-size: .86rem;
+      font-weight: 850;
+      color: #ecf3fb;
+    }
+
+    .trust-copy {
+      margin-top: 2px;
+      color: #7f93a8;
+      font-size: .72rem;
+    }
+
+    section {
+      padding: 106px 0;
+      position: relative;
+    }
+
+    .section-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #90b0ff;
+      font-size: .78rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .11em;
+    }
+
+    .section-kicker::before {
+      content: "";
+      width: 22px;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--blue), var(--cyan));
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 40px;
+      align-items: end;
+      margin-top: 14px;
+      margin-bottom: 40px;
+    }
+
+    .section-title {
+      margin: 0;
+      max-width: 720px;
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      line-height: 1.08;
+      letter-spacing: -.045em;
+      font-weight: 900;
+    }
+
+    .section-copy {
+      max-width: 480px;
+      margin: 0;
+      color: var(--muted);
+      font-size: .98rem;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .feature-card {
+      padding: 25px;
+      min-height: 230px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        radial-gradient(circle at 100% 0%, rgba(91,140,255,.065), transparent 45%),
+        rgba(255,255,255,.025);
+      transition: transform .25s ease, border-color .25s ease, background .25s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(91,140,255,.3);
+      background:
+        radial-gradient(circle at 100% 0%, rgba(91,140,255,.1), transparent 45%),
+        rgba(255,255,255,.035);
+    }
+
+    .feature-icon {
+      width: 47px;
+      height: 47px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      color: #b9ccff;
+      background: linear-gradient(145deg, rgba(91,140,255,.16), rgba(155,124,255,.09));
+      border: 1px solid rgba(91,140,255,.17);
+    }
+
+    .feature-icon svg { width: 22px; height: 22px; }
+
+    .feature-card h3 {
+      margin: 21px 0 8px;
+      font-size: 1.05rem;
+      letter-spacing: -.02em;
+    }
+
+    .feature-card p {
+      margin: 0;
+      color: #8fa2b7;
+      font-size: .88rem;
+    }
+
+    .services {
+      background:
+        linear-gradient(180deg, transparent, rgba(91,140,255,.025) 50%, transparent);
+    }
+
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .service-card {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      min-height: 92px;
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.026);
+      transition: transform .2s ease, border-color .2s ease;
+    }
+
+    .service-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(91,140,255,.28);
+    }
+
+    .service-badge {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: .82rem;
+      background: linear-gradient(145deg, #152a45, #102039);
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .service-card:nth-child(1) .service-badge { color: #ff91c5; }
+    .service-card:nth-child(2) .service-badge { color: #70e0f8; }
+    .service-card:nth-child(3) .service-badge { color: #ff8c8c; }
+    .service-card:nth-child(4) .service-badge { color: #7ea9ff; }
+    .service-card:nth-child(5) .service-badge { color: #7ce0ff; }
+    .service-card:nth-child(6) .service-badge { color: #c7b6ff; }
+
+    .service-name {
+      font-weight: 850;
+      font-size: .94rem;
+      letter-spacing: -.01em;
+    }
+
+    .service-desc {
+      color: #8196ab;
+      font-size: .75rem;
+      margin-top: 2px;
+    }
+
+    .service-cta {
+      margin-top: 28px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .workflow-grid {
+      margin-top: 6px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      counter-reset: step;
+    }
+
+    .workflow-card {
+      position: relative;
+      min-height: 214px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(255,255,255,.023);
+      counter-increment: step;
+    }
+
+    .workflow-number {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      color: #d9e4ff;
+      background: rgba(91,140,255,.11);
+      border: 1px solid rgba(91,140,255,.17);
+      font-size: .8rem;
+      font-weight: 900;
+    }
+
+    .workflow-number::after { content: counter(step); }
+
+    .workflow-card h3 {
+      margin: 23px 0 8px;
+      font-size: 1rem;
+      letter-spacing: -.02em;
+    }
+
+    .workflow-card p {
+      margin: 0;
+      color: #8ba0b4;
+      font-size: .84rem;
+    }
+
+    .workflow-line {
+      position: absolute;
+      top: 41px;
+      right: -15px;
+      width: 15px;
+      height: 1px;
+      background: var(--line);
+    }
+
+    .workflow-card:last-child .workflow-line { display: none; }
+
+    .audience {
+      padding-top: 22px;
+    }
+
+    .audience-box {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 46px;
+      padding: 48px;
+      border: 1px solid rgba(91,140,255,.18);
+      border-radius: 30px;
+      background:
+        radial-gradient(circle at 90% 10%, rgba(155,124,255,.13), transparent 34%),
+        radial-gradient(circle at 0% 100%, rgba(66,216,245,.08), transparent 34%),
+        linear-gradient(145deg, rgba(91,140,255,.07), rgba(255,255,255,.025));
+    }
+
+    .audience-copy h2 {
+      margin: 12px 0 14px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.08;
+      letter-spacing: -.045em;
+    }
+
+    .audience-copy p {
+      margin: 0;
+      color: #95a8bc;
+    }
+
+    .audience-tags {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      align-content: center;
+    }
+
+    .audience-tag {
+      min-height: 92px;
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(148,163,184,.14);
+      background: rgba(6,16,29,.46);
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .audience-tag span:first-child {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: rgba(91,140,255,.1);
+      color: #b8caff;
+      flex: 0 0 auto;
+    }
+
+    .audience-tag svg { width: 18px; height: 18px; }
+
+    .audience-tag b {
+      display: block;
+      font-size: .88rem;
+    }
+
+    .audience-tag small {
+      display: block;
+      margin-top: 2px;
+      color: #7f94a8;
+      font-size: .7rem;
+    }
+
+    .faq-wrap {
+      display: grid;
+      grid-template-columns: .78fr 1.22fr;
+      gap: 58px;
+      align-items: start;
+    }
+
+    .faq-intro {
+      position: sticky;
+      top: 110px;
+    }
+
+    .faq-intro h2 {
+      margin: 13px 0 14px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.08;
+      letter-spacing: -.045em;
+    }
+
+    .faq-intro p {
+      margin: 0;
+      color: #93a7bb;
+    }
+
+    .faq-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: rgba(255,255,255,.023);
+      overflow: hidden;
+    }
+
+    details[open] {
+      border-color: rgba(91,140,255,.24);
+      background: rgba(91,140,255,.035);
+    }
+
+    summary {
+      min-height: 66px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      cursor: pointer;
+      list-style: none;
+      font-weight: 800;
+      font-size: .92rem;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    summary::after {
+      content: "+";
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      background: rgba(255,255,255,.05);
+      color: #aebed0;
+      font-size: 1.15rem;
+      font-weight: 500;
+      transition: transform .2s ease;
+    }
+
+    details[open] summary::after { transform: rotate(45deg); }
+
+    .faq-answer {
+      padding: 0 20px 20px;
+      color: #8fa3b7;
+      font-size: .86rem;
+      max-width: 720px;
+    }
+
+    .cta-section { padding-top: 34px; }
+
+    .cta-box {
+      padding: 56px;
+      border-radius: 30px;
+      border: 1px solid rgba(91,140,255,.24);
+      text-align: center;
+      background:
+        radial-gradient(circle at 18% 100%, rgba(66,216,245,.13), transparent 27rem),
+        radial-gradient(circle at 88% 0%, rgba(155,124,255,.17), transparent 26rem),
+        linear-gradient(135deg, rgba(25,54,91,.72), rgba(22,37,67,.7));
+      box-shadow: var(--shadow);
+    }
+
+    .cta-box h2 {
+      max-width: 780px;
+      margin: 0 auto;
+      font-size: clamp(2.1rem, 5vw, 3.7rem);
+      line-height: 1.05;
+      letter-spacing: -.05em;
+    }
+
+    .cta-box p {
+      max-width: 620px;
+      margin: 16px auto 0;
+      color: #a9bdd1;
+    }
+
+    .cta-actions {
+      margin-top: 27px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 11px;
+    }
+
+    .footer {
+      padding: 76px 0 30px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.25fr .75fr .75fr;
+      gap: 70px;
+      padding-bottom: 44px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .footer-about {
+      max-width: 420px;
+      margin-top: 16px;
+      color: #8196aa;
+      font-size: .84rem;
+    }
+
+    .footer-col h3 {
+      margin: 3px 0 14px;
+      color: #dce7f2;
+      font-size: .83rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .footer-links {
+      display: grid;
+      gap: 10px;
+    }
+
+    .footer-links a {
+      color: #8196aa;
+      font-size: .84rem;
+      transition: color .2s ease;
+    }
+
+    .footer-links a:hover { color: #fff; }
+
+    .footer-bottom {
+      min-height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      color: #657a90;
+      font-size: .75rem;
+    }
+
+    .footer-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .footer-status::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 4px rgba(80,216,144,.08);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity .65s ease, transform .65s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    @media (max-width: 1040px) {
+      .nav-links { display: none; }
+
+      .menu-btn { display: inline-flex; }
+
+      .nav-actions .btn-ghost { display: none; }
+
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 56px;
+      }
+
+      .hero-copy { max-width: 760px; }
+
+      .dashboard-shell {
+        width: min(100%, 690px);
+        margin-inline: auto;
+        transform: none;
+      }
+
+      .trust-box { grid-template-columns: repeat(2, 1fr); }
+
+      .trust-item:nth-child(2) { border-right: 0; }
+      .trust-item:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+
+      .feature-grid,
+      .service-grid { grid-template-columns: repeat(2, 1fr); }
+
+      .workflow-grid { grid-template-columns: repeat(2, 1fr); }
+      .workflow-line { display: none; }
+
+      .audience-box { grid-template-columns: 1fr; }
+
+      .faq-wrap {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+
+      .faq-intro { position: static; }
+
+      .mobile-panel {
+        position: fixed;
+        inset: 74px 0 auto 0;
+        display: none;
+        padding: 18px 20px 24px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(6,16,29,.97);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+      }
+
+      .mobile-panel.open { display: block; }
+
+      .mobile-panel a {
+        display: flex;
+        align-items: center;
+        min-height: 48px;
+        color: #cbd7e4;
+        font-weight: 750;
+        border-bottom: 1px solid rgba(148,163,184,.08);
+      }
+
+      .mobile-panel .mobile-cta {
+        margin-top: 14px;
+        border-bottom: 0;
+      }
+
+      .mobile-panel .mobile-cta .btn { width: 100%; }
+    }
+
+    @media (max-width: 720px) {
+      .container { width: min(calc(100% - 28px), var(--max)); }
+
+      .nav-wrap { height: 68px; }
+
+      .nav-actions .btn-primary { display: none; }
+
+      .hero { padding: 70px 0 60px; }
+
+      h1 { font-size: clamp(2.6rem, 13vw, 4.2rem); }
+
+      .hero-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .hero-actions .btn { width: 100%; }
+
+      .hero-note { gap: 10px 16px; }
+
+      .dash-body { grid-template-columns: 1fr; }
+      .dash-side { display: none; }
+      .dash-cards { grid-template-columns: 1.2fr 1fr; }
+      .dash-card:last-child { display: none; }
+      .dashboard-shell { padding: 8px; border-radius: 22px; }
+      .dashboard { border-radius: 15px; }
+      .dash-content { padding: 14px; }
+      .dash-table-head, .dash-row { grid-template-columns: 1.2fr .8fr; }
+      .dash-table-head span:nth-child(2),
+      .dash-row span:nth-child(2) { display: none; }
+
+      .trust-box { grid-template-columns: 1fr; }
+      .trust-item {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .trust-item:last-child { border-bottom: 0; }
+
+      section { padding: 82px 0; }
+
+      .section-head {
+        display: block;
+        margin-bottom: 28px;
+      }
+
+      .section-copy { margin-top: 14px; }
+
+      .feature-grid,
+      .service-grid,
+      .workflow-grid,
+      .audience-tags {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-card { min-height: auto; }
+
+      .audience-box {
+        padding: 30px 22px;
+        border-radius: 24px;
+      }
+
+      .cta-box {
+        padding: 42px 22px;
+        border-radius: 24px;
+      }
+
+      .cta-actions { display: grid; }
+      .cta-actions .btn { width: 100%; }
+
+      .footer { padding-top: 58px; }
+
+      .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 36px;
+      }
+
+      .footer-bottom {
+        padding-top: 22px;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
 </head>
+
 <body>
-<p>Redirecting to <a href="https://member.mrxpanel.com/">MRXPANEL Member</a>...</p>
+  <a class="skip-link" href="#main">Lewati ke konten utama</a>
+
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="/" aria-label="MRXPANEL Beranda">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M5 16.5V7.7c0-.8.9-1.3 1.6-.8l5.4 3.8 5.4-3.8c.7-.5 1.6 0 1.6.8v8.8" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span>MRXPANEL</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Navigasi utama">
+        <a href="#keunggulan">Keunggulan</a>
+        <a href="#layanan">Layanan</a>
+        <a href="#cara-kerja">Cara Kerja</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a class="btn btn-ghost" href="https://member.mrxpanel.com/">Masuk</a>
+        <a class="btn btn-primary" href="https://member.mrxpanel.com/">Buka Member Area</a>
+      </div>
+
+      <button class="menu-btn" type="button" aria-label="Buka menu" aria-expanded="false" aria-controls="mobileMenu">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <nav id="mobileMenu" class="mobile-panel" aria-label="Navigasi mobile">
+      <a href="#keunggulan">Keunggulan</a>
+      <a href="#layanan">Layanan</a>
+      <a href="#cara-kerja">Cara Kerja</a>
+      <a href="#faq">FAQ</a>
+      <div class="mobile-cta">
+        <a class="btn btn-primary" href="https://member.mrxpanel.com/">Buka Member Area</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-content reveal">
+          <div class="eyebrow">
+            <span class="eyebrow-dot" aria-hidden="true"></span>
+            Dashboard member MRXPANEL
+          </div>
+
+          <h1>
+            Kelola kebutuhan sosial media
+            <span class="gradient-text">lebih mudah.</span>
+          </h1>
+
+          <p class="hero-copy">
+            Satu dashboard untuk memilih layanan, membuat pesanan, mengelola saldo,
+            dan memantau progres dengan alur yang sederhana dan transparan.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="https://member.mrxpanel.com/">
+              Mulai Sekarang
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="m9 18 6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+            <a class="btn btn-ghost" href="#cara-kerja">Lihat Cara Kerja</a>
+          </div>
+
+          <div class="hero-note" aria-label="Keunggulan singkat">
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="m5 12 4 4L19 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Ribuan pilihan layanan
+            </span>
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="m5 12 4 4L19 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Status pesanan terpantau
+            </span>
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="m5 12 4 4L19 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Web responsif
+            </span>
+          </div>
+        </div>
+
+        <div class="dashboard-shell reveal" aria-label="Ilustrasi dashboard MRXPANEL">
+          <div class="dashboard">
+            <div class="dash-top">
+              <div class="dash-brand">
+                <span class="mini-mark">M</span>
+                MRXPANEL
+              </div>
+              <span class="dash-user">U</span>
+            </div>
+
+            <div class="dash-body">
+              <aside class="dash-side" aria-hidden="true">
+                <div class="side-line active"><span class="side-icon"></span>Beranda</div>
+                <div class="side-line"><span class="side-icon"></span>Layanan</div>
+                <div class="side-line"><span class="side-icon"></span>Pesanan</div>
+                <div class="side-line"><span class="side-icon"></span>Deposit</div>
+                <div class="side-line"><span class="side-icon"></span>Profil</div>
+              </aside>
+
+              <div class="dash-content">
+                <div class="dash-greeting">
+                  Selamat datang 👋
+                  <div class="dash-sub">Ringkasan akun dan pesanan Anda</div>
+                </div>
+
+                <div class="dash-cards">
+                  <div class="dash-card main">
+                    <div class="dash-label">Saldo tersedia</div>
+                    <div class="dash-value">Rp ••••••</div>
+                  </div>
+                  <div class="dash-card">
+                    <div class="dash-label">Pesanan aktif</div>
+                    <div class="dash-value">Terpantau</div>
+                  </div>
+                  <div class="dash-card">
+                    <div class="dash-label">Layanan</div>
+                    <div class="dash-value">Ribuan</div>
+                  </div>
+                </div>
+
+                <div class="dash-table">
+                  <div class="dash-table-head">
+                    <span>Pesanan terbaru</span>
+                    <span>Layanan</span>
+                    <span>Status</span>
+                  </div>
+                  <div class="dash-row">
+                    <span>ORD-••••••</span>
+                    <span>Social Media</span>
+                    <span class="status-pill">Selesai</span>
+                  </div>
+                  <div class="dash-row">
+                    <span>ORD-••••••</span>
+                    <span>Social Media</span>
+                    <span class="status-pill wait">Diproses</span>
+                  </div>
+                  <div class="dash-row">
+                    <span>ORD-••••••</span>
+                    <span>Social Media</span>
+                    <span class="status-pill">Selesai</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container trust-strip reveal">
+        <div class="trust-box">
+          <div class="trust-item">
+            <div class="trust-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="trust-title">Dashboard terpusat</div>
+              <div class="trust-copy">Semua aktivitas dalam satu akun</div>
+            </div>
+          </div>
+
+          <div class="trust-item">
+            <div class="trust-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/>
+              </svg>
+            </div>
+            <div>
+              <div class="trust-title">Proses praktis</div>
+              <div class="trust-copy">Pesan dan pantau tanpa alur rumit</div>
+            </div>
+          </div>
+
+          <div class="trust-item">
+            <div class="trust-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 7h16v10H4z" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M8 10h8M8 14h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="trust-title">Saldo transparan</div>
+              <div class="trust-copy">Riwayat transaksi lebih mudah dilacak</div>
+            </div>
+          </div>
+
+          <div class="trust-item">
+            <div class="trust-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 5h14v14H5z" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M8 15v-3m4 3V9m4 6v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="trust-title">Status jelas</div>
+              <div class="trust-copy">Pantau perkembangan pesanan Anda</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="keunggulan">
+      <div class="container">
+        <div class="section-kicker reveal">Kenapa MRXPANEL</div>
+        <div class="section-head reveal">
+          <h2 class="section-title">Dibuat supaya aktivitas panel terasa lebih sederhana.</h2>
+          <p class="section-copy">
+            MRXPANEL memusatkan layanan, saldo, pesanan, dan riwayat ke dalam pengalaman member
+            yang konsisten di desktop maupun perangkat mobile.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card reveal">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 5h6v6H5zM13 5h6v6h-6zM5 13h6v6H5zM13 13h6v6h-6z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h3>Ribuan pilihan layanan</h3>
+            <p>Temukan berbagai kategori layanan sosial media dari satu katalog yang mudah ditelusuri.</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 12h16M12 4v16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/>
+              </svg>
+            </div>
+            <h3>Pemesanan lebih cepat</h3>
+            <p>Pilih layanan, masukkan target dan jumlah, lalu pantau pesanan langsung dari dashboard.</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 7.5h16v9H4z" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M7 11h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <circle cx="17" cy="12" r="1.5" fill="currentColor"/>
+              </svg>
+            </div>
+            <h3>Wallet dalam satu akun</h3>
+            <p>Saldo dan transaksi tercatat dalam sistem sehingga aktivitas akun lebih mudah dipantau.</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 4h12v16H6z" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M9 8h6M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Riwayat pesanan rapi</h3>
+            <p>Pesanan tersimpan bersama statusnya agar Anda tidak perlu mencatat secara manual.</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 5h14v10H5zM9 19h6M12 15v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h3>Nyaman di berbagai layar</h3>
+            <p>Tampilan responsif dirancang agar tetap nyaman digunakan lewat laptop maupun browser HP.</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="m12 3 2.4 5 5.6.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.6-.8L12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h3>Pengalaman yang konsisten</h3>
+            <p>Dari masuk akun sampai melihat status pesanan, alur dibuat jelas dan tidak berbelit.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="layanan" class="services">
+      <div class="container">
+        <div class="section-kicker reveal">Kategori layanan</div>
+        <div class="section-head reveal">
+          <h2 class="section-title">Beragam kategori populer dalam satu tempat.</h2>
+          <p class="section-copy">
+            Ketersediaan layanan dapat berubah. Daftar lengkap dan harga terbaru selalu ditampilkan
+            langsung di Member Area.
+          </p>
+        </div>
+
+        <div class="service-grid">
+          <div class="service-card reveal">
+            <div class="service-badge">IG</div>
+            <div>
+              <div class="service-name">Instagram</div>
+              <div class="service-desc">Beragam layanan untuk kebutuhan Instagram</div>
+            </div>
+          </div>
+
+          <div class="service-card reveal">
+            <div class="service-badge">TT</div>
+            <div>
+              <div class="service-name">TikTok</div>
+              <div class="service-desc">Pilihan layanan untuk konten TikTok</div>
+            </div>
+          </div>
+
+          <div class="service-card reveal">
+            <div class="service-badge">YT</div>
+            <div>
+              <div class="service-name">YouTube</div>
+              <div class="service-desc">Layanan terkait kanal dan konten YouTube</div>
+            </div>
+          </div>
+
+          <div class="service-card reveal">
+            <div class="service-badge">FB</div>
+            <div>
+              <div class="service-name">Facebook</div>
+              <div class="service-desc">Pilihan layanan untuk kebutuhan Facebook</div>
+            </div>
+          </div>
+
+          <div class="service-card reveal">
+            <div class="service-badge">TG</div>
+            <div>
+              <div class="service-name">Telegram</div>
+              <div class="service-desc">Layanan untuk komunitas dan channel Telegram</div>
+            </div>
+          </div>
+
+          <div class="service-card reveal">
+            <div class="service-badge">+</div>
+            <div>
+              <div class="service-name">Platform lainnya</div>
+              <div class="service-desc">Jelajahi kategori lain dari katalog member</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="service-cta reveal">
+          <a class="btn btn-primary" href="https://member.mrxpanel.com/">
+            Lihat Katalog di Member Area
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="m9 18 6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section id="cara-kerja">
+      <div class="container">
+        <div class="section-kicker reveal">Cara kerja</div>
+        <div class="section-head reveal">
+          <h2 class="section-title">Empat langkah untuk mulai menggunakan MRXPANEL.</h2>
+          <p class="section-copy">
+            Tidak perlu alur yang rumit. Mulai dari akun member, isi saldo, pilih layanan,
+            lalu pantau pesanan.
+          </p>
+        </div>
+
+        <div class="workflow-grid">
+          <article class="workflow-card reveal">
+            <div class="workflow-number"></div>
+            <h3>Buat akun member</h3>
+            <p>Masuk ke Member Area dan ikuti proses pendaftaran akun yang tersedia.</p>
+            <span class="workflow-line" aria-hidden="true"></span>
+          </article>
+
+          <article class="workflow-card reveal">
+            <div class="workflow-number"></div>
+            <h3>Siapkan saldo</h3>
+            <p>Gunakan menu deposit yang tersedia untuk menambahkan saldo akun Anda.</p>
+            <span class="workflow-line" aria-hidden="true"></span>
+          </article>
+
+          <article class="workflow-card reveal">
+            <div class="workflow-number"></div>
+            <h3>Pilih layanan</h3>
+            <p>Cari kategori yang dibutuhkan, baca detail layanan, lalu tentukan jumlah pesanan.</p>
+            <span class="workflow-line" aria-hidden="true"></span>
+          </article>
+
+          <article class="workflow-card reveal">
+            <div class="workflow-number"></div>
+            <h3>Pantau pesanan</h3>
+            <p>Lihat perkembangan dan riwayat pesanan langsung dari dashboard member.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="audience">
+      <div class="container">
+        <div class="audience-box reveal">
+          <div class="audience-copy">
+            <div class="section-kicker">Untuk siapa</div>
+            <h2>Satu panel, untuk berbagai kebutuhan.</h2>
+            <p>
+              MRXPANEL dirancang agar mudah dipakai baik untuk penggunaan pribadi,
+              pengelolaan bisnis kecil, maupun aktivitas reseller.
+            </p>
+          </div>
+
+          <div class="audience-tags">
+            <div class="audience-tag">
+              <span>
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M6 19c.6-3.7 2.6-5.5 6-5.5s5.4 1.8 6 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span><b>Personal</b><small>Untuk kebutuhan akun sendiri</small></span>
+            </div>
+
+            <div class="audience-tag">
+              <span>
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M4 9h16v10H4zM7 9V5h10v4" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span><b>UMKM</b><small>Kelola kebutuhan bisnis lebih praktis</small></span>
+            </div>
+
+            <div class="audience-tag">
+              <span>
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M6 18V9l6-4 6 4v9M9 18v-5h6v5" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span><b>Agency</b><small>Satu dashboard untuk banyak kebutuhan</small></span>
+            </div>
+
+            <div class="audience-tag">
+              <span>
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M5 6h14v12H5zM8 10h8M8 14h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span><b>Reseller</b><small>Akses katalog dan alur order terpusat</small></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <div class="container faq-wrap">
+        <div class="faq-intro reveal">
+          <div class="section-kicker">FAQ</div>
+          <h2>Pertanyaan yang sering muncul.</h2>
+          <p>Informasi singkat sebelum Anda mulai menggunakan Member Area MRXPANEL.</p>
+        </div>
+
+        <div class="faq-list">
+          <details class="reveal">
+            <summary>Apa itu MRXPANEL?</summary>
+            <div class="faq-answer">
+              MRXPANEL adalah panel layanan sosial media dengan dashboard member untuk memilih layanan,
+              membuat pesanan, mengelola saldo, dan memantau status pesanan dari satu tempat.
+            </div>
+          </details>
+
+          <details class="reveal">
+            <summary>Bagaimana cara melihat harga dan layanan terbaru?</summary>
+            <div class="faq-answer">
+              Masuk ke Member Area. Katalog di sana menampilkan layanan yang tersedia beserta informasi
+              dan harga terbaru pada saat Anda mengaksesnya.
+            </div>
+          </details>
+
+          <details class="reveal">
+            <summary>Bagaimana cara membuat pesanan?</summary>
+            <div class="faq-answer">
+              Setelah memiliki akun dan saldo yang cukup, pilih layanan yang sesuai, isi target serta
+              jumlah yang diminta, kemudian konfirmasi pesanan dari dashboard.
+            </div>
+          </details>
+
+          <details class="reveal">
+            <summary>Apakah status pesanan bisa dipantau?</summary>
+            <div class="faq-answer">
+              Ya. Riwayat dan status pesanan tersedia di Member Area sehingga Anda dapat melihat
+              perkembangan pesanan tanpa perlu mencatatnya secara terpisah.
+            </div>
+          </details>
+
+          <details class="reveal">
+            <summary>Apakah MRXPANEL bisa digunakan lewat HP?</summary>
+            <div class="faq-answer">
+              Member Web dirancang responsif sehingga dapat digunakan melalui browser di desktop,
+              laptop, maupun perangkat mobile.
+            </div>
+          </details>
+
+          <details class="reveal">
+            <summary>Ke mana saya harus masuk sebagai member?</summary>
+            <div class="faq-answer">
+              Gunakan Member Area resmi di member.mrxpanel.com. Tombol “Buka Member Area” pada halaman
+              ini juga akan membawa Anda langsung ke sana.
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <div class="container">
+        <div class="cta-box reveal">
+          <h2>Siap mencoba pengalaman MRXPANEL yang baru?</h2>
+          <p>
+            Masuk ke Member Area untuk menjelajahi katalog, mengelola saldo,
+            dan membuat pesanan dari satu dashboard.
+          </p>
+          <div class="cta-actions">
+            <a class="btn btn-primary" href="https://member.mrxpanel.com/">
+              Buka Member Area
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="m9 18 6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+            <a class="btn btn-ghost" href="#keunggulan">Pelajari Lebih Lanjut</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a class="brand" href="/" aria-label="MRXPANEL">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M5 16.5V7.7c0-.8.9-1.3 1.6-.8l5.4 3.8 5.4-3.8c.7-.5 1.6 0 1.6.8v8.8" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span>MRXPANEL</span>
+          </a>
+          <p class="footer-about">
+            Panel layanan sosial media dengan dashboard member yang sederhana,
+            responsif, dan mudah digunakan.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h3>Navigasi</h3>
+          <div class="footer-links">
+            <a href="#keunggulan">Keunggulan</a>
+            <a href="#layanan">Layanan</a>
+            <a href="#cara-kerja">Cara Kerja</a>
+            <a href="#faq">FAQ</a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h3>Member</h3>
+          <div class="footer-links">
+            <a href="https://member.mrxpanel.com/">Masuk Member Area</a>
+            <a href="https://member.mrxpanel.com/">Buat Akun</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 MRXPANEL. Seluruh hak dilindungi.</span>
+        <span class="footer-status">Member Web tersedia</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const menuButton = document.querySelector('.menu-btn');
+      const mobileMenu = document.getElementById('mobileMenu');
+
+      if (menuButton && mobileMenu) {
+        menuButton.addEventListener('click', function () {
+          const open = mobileMenu.classList.toggle('open');
+          menuButton.setAttribute('aria-expanded', String(open));
+          menuButton.setAttribute('aria-label', open ? 'Tutup menu' : 'Buka menu');
+        });
+
+        mobileMenu.querySelectorAll('a').forEach(function (link) {
+          link.addEventListener('click', function () {
+            mobileMenu.classList.remove('open');
+            menuButton.setAttribute('aria-expanded', 'false');
+            menuButton.setAttribute('aria-label', 'Buka menu');
+          });
+        });
+      }
+
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const revealItems = document.querySelectorAll('.reveal');
+
+      if (reducedMotion || !('IntersectionObserver' in window)) {
+        revealItems.forEach(function (item) { item.classList.add('visible'); });
+      } else {
+        const observer = new IntersectionObserver(function (entries, obs) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              obs.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.08 });
+
+        revealItems.forEach(function (item) { observer.observe(item); });
+      }
+    }());
+  </script>
 </body>
 </html>
