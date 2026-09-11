@@ -1233,6 +1233,242 @@
       }
       .reveal { opacity: 1; transform: none; }
     }
+  
+    /* MRXPANEL dark + gold brand alignment */
+    :root{
+      --bg:#0b0d10;
+      --bg-2:#111419;
+      --surface:rgba(20,22,26,.82);
+      --surface-strong:#171a1f;
+      --surface-soft:rgba(255,255,255,.035);
+      --line:rgba(224,173,53,.20);
+      --text:#f7f7f5;
+      --muted:#a7a9ad;
+      --blue:#d7a62f;
+      --blue-2:#f2c95c;
+      --cyan:#e7b944;
+      --violet:#c99022;
+      --green:#62d98a;
+      --gold:#e1ad37;
+      --gold-2:#ffd66b;
+      --gold-soft:rgba(225,173,55,.11);
+      --shadow:0 28px 90px rgba(0,0,0,.46);
+    }
+
+    body{
+      background:
+        radial-gradient(circle at 8% 7%, rgba(225,173,55,.10), transparent 26rem),
+        radial-gradient(circle at 93% 18%, rgba(225,173,55,.08), transparent 29rem),
+        linear-gradient(180deg,#0a0c0f 0%,#101318 48%,#090b0e 100%);
+    }
+
+    .site-header{
+      background:rgba(10,12,15,.88);
+      border-bottom-color:rgba(225,173,55,.12);
+    }
+
+    .brand-mark{
+      border-radius:50%;
+      background:#111318;
+      border:1px solid rgba(225,173,55,.75);
+      color:var(--gold-2);
+      box-shadow:0 0 0 3px rgba(225,173,55,.07),0 10px 28px rgba(0,0,0,.3);
+    }
+    .brand-mark::after{background:rgba(225,173,55,.12)}
+
+    .btn-primary{
+      color:#17130a;
+      background:linear-gradient(135deg,#dca92e,#ffd96e);
+      box-shadow:0 12px 30px rgba(225,173,55,.22);
+    }
+    .btn-primary:hover{box-shadow:0 16px 36px rgba(225,173,55,.30)}
+    .btn-ghost{border-color:rgba(225,173,55,.28)}
+    .btn-ghost:hover{border-color:rgba(225,173,55,.5)}
+
+    .eyebrow{
+      border-color:rgba(225,173,55,.42);
+      background:rgba(225,173,55,.07);
+      color:#f2cd72;
+    }
+    .eyebrow-dot{
+      background:var(--gold-2);
+      box-shadow:0 0 0 5px rgba(225,173,55,.09);
+    }
+
+    .gradient-text{
+      background:linear-gradient(105deg,#e2ad35 0%,#ffd86a 55%,#f0bf50 100%);
+      background-clip:text;
+      -webkit-background-clip:text;
+    }
+
+    .hero::before{
+      background:
+        linear-gradient(rgba(225,173,55,.022) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(225,173,55,.022) 1px,transparent 1px);
+      background-size:54px 54px;
+    }
+    .hero-note svg{color:var(--gold-2)}
+
+    .dashboard-shell{
+      border-color:rgba(225,173,55,.42);
+      background:linear-gradient(145deg,rgba(225,173,55,.08),rgba(255,255,255,.02));
+      box-shadow:0 28px 90px rgba(0,0,0,.5),0 0 50px rgba(225,173,55,.08);
+      transform:perspective(1200px) rotateY(-2deg) rotateX(1deg);
+    }
+    .dashboard-shell::before{
+      background:rgba(225,173,55,.16);
+    }
+
+    .real-dashboard{
+      overflow:hidden;
+      border:1px solid rgba(225,173,55,.16);
+      border-radius:19px;
+      background:
+        radial-gradient(circle at 80% 0%,rgba(225,173,55,.05),transparent 38%),
+        #101216;
+      color:#f6f6f4;
+    }
+    .real-top{
+      height:54px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 16px;
+      border-bottom:1px solid rgba(225,173,55,.13);
+      background:#111318;
+    }
+    .real-brand{display:flex;align-items:center;gap:10px;min-width:0}
+    .real-brand>span:last-child{display:grid;line-height:1.02}
+    .real-brand b{font-size:.69rem;letter-spacing:.02em}
+    .real-brand small{margin-top:3px;color:#d4aa48;font-size:.42rem;font-weight:900;letter-spacing:.11em}
+    .real-logo{
+      width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+      border:1px solid rgba(225,173,55,.8);color:#f1c95f;background:#0e1013;
+      font-size:.54rem;font-weight:950;box-shadow:0 0 16px rgba(225,173,55,.08);
+    }
+    .real-logout{
+      padding:5px 10px;border:1px solid rgba(225,173,55,.28);border-radius:8px;
+      color:#e8bd55;font-size:.48rem;font-weight:850;
+    }
+    .real-tabs{
+      display:grid;grid-template-columns:1.05fr .9fr .85fr 1.25fr 1.2fr .75fr .85fr;
+      gap:2px;padding:5px 8px;border-bottom:1px solid rgba(225,173,55,.10);
+      background:#0d0f12;
+    }
+    .real-tabs span{
+      min-height:26px;display:grid;place-items:center;padding:0 5px;border-radius:7px;
+      color:#8e9196;font-size:.43rem;font-weight:800;white-space:nowrap;
+    }
+    .real-tabs .active{
+      background:linear-gradient(135deg,#d8a32c,#f3cb5d);color:#17120a;
+      box-shadow:0 5px 14px rgba(225,173,55,.16);
+    }
+    .real-layout{display:grid;grid-template-columns:112px 1fr;min-height:328px}
+    .real-side{
+      padding:14px 9px;border-right:1px solid rgba(225,173,55,.09);background:#0c0e11;
+    }
+    .real-side-item{
+      min-height:34px;display:flex;align-items:center;gap:8px;padding:0 9px;margin-bottom:5px;
+      border-radius:8px;color:#8e9196;font-size:.48rem;font-weight:760;
+    }
+    .real-side-item span{width:15px;text-align:center;color:#b7b8bb;font-weight:900}
+    .real-side-item.active{
+      color:#f2c95d;background:linear-gradient(90deg,rgba(225,173,55,.18),rgba(225,173,55,.07));
+      border:1px solid rgba(225,173,55,.12);
+    }
+    .real-main{padding:18px 18px 17px}
+    .real-status{color:#d9a72f;font-size:.43rem;font-weight:950;letter-spacing:.12em}
+    .real-welcome{margin-top:7px;font-size:.91rem;font-weight:900;letter-spacing:-.02em}
+    .real-welcome strong{color:#efc85e}
+    .real-sub{margin-top:2px;color:#777b82;font-size:.5rem}
+    .real-cards{display:grid;grid-template-columns:1.05fr 1fr 1fr;gap:9px;margin-top:13px}
+    .real-card{
+      min-height:72px;padding:11px;border-radius:10px;border:1px solid rgba(225,173,55,.18);
+      background:linear-gradient(145deg,#15181d,#111317);
+    }
+    .real-card.saldo{
+      background:radial-gradient(circle at 20% 100%,rgba(225,173,55,.14),transparent 65%),linear-gradient(145deg,#1a1b1a,#121417);
+      box-shadow:inset 0 0 18px rgba(225,173,55,.04);
+    }
+    .real-card small{display:block;color:#8f9196;font-size:.4rem;font-weight:850;letter-spacing:.08em}
+    .real-card b{display:block;margin-top:8px;font-size:.77rem;line-height:1.05}
+    .real-card.saldo b{color:#f1c85e;font-size:.94rem}
+    .real-orders{
+      margin-top:11px;overflow:hidden;border:1px solid rgba(225,173,55,.12);border-radius:10px;background:#101216;
+    }
+    .real-order-head,.real-order-row{
+      display:grid;grid-template-columns:1.2fr .9fr .7fr;align-items:center;gap:7px;padding:0 11px;
+    }
+    .real-order-head{height:31px;color:#8d9095;font-size:.41rem;font-weight:850;border-bottom:1px solid rgba(225,173,55,.08)}
+    .real-order-row{min-height:36px;color:#a6a8ac;font-size:.43rem;border-bottom:1px solid rgba(255,255,255,.045)}
+    .real-order-row:last-child{border-bottom:0}
+    .real-pill{width:max-content;padding:3px 7px;border-radius:999px;font-size:.38rem;font-weight:900}
+    .real-pill.ok{color:#74e49f;background:rgba(70,190,112,.15)}
+    .real-pill.wait{color:#f0c44e;background:rgba(225,173,55,.13)}
+
+    .trust-box{border-color:rgba(225,173,55,.20);background:rgba(255,255,255,.02)}
+    .trust-icon{
+      color:#f1c75d;background:rgba(225,173,55,.09);border-color:rgba(225,173,55,.18)
+    }
+    .section-kicker{color:#dfb34d}
+    .section-kicker::before{background:linear-gradient(90deg,#b77f12,#ffd76a)}
+    .feature-card{
+      border-color:rgba(225,173,55,.16);
+      background:radial-gradient(circle at 100% 0%,rgba(225,173,55,.055),transparent 45%),rgba(255,255,255,.02);
+    }
+    .feature-card:hover{
+      border-color:rgba(225,173,55,.34);
+      background:radial-gradient(circle at 100% 0%,rgba(225,173,55,.095),transparent 45%),rgba(255,255,255,.03);
+    }
+    .feature-icon,.workflow-number{
+      color:#f1c85f;background:rgba(225,173,55,.10);border-color:rgba(225,173,55,.18)
+    }
+    .services{background:linear-gradient(180deg,transparent,rgba(225,173,55,.025) 50%,transparent)}
+    .service-card:hover{border-color:rgba(225,173,55,.3)}
+    .service-badge{
+      color:#edc45a!important;background:linear-gradient(145deg,#17191d,#101216);border-color:rgba(225,173,55,.15)
+    }
+    .audience-box{
+      border-color:rgba(225,173,55,.2);
+      background:
+        radial-gradient(circle at 90% 10%,rgba(225,173,55,.10),transparent 34%),
+        radial-gradient(circle at 0% 100%,rgba(225,173,55,.07),transparent 34%),
+        linear-gradient(145deg,rgba(225,173,55,.045),rgba(255,255,255,.018));
+    }
+    .audience-tag span:first-child{background:rgba(225,173,55,.09);color:#efc65e}
+    details[open]{border-color:rgba(225,173,55,.25);background:rgba(225,173,55,.03)}
+    .cta-box{
+      border-color:rgba(225,173,55,.28);
+      background:
+        radial-gradient(circle at 18% 100%,rgba(225,173,55,.09),transparent 27rem),
+        radial-gradient(circle at 88% 0%,rgba(225,173,55,.10),transparent 26rem),
+        linear-gradient(135deg,rgba(36,31,20,.86),rgba(17,19,23,.88));
+    }
+    .footer-status::before{background:var(--gold-2);box-shadow:0 0 0 4px rgba(225,173,55,.08)}
+
+    /* Hide the mobile navigation on desktop; it was previously visible as a duplicate row. */
+    .mobile-panel{display:none}
+
+    @media (max-width:1040px){
+      .dashboard-shell{transform:none}
+      .mobile-panel{
+        position:fixed;inset:74px 0 auto 0;display:none;padding:18px 20px 24px;
+        border-bottom:1px solid var(--line);background:rgba(10,12,15,.98);
+        backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)
+      }
+      .mobile-panel.open{display:block}
+    }
+    @media (max-width:720px){
+      .real-tabs{display:none}
+      .real-layout{grid-template-columns:1fr}
+      .real-side{display:none}
+      .real-main{padding:15px}
+      .real-cards{grid-template-columns:1fr 1fr}
+      .real-card:last-child{display:none}
+      .real-order-head,.real-order-row{grid-template-columns:1.2fr .8fr}
+      .real-order-head span:nth-child(2),.real-order-row span:nth-child(2){display:none}
+    }
+
   </style>
 </head>
 
@@ -1331,66 +1567,71 @@
           </div>
         </div>
 
-        <div class="dashboard-shell reveal" aria-label="Ilustrasi dashboard MRXPANEL">
-          <div class="dashboard">
-            <div class="dash-top">
-              <div class="dash-brand">
-                <span class="mini-mark">M</span>
-                MRXPANEL
+        <div class="dashboard-shell reveal" aria-label="Ilustrasi dashboard Member MRXPANEL">
+          <div class="real-dashboard">
+            <div class="real-top">
+              <div class="real-brand">
+                <span class="real-logo">MRX</span>
+                <span>
+                  <b>MRXPANEL.COM</b>
+                  <small>MEMBER SYSTEM</small>
+                </span>
               </div>
-              <span class="dash-user">U</span>
+              <span class="real-logout">Keluar</span>
             </div>
 
-            <div class="dash-body">
-              <aside class="dash-side" aria-hidden="true">
-                <div class="side-line active"><span class="side-icon"></span>Beranda</div>
-                <div class="side-line"><span class="side-icon"></span>Layanan</div>
-                <div class="side-line"><span class="side-icon"></span>Pesanan</div>
-                <div class="side-line"><span class="side-icon"></span>Deposit</div>
-                <div class="side-line"><span class="side-icon"></span>Profil</div>
+            <div class="real-tabs" aria-hidden="true">
+              <span class="active">Beranda</span>
+              <span>Layanan</span>
+              <span>Deposit</span>
+              <span>Buat Pesanan</span>
+              <span>Pesanan Saya</span>
+              <span>Akun</span>
+              <span>Bantuan</span>
+            </div>
+
+            <div class="real-layout">
+              <aside class="real-side" aria-hidden="true">
+                <div class="real-side-item active"><span>⌂</span>Beranda</div>
+                <div class="real-side-item"><span>▣</span>Layanan</div>
+                <div class="real-side-item"><span>◷</span>Deposit</div>
+                <div class="real-side-item"><span>▤</span>Pesanan</div>
+                <div class="real-side-item"><span>♙</span>Akun</div>
+                <div class="real-side-item"><span>?</span>Bantuan</div>
               </aside>
 
-              <div class="dash-content">
-                <div class="dash-greeting">
-                  Selamat datang 👋
-                  <div class="dash-sub">Ringkasan akun dan pesanan Anda</div>
+              <div class="real-main">
+                <div class="real-status">AKUN BERHASIL TERHUBUNG</div>
+                <div class="real-welcome">Selamat datang, <strong>mrxpanel</strong> 👋</div>
+                <div class="real-sub">Ringkasan akun dan pesanan Anda</div>
+
+                <div class="real-cards">
+                  <div class="real-card saldo">
+                    <small>SALDO TERSEDIA</small>
+                    <b>Rp 8.350</b>
+                  </div>
+                  <div class="real-card">
+                    <small>PESANAN AKTIF</small>
+                    <b>Terpantau</b>
+                  </div>
+                  <div class="real-card">
+                    <small>LAYANAN</small>
+                    <b>Ribuan</b>
+                  </div>
                 </div>
 
-                <div class="dash-cards">
-                  <div class="dash-card main">
-                    <div class="dash-label">Saldo tersedia</div>
-                    <div class="dash-value">Rp ••••••</div>
+                <div class="real-orders">
+                  <div class="real-order-head">
+                    <span>Pesanan terbaru</span><span>Layanan</span><span>Status</span>
                   </div>
-                  <div class="dash-card">
-                    <div class="dash-label">Pesanan aktif</div>
-                    <div class="dash-value">Terpantau</div>
+                  <div class="real-order-row">
+                    <span>ORD-742918</span><span>Social Media</span><span class="real-pill ok">Selesai</span>
                   </div>
-                  <div class="dash-card">
-                    <div class="dash-label">Layanan</div>
-                    <div class="dash-value">Ribuan</div>
+                  <div class="real-order-row">
+                    <span>ORD-742917</span><span>Social Media</span><span class="real-pill wait">Diproses</span>
                   </div>
-                </div>
-
-                <div class="dash-table">
-                  <div class="dash-table-head">
-                    <span>Pesanan terbaru</span>
-                    <span>Layanan</span>
-                    <span>Status</span>
-                  </div>
-                  <div class="dash-row">
-                    <span>ORD-••••••</span>
-                    <span>Social Media</span>
-                    <span class="status-pill">Selesai</span>
-                  </div>
-                  <div class="dash-row">
-                    <span>ORD-••••••</span>
-                    <span>Social Media</span>
-                    <span class="status-pill wait">Diproses</span>
-                  </div>
-                  <div class="dash-row">
-                    <span>ORD-••••••</span>
-                    <span>Social Media</span>
-                    <span class="status-pill">Selesai</span>
+                  <div class="real-order-row">
+                    <span>ORD-742916</span><span>Social Media</span><span class="real-pill ok">Selesai</span>
                   </div>
                 </div>
               </div>
