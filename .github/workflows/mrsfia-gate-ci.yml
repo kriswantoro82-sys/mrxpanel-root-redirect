@@ -1,0 +1,94 @@
+name: MRSFIA License Gate CI
+
+on:
+  push:
+    branches:
+      - mrsfia-license-gate-v1
+    paths:
+      - 'mrsfia-license-gate/**'
+      - '.github/workflows/mrsfia-gate-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JavaScript syntax
+        run: node --check mrsfia-license-gate/api/gate.js
+      - name: Validate Vercel config JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('mrsfia-license-gate/vercel.json','utf8')); console.log('vercel.json OK')"
+      - name: Guard against privileged Supabase keys
+        run: |
+          if grep -R -n -E 'service_role|sb_secret_' mrsfia-license-gate; then
+            echo 'Privileged Supabase credential marker found'
+            exit 1
+          fi
+          echo 'No privileged Supabase credential markers'
+      - name: Test EXPIRED lock, fail-closed, and ACTIVE proxy
+        shell: bash
+        run: |
+          node <<'NODE'
+          const handler = require('./mrsfia-license-gate/api/gate.js');
+
+          function resMock() {
+            return {
+              statusCode: 200,
+              headers: {},
+              body: null,
+              status(code) { this.statusCode = code; return this; },
+              setHeader(k,v) { this.headers[String(k).toLowerCase()] = String(v); return this; },
+              send(body) { this.body = body; return this; },
+              end() { this.body = this.body ?? ''; return this; }
+            };
+          }
+
+          async function runLocked() {
+            global.fetch = async () => ({ ok: true, json: async () => ({ success:true, locked:true, state:'LICENSE_LOCKED', license_state:'EXPIRED' }) });
+            const req = { method:'GET', headers:{host:'member.mrsfiadigital.com'}, query:{path:''} };
+            const res = resMock();
+            await handler(req,res);
+            if (res.statusCode !== 423) throw new Error('EXPIRED did not return 423');
+            const text = String(res.body || '');
+            if (!text.includes('Lisensi Panel Telah Berakhir')) throw new Error('Lock page title missing');
+            if (!text.includes('sb-thymtqaxleqckzgmltwz-auth-token')) throw new Error('Member session cleanup marker missing');
+          }
+
+          async function runFailClosed() {
+            global.fetch = async () => { throw new Error('network down'); };
+            const req = { method:'GET', headers:{host:'mrsfiadigital.com'}, query:{path:''} };
+            const res = resMock();
+            await handler(req,res);
+            if (res.statusCode !== 503) throw new Error('Verification failure did not fail closed');
+            if (!String(res.body || '').includes('Lisensi Panel Telah Berakhir')) throw new Error('Fail-closed page missing');
+          }
+
+          async function runActiveProxy() {
+            global.fetch = async (url) => {
+              const u = String(url);
+              if (u.includes('/rpc/mrxpanel_mrsfia_frontdoor_license_status_v1')) {
+                return { ok:true, json:async()=>({ success:true, locked:false, state:'LICENSE_ACTIVE', license_state:'ACTIVE' }) };
+              }
+              if (u === 'https://mrsfia-child-panel.vercel.app/') {
+                return new Response('<!doctype html><title>Origin OK</title>', {status:200, headers:{'content-type':'text/html'}});
+              }
+              throw new Error('Unexpected URL '+u);
+            };
+            const req = { method:'GET', headers:{host:'mrsfiadigital.com'}, query:{path:''} };
+            const res = resMock();
+            await handler(req,res);
+            if (res.statusCode !== 200) throw new Error('ACTIVE did not proxy with 200');
+            if (!Buffer.isBuffer(res.body) || !res.body.toString().includes('Origin OK')) throw new Error('Origin body not proxied');
+            if (res.headers['x-mrsfia-license-gate'] !== 'ACTIVE_PROXY') throw new Error('ACTIVE proxy marker missing');
+          }
+
+          Promise.resolve()
+            .then(runLocked)
+            .then(runFailClosed)
+            .then(runActiveProxy)
+            .then(()=>console.log('MRSFIA gate tests PASS'))
+            .catch(err=>{ console.error(err); process.exit(1); });
+          NODE
