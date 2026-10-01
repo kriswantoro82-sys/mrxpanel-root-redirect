@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Download Aplikasi MRXPANEL</title>
+  <link rel="icon" href="/favicon-mrx.svg" type="image/svg+xml">
+  <style>
+    :root{--bg:#101114;--card:#181a1f;--gold:#d8a928;--soft:#ffe8a6;--text:#fff;--muted:#aeb4bf;--border:#2a2f38}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(180deg,#101114 0%,#171a20 100%);color:var(--text);font-family:Arial,Helvetica,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px}
+    .card{width:min(520px,100%);background:var(--card);border:1px solid var(--border);border-radius:24px;padding:28px;box-shadow:0 24px 70px rgba(0,0,0,.35)}
+    .brand{display:flex;align-items:center;gap:12px;margin-bottom:24px}.logo{width:46px;height:46px;border-radius:14px;background:var(--gold);display:grid;place-items:center;color:#111;font-weight:900;font-size:22px}.brand strong{font-size:20px}.tag{color:var(--soft);font-size:13px;margin-top:3px}
+    h1{font-size:28px;line-height:1.15;margin:0 0 12px}.desc{color:var(--muted);line-height:1.6;margin:0 0 22px}
+    .status{border:1px solid rgba(216,169,40,.35);background:rgba(216,169,40,.08);border-radius:16px;padding:14px 16px;margin-bottom:18px;color:#f4e3ad;font-size:14px}
+    button{width:100%;border:0;border-radius:14px;background:var(--gold);color:#111;padding:15px 18px;font-weight:800;font-size:16px;cursor:pointer}button:active{transform:translateY(1px)}button[disabled]{opacity:.65;cursor:wait}
+    .small{margin-top:16px;color:#9297a0;font-size:12px;line-height:1.5;text-align:center}.error{display:none;margin-top:14px;color:#ffb4b4;font-size:13px;text-align:center}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="brand"><div class="logo">M</div><div><strong>MRXPANEL</strong><div class="tag">Aplikasi Android Resmi</div></div></div>
+    <h1>Download Aplikasi MRXPANEL</h1>
+    <p class="desc">Gunakan aplikasi Android MRXPANEL untuk mengakses layanan, saldo, deposit, pesanan, dan tiket bantuan dengan lebih praktis.</p>
+    <div class="status">Versi terbaru akan selalu diunduh dari jalur resmi MRXPANEL.</div>
+    <button id="downloadBtn" type="button">Download APK MRXPANEL</button>
+    <div id="error" class="error">Download belum dimulai. Tekan tombol sekali lagi.</div>
+    <div class="small">Sumber resmi: mrxpanel.com • Android APK</div>
+  </main>
+  <script>
+    (()=>{
+      const encoded='aHR0cHM6Ly9tcnhwYW5lbC1hcGstZG93bmxvYWQubXJ4cGFuZWwwMS53b3JrZXJzLmRldg==';
+      const btn=document.getElementById('downloadBtn');
+      const err=document.getElementById('error');
+      function start(){
+        btn.disabled=true;btn.textContent='Menyiapkan download...';err.style.display='none';
+        const a=document.createElement('a');
+        a.href=atob(encoded)+'?source=mrxpanel.com&t='+Date.now();
+        a.download='MRXPANEL-latest.apk';
+        a.rel='noopener';
+        document.body.appendChild(a);a.click();a.remove();
+        setTimeout(()=>{btn.disabled=false;btn.textContent='Download APK MRXPANEL';},1800);
+        setTimeout(()=>{err.style.display='block';},7000);
+      }
+      btn.addEventListener('click',start);
+      setTimeout(start,700);
+    })();
+  </script>
+</body>
+</html>
