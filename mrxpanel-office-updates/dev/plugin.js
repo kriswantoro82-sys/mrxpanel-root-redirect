@@ -247,7 +247,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  const u={svp:gl.getUniformLocation(sp,'uVP'),sm:gl.getUniformLocation(sp,'uModel'),sj:gl.getUniformLocation(sp,'uJ[0]'),shirt:gl.getUniformLocation(sp,'uShirt'),skinTone:gl.getUniformLocation(sp,'uSkinTone'),pants:gl.getUniformLocation(sp,'uPants'),bvp:gl.getUniformLocation(bp,'uVP'),bm:gl.getUniformLocation(bp,'uModel'),bc:gl.getUniformLocation(bp,'uColor')}
  const invBind=[];for(let i=0;i<skin.joints.length;i++)invBind.push(new Float32Array(ibmAcc.array.slice(i*16,i*16+16)))
  const cam={yaw:.78,pitch:.40,dist:17.2},drag={active:false,x:0,y:0,yaw:0,pitch:0}
- const labelMap=new Map(),roomLabelMap=new Map(),seatMap=new Map()
+ const labelMap=new Map(),roomLabelMap=new Map()
  const facingMap=new Map()
  let lastPhase='',start=performance.now(),raf=0,labelFrame=0
  function localState(t,w,activity='idle'){
@@ -378,10 +378,16 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     B(xx,1.62,-4.525,.90,.44,.012,[.20,.48,.64])
   }
 
-  // Low partitions define real office zones without blocking the camera.
-  B(-1.5,.68,-1.05,.055,.68,3.45,[.40,.45,.46])
-  B(2.15,.68,-1.05,.055,.68,3.45,[.40,.45,.46])
-  B(0,.68,.95,6.0,.68,.055,[.40,.45,.46])
+  // Segmented partitions: visible rooms with actual walk-through gaps.
+  // Left divider: rear wall, door gap around z=-1.55, short front return.
+  B(-1.5,.72,-3.30,.055,.72,1.20,[.40,.44,.45])
+  B(-1.5,.72,-.20,.055,.72,.85,[.40,.44,.45])
+  // Right divider: same doorway alignment for the main corridor.
+  B(2.15,.72,-3.30,.055,.72,1.20,[.40,.44,.45])
+  B(2.15,.72,-.20,.055,.72,.85,[.40,.44,.45])
+  // Front divider is broken into side wings, leaving a generous central aisle.
+  B(-4.55,.72,.95,1.55,.72,.055,[.40,.44,.45])
+  B(4.45,.72,.95,1.65,.72,.055,[.40,.44,.45])
 
   // Executive room: Kris + Maya.
   B(-4.25,.78,-3.20,1.38,.08,.55,[.48,.28,.13])
@@ -389,8 +395,6 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   B(-4.25,1.15,-3.68,.62,.38,.05,[.035,.06,.08])
   B(-4.25,2.15,-4.52,1.15,.025,.03,[.86,.65,.22])
   B(-4.25,2.05,-4.49,.72,.20,.02,[.12,.16,.18])
-  B(-5.35,.48,-2.35,.36,.05,.34,[.16,.21,.25]);B(-5.35,.86,-2.07,.36,.40,.05,[.16,.21,.25])
-  B(-3.20,.48,-2.35,.36,.05,.34,[.16,.21,.25]);B(-3.20,.86,-2.07,.36,.40,.05,[.16,.21,.25])
 
   // Meeting room.
   B(4.05,.56,-3.05,1.20,.08,.68,[.42,.25,.12])
@@ -398,17 +402,8 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   B(4.05,1.70,-4.50,1.15,.025,.025,[.16,.29,.34])
   B(4.05,1.70,-4.46,.92,.32,.018,[.08,.13,.17])
 
-  // Work chairs: seat + backrest. Character lowers into these during WORK mode.
-  const chair=(x,z)=>{
-    B(x,.34,z,.28,.05,.28,[.13,.18,.22])
-    B(x,.66,z+.25,.28,.32,.05,[.13,.18,.22])
-    B(x-.22,.15,z-.18,.035,.15,.035,[.08,.11,.14]);B(x+.22,.15,z-.18,.035,.15,.035,[.08,.11,.14])
-    B(x-.22,.15,z+.18,.035,.15,.035,[.08,.11,.14]);B(x+.22,.15,z+.18,.035,.15,.035,[.08,.11,.14])
-  }
-  chair(-5.20,-2.45);chair(-3.30,-2.45)
-  chair(-4.75,.65);chair(-3.05,.65);chair(-.55,.65);chair(1.15,.65)
-  chair(3.15,.65);chair(4.65,.65)
-  chair(-4.80,2.60);chair(-2.35,2.60)
+  // Workstation chairs intentionally withheld in realism mode.
+  // They return only after a true hip/knee sit pose is implemented; no clipping placeholders.
 
   // Operations desks.
   for(const xx of [-4.75,-3.05,-.55,1.15]){
@@ -441,14 +436,14 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   B(0,1.07,3.78,1.15,.06,.28,[.58,.37,.20])
  }
  const cast=[
-  {name:'Kris',role:'PIMPINAN',executive:'kris',lane:-.08,home:[-5.20,-2.45],seatY:-.34,mid:[-4.70,-1.55],target:[-4.15,-1.55],shirt:[.07,.11,.17],pants:[.05,.07,.10],skin:[.72,.44,.31],hair:[.055,.035,.025],eye:[.05,.06,.07],lip:[.24,.07,.065],accent:[.92,.70,.26],hairStyle:2,accessory:'none',offset:0,scale:1.04},
-  {name:'Maya',role:'AI EXECUTIVE',executive:'maya',lane:.08,home:[-3.30,-2.45],seatY:-.34,mid:[-2.80,-1.55],target:[-2.25,-1.55],shirt:[.48,.20,.38],pants:[.10,.08,.14],skin:[.76,.48,.34],hair:[.10,.055,.035],eye:[.08,.06,.055],lip:[.45,.09,.16],accent:[.94,.73,.32],hairStyle:1,accessory:'none',offset:3.1,scale:1.00},
-  {name:'Team 1',role:'OPERASIONAL',lane:-.12,home:[-4.75,.65],seatY:-.36,mid:[-3.20,1.25],target:[-1.95,.65],shirt:[.10,.30,.58],pants:[.06,.10,.16],skin:[.72,.43,.30],hair:[.08,.05,.035],eye:[.05,.06,.07],lip:[.28,.08,.07],accent:[.91,.69,.25],hairStyle:2,accessory:'headset',offset:1.3,scale:.96},
-  {name:'Team 2',role:'OPERASIONAL',lane:.12,home:[-3.05,.65],seatY:-.36,mid:[.35,1.25],target:[3.55,-2.15],shirt:[.32,.22,.50],pants:[.08,.08,.13],skin:[.67,.39,.28],hair:[.055,.035,.028],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.76,.60,.22],hairStyle:0,accessory:'glasses',offset:5.7,scale:.96},
-  {name:'Team 3',role:'OPERASIONAL',lane:-.10,home:[-.55,.65],seatY:-.36,mid:[-.20,1.35],target:[.45,2.05],shirt:[.10,.39,.30],pants:[.055,.11,.10],skin:[.76,.48,.34],hair:[.12,.075,.045],eye:[.045,.06,.06],lip:[.34,.08,.08],accent:[.90,.68,.24],hairStyle:1,accessory:'none',offset:8.4,scale:.96},
-  {name:'VPS Operator',role:'VPS / TECH',lane:.10,home:[3.15,.65],seatY:-.36,mid:[4.00,1.15],target:[4.90,.80],shirt:[.28,.20,.48],pants:[.07,.07,.12],skin:[.67,.40,.30],hair:[.06,.04,.032],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.93,.70,.26],hairStyle:0,accessory:'headset',offset:2.4,scale:.96},
-  {name:'Maya Support',role:'SUPPORT',lane:-.14,home:[-4.80,2.60],seatY:-.36,mid:[-2.25,3.45],target:[0,3.25],shirt:[.52,.20,.38],pants:[.10,.08,.13],skin:[.76,.48,.34],hair:[.12,.06,.04],eye:[.07,.06,.06],lip:[.46,.09,.16],accent:[.95,.73,.30],hairStyle:1,accessory:'headset',offset:6.3,scale:.95},
-  {name:'Finance',role:'FINANCE',lane:.14,home:[-2.35,2.60],seatY:-.36,mid:[.10,3.40],target:[2.55,2.25],shirt:[.63,.48,.14],pants:[.11,.09,.07],skin:[.72,.44,.31],hair:[.07,.045,.032],eye:[.05,.06,.07],lip:[.30,.075,.07],accent:[.96,.78,.36],hairStyle:2,accessory:'glasses',offset:10.2,scale:.95}
+  {name:'Kris',role:'PIMPINAN',executive:'kris',lane:-.08,home:[-5.20,-2.45],target:[-4.15,-1.55],route:[[-5.20,-2.45],[-4.75,-1.75],[-4.15,-1.55]],shirt:[.07,.11,.17],pants:[.05,.07,.10],skin:[.72,.44,.31],hair:[.055,.035,.025],eye:[.05,.06,.07],lip:[.24,.07,.065],accent:[.92,.70,.26],hairStyle:2,accessory:'none',offset:0,scale:1.04},
+  {name:'Maya',role:'AI EXECUTIVE',executive:'maya',lane:.08,home:[-3.30,-2.45],target:[-2.25,-1.55],route:[[-3.30,-2.45],[-2.85,-1.75],[-2.25,-1.55]],shirt:[.48,.20,.38],pants:[.10,.08,.14],skin:[.76,.48,.34],hair:[.10,.055,.035],eye:[.08,.06,.055],lip:[.45,.09,.16],accent:[.94,.73,.32],hairStyle:1,accessory:'none',offset:3.1,scale:1.00},
+  {name:'Team 1',role:'OPERASIONAL',lane:-.12,home:[-4.75,.65],target:[-1.95,.65],route:[[-4.75,.65],[-3.65,.70],[-2.55,.70],[-1.95,.65]],shirt:[.10,.30,.58],pants:[.06,.10,.16],skin:[.72,.43,.30],hair:[.08,.05,.035],eye:[.05,.06,.07],lip:[.28,.08,.07],accent:[.91,.69,.25],hairStyle:2,accessory:'headset',offset:1.3,scale:.96},
+  {name:'Team 2',role:'OPERASIONAL',lane:.12,home:[-3.05,.65],target:[3.55,-2.15],route:[[-3.05,.65],[-2.45,-1.55],[-.95,-1.55],[1.45,-1.55],[2.75,-1.55],[3.55,-2.15]],shirt:[.32,.22,.50],pants:[.08,.08,.13],skin:[.67,.39,.28],hair:[.055,.035,.028],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.76,.60,.22],hairStyle:0,accessory:'glasses',offset:5.7,scale:.96},
+  {name:'Team 3',role:'OPERASIONAL',lane:-.10,home:[-.55,.65],target:[.45,2.05],route:[[-.55,.65],[-.15,1.35],[.45,2.05]],shirt:[.10,.39,.30],pants:[.055,.11,.10],skin:[.76,.48,.34],hair:[.12,.075,.045],eye:[.045,.06,.06],lip:[.34,.08,.08],accent:[.90,.68,.24],hairStyle:1,accessory:'none',offset:8.4,scale:.96},
+  {name:'VPS Operator',role:'VPS / TECH',lane:.10,home:[3.15,.65],target:[4.90,.80],route:[[3.15,.65],[4.00,.78],[4.90,.80]],shirt:[.28,.20,.48],pants:[.07,.07,.12],skin:[.67,.40,.30],hair:[.06,.04,.032],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.93,.70,.26],hairStyle:0,accessory:'headset',offset:2.4,scale:.96},
+  {name:'Maya Support',role:'SUPPORT',lane:-.14,home:[-4.80,2.60],target:[0,3.25],route:[[-4.80,2.60],[-3.20,3.15],[-1.40,3.30],[0,3.25]],shirt:[.52,.20,.38],pants:[.10,.08,.13],skin:[.76,.48,.34],hair:[.12,.06,.04],eye:[.07,.06,.06],lip:[.46,.09,.16],accent:[.95,.73,.30],hairStyle:1,accessory:'headset',offset:6.3,scale:.95},
+  {name:'Finance',role:'FINANCE',lane:.14,home:[-2.35,2.60],target:[2.55,2.25],route:[[-2.35,2.60],[-.80,3.20],[1.00,3.05],[2.55,2.25]],shirt:[.63,.48,.14],pants:[.11,.09,.07],skin:[.72,.44,.31],hair:[.07,.045,.032],eye:[.05,.06,.07],lip:[.30,.075,.07],accent:[.96,.78,.36],hairStyle:2,accessory:'glasses',offset:10.2,scale:.95}
  ]
 
  const rooms=[
@@ -475,22 +470,21 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
 
 
 
+  const routeSeg=(p,f)=>{
+    const pts=p.route||[p.home,p.target],segs=Math.max(1,pts.length-1),cl=Math.max(0,Math.min(.999999,f))
+    const raw=cl*segs,i=Math.min(segs-1,Math.floor(raw)),q=smooth01(raw-i)
+    return{a:pts[i],b:pts[i+1],q}
+  }
   const pathAt=(p,f)=>{
-    const a=p.home,m=p.mid||[(a[0]+p.target[0])/2,(a[1]+p.target[1])/2],b=p.target
-    let x,z,dx,dz
-    if(f<=.5){const q=smooth01(f*2);x=a[0]+(m[0]-a[0])*q;z=a[1]+(m[1]-a[1])*q;dx=m[0]-a[0];dz=m[1]-a[1]}
-    else{const q=smooth01((f-.5)*2);x=m[0]+(b[0]-m[0])*q;z=m[1]+(b[1]-m[1])*q;dx=b[0]-m[0];dz=b[1]-m[1]}
-    const len=Math.hypot(dx,dz)||1,lane=p.lane||0
-    return[x-dz/len*lane,z+dx/len*lane]
+    const {a,b,q}=routeSeg(p,f),dx=b[0]-a[0],dz=b[1]-a[1],len=Math.hypot(dx,dz)||1
+    const lane=(p.lane||0)*Math.sin(Math.PI*Math.max(0,Math.min(1,f)))
+    return[a[0]+dx*q-dz/len*lane,a[1]+dz*q+dx/len*lane]
   }
   const dirAt=(p,f,reverse=false)=>{
-    const a=p.home,m=p.mid||[(a[0]+p.target[0])/2,(a[1]+p.target[1])/2],b=p.target
-    let dx,dz
-    if(f<=.5){dx=m[0]-a[0];dz=m[1]-a[1]}else{dx=b[0]-m[0];dz=b[1]-m[1]}
+    const {a,b}=routeSeg(p,f);let dx=b[0]-a[0],dz=b[1]-a[1]
     if(reverse){dx=-dx;dz=-dz}
     return Math.atan2(-dz,dx)
   }
-
 
   // Room labels intentionally hidden in realism mode; architecture should explain the space.
 
@@ -516,11 +510,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     const yaw=prevYaw+angleDelta(prevYaw,desiredYaw)*(walking?.16:.09)
     facingMap.set(p.name,yaw)
     const activity=walking?'walk':(cycle>=16&&cycle<23?'review':'work')
-    const seated=false // realism reset: no fake body-sinking sit pose
-    const seatTarget=0
-    const seatPrev=seatMap.has(p.name)?seatMap.get(p.name):0
-    const yOffset=seatPrev+(seatTarget-seatPrev)*(seated?.10:.16)
-    seatMap.set(p.name,Math.abs(yOffset-seatTarget)<.006?seatTarget:yOffset)
+    const yOffset=0
     const st=localState(sec+p.offset,walking?1:0,activity),world=worlds(st),mw=world[meshNode],invMw=invert4(mw),jm=new Float32Array(skin.joints.length*16)
     for(let i=0;i<skin.joints.length;i++)jm.set(mul4(mul4(invMw,world[skin.joints[i]]),invBind[i]),i*16)
     const placement=mul4(mul4(trans(px,yOffset,pz),rotY(yaw)),scale(p.scale,p.scale,p.scale)),modelM=mul4(placement,mw)
@@ -539,7 +529,6 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
       }
       const pt=project3(vp,[px,1.78+yOffset,pz],cssW,cssH)
       if(pt){
-        const transitioning=Math.abs(yOffset-seatTarget)>.025
         const status=walking?'MOVING':(activity==='review'?'REVIEWING':'WORKING')
         el.style.opacity='1';el.style.left=pt[0]+'px';el.style.top=pt[1]+'px'
         el.style.borderColor=p.executive?'rgba(241,204,108,.75)':status==='MOVING'?'rgba(88,166,255,.55)':status==='REVIEWING'?'rgba(184,146,255,.58)':status==='TYPING'?'rgba(241,204,108,.62)':status==='SITTING'||status==='STANDING'?'rgba(255,191,82,.58)':'rgba(84,201,135,.55)'
@@ -555,7 +544,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • REALISM RESET LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • SPACE & ROUTING REALISM LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -573,14 +562,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.1 DEV • REALISM RESET'})
+   jsx('div',{className:'h3chip',children:'V3.2 DEV • SPACE & ROUTING REALISM'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'CHARACTER MAKEOVER'}),
-     jsx('small',{children:'Realism reset: calmer office behavior, cleaner silhouettes, less HUD clutter, corrected proportions, safer workstation behavior, muted materials, and fewer visually impossible interactions.'})
+     jsx('small',{children:'Space/routing realism: open door gaps, collision-safe corridor routes, no workstation chair clipping, calmer materials, and waypoint paths that respect the office architecture.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag = orbit camera'}),jsx('div',{className:'h3pill',children:'Wheel = zoom'}),
@@ -588,7 +577,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.1 DEV deliberately removes fake sitting, floating room labels and detached ceiling panels; it reduces face exaggeration, calms traffic, and cleans the office presentation. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.2 DEV rebuilds room openings and character routes so people stop crossing walls/furniture. Workstation chairs remain withheld until a real sit rig exists. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
