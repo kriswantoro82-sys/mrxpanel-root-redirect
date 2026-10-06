@@ -370,18 +370,22 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function sceneBoxes(vp){
   const B=(x,y,z,sx,sy,sz,c)=>boxDraw(vp,mul4(trans(x,y,z),scale(sx,sy,sz)),c)
   // Main floor + perimeter.
-  B(0,-.10,0,6.2,.08,4.7,[.29,.43,.42])
+  B(0,-.10,0,6.2,.08,4.7,[.18,.21,.23])
   // Subtle room floor zoning.
-  B(-4.10,-.010,-2.65,1.85,.018,1.60,[.30,.34,.32])
-  B(4.10,-.010,-2.65,1.85,.018,1.60,[.29,.35,.38])
-  B(-2.85,-.010,.05,3.00,.018,.86,[.28,.34,.35])
-  B(3.95,-.010,.05,2.05,.018,.86,[.27,.33,.36])
-  B(-3.60,-.010,2.35,2.25,.018,.88,[.30,.35,.32])
-  B(1.85,-.010,2.35,2.55,.018,.88,[.29,.35,.36])
-  B(0,-.008,4.00,1.55,.020,.58,[.34,.32,.29])
-  B(0,1.30,-4.65,6.2,1.4,.08,[.74,.70,.63])
-  B(-6.15,1.30,0,.08,1.4,4.7,[.60,.65,.63])
-  B(6.15,1.30,0,.08,1.4,4.7,[.60,.65,.63])
+  B(-4.10,-.010,-2.65,1.85,.018,1.60,[.22,.23,.23])
+  B(4.10,-.010,-2.65,1.85,.018,1.60,[.20,.23,.25])
+  B(-2.85,-.010,.05,3.00,.018,.86,[.20,.22,.23])
+  B(3.95,-.010,.05,2.05,.018,.86,[.19,.22,.24])
+  B(-3.60,-.010,2.35,2.25,.018,.88,[.21,.23,.22])
+  B(1.85,-.010,2.35,2.55,.018,.88,[.20,.22,.23])
+  B(0,-.008,4.00,1.55,.020,.58,[.24,.22,.20])
+  B(0,1.30,-4.65,6.2,1.4,.08,[.73,.71,.67])
+  B(-6.15,1.30,0,.08,1.4,4.7,[.67,.68,.66])
+  B(6.15,1.30,0,.08,1.4,4.7,[.67,.68,.66])
+  // Baseboards visually anchor the open dollhouse walls.
+  B(0,.07,-4.54,6.05,.07,.035,[.16,.17,.18])
+  B(-6.04,.07,0,.035,.07,4.55,[.16,.17,.18])
+  B(6.04,.07,0,.035,.07,4.55,[.16,.17,.18])
   // Back-wall windows and warm office lighting.
   for(const xx of [-4.25,-1.45,1.45,4.25]){
     B(xx,1.62,-4.56,1.05,.58,.025,[.10,.25,.34])
@@ -390,17 +394,17 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
 
   // Segmented partitions: visible rooms with actual walk-through gaps.
   // Left divider: rear wall, door gap around z=-1.55, short front return.
-  B(-1.5,.72,-3.30,.055,.72,1.20,[.40,.44,.45])
-  B(-1.5,.72,-.20,.055,.72,.85,[.40,.44,.45])
+  B(-1.5,.72,-3.30,.055,.72,1.20,[.30,.32,.33])
+  B(-1.5,.72,-.20,.055,.72,.85,[.30,.32,.33])
   // Right divider: same doorway alignment for the main corridor.
-  B(2.15,.72,-3.30,.055,.72,1.20,[.40,.44,.45])
-  B(2.15,.72,-.20,.055,.72,.85,[.40,.44,.45])
+  B(2.15,.72,-3.30,.055,.72,1.20,[.30,.32,.33])
+  B(2.15,.72,-.20,.055,.72,.85,[.30,.32,.33])
   // Front divider is broken into side wings, leaving a generous central aisle.
-  B(-4.55,.72,.95,1.55,.72,.055,[.40,.44,.45])
-  B(4.45,.72,.95,1.65,.72,.055,[.40,.44,.45])
+  B(-4.55,.72,.95,1.55,.72,.055,[.30,.32,.33])
+  B(4.45,.72,.95,1.65,.72,.055,[.30,.32,.33])
 
   // Executive room: Kris + Maya.
-  B(-4.25,.78,-3.20,1.38,.08,.55,[.48,.28,.13])
+  B(-4.25,.78,-3.20,1.38,.08,.55,[.31,.20,.12])
   for(const xx of [-5.35,-3.15])for(const zz of [-3.55,-2.85])B(xx,.38,zz,.06,.38,.06,[.30,.17,.08])
   B(-4.25,1.15,-3.68,.62,.38,.05,[.035,.06,.08])
   B(-4.25,.91,-3.68,.035,.16,.035,[.09,.10,.11])
@@ -412,7 +416,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   B(-4.25,2.05,-4.49,.72,.20,.02,[.12,.16,.18])
 
   // Meeting room.
-  B(4.05,.56,-3.05,1.20,.08,.68,[.42,.25,.12])
+  B(4.05,.56,-3.05,1.20,.08,.68,[.30,.19,.11])
   for(const xx of [2.90,5.20])for(const zz of [-3.55,-2.55])B(xx,.34,zz,.28,.05,.28,[.17,.22,.26])
   B(4.05,1.70,-4.50,1.15,.025,.025,[.16,.29,.34])
   B(4.05,1.70,-4.46,.92,.32,.018,[.08,.13,.17])
@@ -421,22 +425,22 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   // They return only after a true hip/knee sit pose is implemented; no clipping placeholders.
 
   // Operations workstations: desk, monitor body + stand/base, keyboard and mouse.
-  const workstation=(x,z,wood=[.44,.28,.15])=>{
-    B(x,.70,z,.62,.055,.40,wood)
+  const workstation=(x,z,wood=[.31,.20,.12])=>{
+    B(x,.70,z,.60,.055,.34,wood)
     B(x,.98,z-.35,.31,.23,.035,[.040,.055,.065])
     B(x,.80,z-.35,.030,.10,.030,[.09,.10,.11])
     B(x,.715,z-.35,.15,.018,.075,[.10,.11,.12])
-    B(x,.765,z+.18,.25,.018,.075,[.10,.11,.12])
-    B(x+.34,.765,z+.18,.045,.018,.060,[.11,.12,.13])
+    B(x,.765,z+.15,.23,.016,.060,[.10,.11,.12])
+    B(x+.31,.765,z+.15,.040,.016,.050,[.11,.12,.13])
   }
-  for(const xx of [-4.75,-3.05,-.55,1.15])workstation(xx,.05,[.46,.29,.15])
+  for(const xx of [-4.75,-3.05,-.55,1.15])workstation(xx,.05,[.32,.21,.12])
   // VPS / tech desks + server racks.
-  for(const xx of [3.15,4.65])workstation(xx,.05,[.40,.26,.14])
-  for(const xx of [5.65,5.20,4.75]){B(xx,.85,.55,.18,.85,.32,[.035,.065,.085]);for(let k=0;k<4;k++)B(xx,.55+k*.22,.20,.12,.025,.02,k%2?[.20,.80,.55]:[.18,.55,.95])}
+  for(const xx of [3.15,4.65])workstation(xx,.05,[.28,.19,.12])
+  for(const xx of [5.65,5.20,4.75]){B(xx,.85,.55,.18,.85,.32,[.035,.065,.085]);for(let k=0;k<4;k++)B(xx,.55+k*.22,.20,.12,.025,.02,k%2?[.16,.50,.34]:[.14,.36,.58])}
 
   // Support / Finance.
-  workstation(-4.80,2.05,[.47,.29,.15])
-  workstation(-2.35,2.05,[.47,.29,.15])
+  workstation(-4.80,2.05,[.32,.21,.12])
+  workstation(-2.35,2.05,[.32,.21,.12])
 
   // Lounge / pantry.
   B(.45,.32,2.35,1.05,.30,.42,[.20,.28,.34]);B(.45,.72,2.70,1.05,.45,.08,[.20,.28,.34])
@@ -446,15 +450,15 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   // Decorative office plants.
   const plant=(x,z)=>{
     B(x,.20,z,.16,.20,.16,[.38,.22,.11])
-    sphereDraw(vp,mul4(trans(x,.52,z),scale(.25,.34,.25)),[.10,.36,.20])
-    sphereDraw(vp,mul4(trans(x-.16,.63,z+.04),scale(.16,.24,.16)),[.12,.43,.24])
-    sphereDraw(vp,mul4(trans(x+.16,.61,z-.03),scale(.16,.23,.16)),[.09,.39,.20])
+    sphereDraw(vp,mul4(trans(x,.52,z),scale(.25,.34,.25)),[.10,.27,.16])
+    sphereDraw(vp,mul4(trans(x-.16,.63,z+.04),scale(.16,.24,.16)),[.12,.31,.18])
+    sphereDraw(vp,mul4(trans(x+.16,.61,z-.03),scale(.16,.23,.16)),[.09,.29,.16])
   }
   plant(-5.55,-1.25);plant(5.55,-1.25);plant(-.20,2.85);plant(4.25,2.80)
 
   // Lobby / reception.
-  B(0,.62,4.02,1.15,.45,.28,[.48,.30,.16])
-  B(0,1.07,3.78,1.15,.06,.28,[.58,.37,.20])
+  B(0,.62,4.02,1.15,.45,.28,[.30,.21,.14])
+  B(0,1.07,3.78,1.15,.06,.28,[.38,.25,.14])
  }
  const cast=[
   {name:'Kris',role:'PIMPINAN',workYaw:.67,executive:'kris',lane:-.08,home:[-5.20,-2.45],target:[-4.15,-1.55],route:[[-5.20,-2.45],[-4.75,-1.75],[-4.15,-1.55]],shirt:[.07,.11,.17],pants:[.05,.07,.10],skin:[.72,.44,.31],hair:[.055,.035,.025],eye:[.05,.06,.07],lip:[.24,.07,.065],accent:[.92,.70,.26],hairStyle:2,accessory:'none',schedule:0,offset:0,scale:1.04},
@@ -566,7 +570,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • BEHAVIOR REALISM LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • MATERIAL & SCALE POLISH LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -584,14 +588,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.5 DEV • BEHAVIOR REALISM'})
+   jsx('div',{className:'h3chip',children:'V3.6 DEV • MATERIAL & SCALE POLISH'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'CHARACTER MAKEOVER'}),
-     jsx('small',{children:'Behavior realism: calmer workstation posture, restrained head/arm motion, less HUD clutter, staggered office traffic, and cleaner route behavior.'})
+     jsx('small',{children:'Material/scale polish: neutral office carpet, warmer walls, darker partitions, restrained wood/metal tones, cleaner server racks, baseboards, and calmer presentation.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag = orbit camera'}),jsx('div',{className:'h3pill',children:'Wheel = zoom'}),
@@ -599,7 +603,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.5 DEV removes fake rapid typing, restrains head/arm motion, staggers traffic, and hides stationary staff HUD clutter. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.6 DEV replaces the teal prototype palette with neutral carpet/walls, darker architectural partitions, restrained wood/metal tones, baseboards and cleaner workstation scale. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
