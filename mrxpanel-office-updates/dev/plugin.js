@@ -14,6 +14,7 @@ const CSS=`
 .h3stage{padding:12px;min-height:0;background:#090d12}.h3wrap{position:relative;width:100%;height:100%;min-height:650px;border:1px solid #323b47;border-radius:16px;overflow:hidden;background:#15252f}
 .h3canvas{display:block;width:100%;height:100%;min-height:650px;touch-action:none;cursor:grab}.h3canvas:active{cursor:grabbing}
 .h3labels{pointer-events:none;position:absolute;inset:0;overflow:hidden}.h3name{position:absolute;left:0;top:0;transform:translate(-50%,-100%);padding:4px 7px;border-radius:7px;background:rgba(9,13,18,.86);border:1px solid rgba(241,204,108,.38);box-shadow:0 4px 12px rgba(0,0,0,.28);font-size:7px;font-weight:900;color:#fff;white-space:nowrap;transition:opacity .15s ease}.h3name small{display:block;margin-top:1px;font-size:6px;font-weight:800;color:#9aa6b2;letter-spacing:.04em}
+.h3room{position:absolute;left:0;top:0;transform:translate(-50%,-50%);padding:4px 8px;border-radius:5px;background:rgba(244,236,222,.90);border:1px solid rgba(144,124,93,.72);box-shadow:0 4px 10px rgba(0,0,0,.18);font-size:7px;font-weight:950;color:#3b3329;letter-spacing:.06em;white-space:nowrap;opacity:.86}
 .h3over{pointer-events:none;position:absolute;left:16px;top:16px;max-width:360px;padding:10px 12px;border:1px solid rgba(241,204,108,.3);border-radius:10px;background:rgba(10,15,20,.75);backdrop-filter:blur(8px)}
 .h3over strong{font-size:12px;color:#f1cc6c}.h3over small{display:block;margin-top:4px;font-size:8px;line-height:1.5;color:#b3bcc5}
 .h3legend{position:absolute;left:16px;bottom:16px;display:flex;gap:6px;flex-wrap:wrap}.h3pill{padding:5px 7px;border:1px solid #33404b;border-radius:999px;background:rgba(10,15,20,.82);font-size:7px;color:#d2d8de}
@@ -246,7 +247,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  const u={svp:gl.getUniformLocation(sp,'uVP'),sm:gl.getUniformLocation(sp,'uModel'),sj:gl.getUniformLocation(sp,'uJ[0]'),shirt:gl.getUniformLocation(sp,'uShirt'),skinTone:gl.getUniformLocation(sp,'uSkinTone'),pants:gl.getUniformLocation(sp,'uPants'),bvp:gl.getUniformLocation(bp,'uVP'),bm:gl.getUniformLocation(bp,'uModel'),bc:gl.getUniformLocation(bp,'uColor')}
  const invBind=[];for(let i=0;i<skin.joints.length;i++)invBind.push(new Float32Array(ibmAcc.array.slice(i*16,i*16+16)))
  const cam={yaw:.76,pitch:.54,dist:17.6},drag={active:false,x:0,y:0,yaw:0,pitch:0}
- const labelMap=new Map()
+ const labelMap=new Map(),roomLabelMap=new Map()
  const facingMap=new Map()
  let lastPhase='',start=performance.now(),raf=0
  function localState(t,w,activity='idle'){
@@ -429,7 +430,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   B(0,1.07,3.78,1.15,.06,.28,[.58,.37,.20])
  }
  function render(now){
-  const cssW=Math.max(1,canvas.clientWidth),cssH=Math.max(1,canvas.clientHeight),dpr=Math.min(2,window.devicePixelRatio||1)
+  const cssW=Math.max(1,canvas.clientWidth),cssH=Math.max(1,canvas.clientHeight),dpr=Math.min(1.6,window.devicePixelRatio||1)
   const rw=Math.round(cssW*dpr),rh=Math.round(cssH*dpr);if(canvas.width!==rw||canvas.height!==rh){canvas.width=rw;canvas.height=rh}
   gl.viewport(0,0,rw,rh);gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.clearColor(.045,.075,.095,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT)
   const eye=[Math.sin(cam.yaw)*Math.cos(cam.pitch)*cam.dist,1.65+Math.sin(cam.pitch)*cam.dist,Math.cos(cam.yaw)*Math.cos(cam.pitch)*cam.dist]
@@ -460,6 +461,26 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     if(f<=.5){dx=m[0]-a[0];dz=m[1]-a[1]}else{dx=b[0]-m[0];dz=b[1]-m[1]}
     if(reverse){dx=-dx;dz=-dz}
     return Math.atan2(-dz,dx)
+  }
+
+  const rooms=[
+   ['RUANG PIMPINAN',-4.25,2.45,-4.42],
+   ['MEETING',4.05,2.35,-4.42],
+   ['OPERASIONAL',-2.60,1.15,-.90],
+   ['VPS / TECH',4.10,1.15,-.90],
+   ['SUPPORT',-4.80,1.20,1.45],
+   ['FINANCE',-2.35,1.20,1.45],
+   ['LOUNGE',.45,1.05,1.75],
+   ['PANTRY',2.85,1.15,1.78],
+   ['LOBBY',0,1.45,3.72]
+  ]
+  if(labelLayer){
+   for(const [name,rx,ry,rz] of rooms){
+    let el=roomLabelMap.get(name)
+    if(!el){el=document.createElement('div');el.className='h3room';el.textContent=name;labelLayer.appendChild(el);roomLabelMap.set(name,el)}
+    const pt=project3(vp,[rx,ry,rz],cssW,cssH)
+    if(pt){el.style.opacity='.86';el.style.left=pt[0]+'px';el.style.top=pt[1]+'px'}else el.style.opacity='0'
+   }
   }
 
   let phaseSummary='OFFICE ACTIVE'
@@ -518,7 +539,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • DESK INTERACTION LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • PRESENTATION POLISH LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -536,14 +557,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V2.6 DEV • DESK INTERACTION'})
+   jsx('div',{className:'h3chip',children:'V2.7 DEV • PRESENTATION POLISH'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'CHARACTER MAKEOVER'}),
-     jsx('small',{children:'Living 3D office + desk interaction. Characters visually settle into chairs at workstations, type at desks, stand to move, and keep smooth routed motion.'})
+     jsx('small',{children:'Presentation polish: room signage, stable character HUD, adaptive render density, desk interaction, smooth routing, and readable office zones.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag = orbit camera'}),jsx('div',{className:'h3pill',children:'Wheel = zoom'}),
@@ -551,7 +572,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'DEV V2.6 adds workstation chairs, seated typing illusion, stand-to-move transitions, routed paths, smooth turns, status HUD, and multi-character office life. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'DEV V2.7 adds projected room signage, adaptive render density, desk interaction, smooth routing, and persistent character HUD. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
