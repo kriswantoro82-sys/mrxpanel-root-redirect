@@ -1,34 +1,39 @@
 # MRXPANEL OFFICE — DEV STATUS
 
-Current dev build: **V3.8 DEV — PRESENTATION REALISM**
+Current dev build: **V3.11 DEV — ARCHITECTURAL SCALE**
 
 Stable channel: **V1.3.0** (unchanged)
 
-## Current realism baseline
+## Realism baseline now implemented
 - 8 simultaneous rigged 3D characters.
-- Floating room labels removed.
-- Fake body-sinking sit pose removed; workstation chairs withheld until a real sit rig exists.
+- Fake seated body-sinking removed; chairs remain withheld until a true sit rig exists.
 - Character face/hair/accessory proportions tightened.
-- Softer key/fill lighting.
-- Neutral carpet, warmer walls, darker architectural partitions, restrained wood/metal tones.
-- Baseboards, framed windows, and framed doorway openings.
-- All character routes use explicit architecture-aware multi-waypoint polylines.
-- Route traversal is distance weighted, not segment-count weighted.
-- Travel duration is based on total route length at a consistent office walking speed.
+- Softer key/fill lighting and restrained material palette.
+- Neutral carpet, warmer perimeter walls, darker architectural partitions, muted wood/metal/server colors.
+- Physical baseboards, framed windows and framed door openings.
+- Interior partitions are now full office height instead of waist-high prototype walls.
+- Upper glass bands preserve dollhouse visibility without fake low walls.
+- All 8 characters use explicit architecture-aware multi-waypoint routes.
+- Route traversal is distance weighted.
+- World travel duration is based on route length and a consistent office walking speed.
+- Skeletal gait phase is synchronized to distance travelled.
+- Walk blend eases in/out and turning is frame-rate independent.
 - Staff traffic is staggered and work/review motion is restrained.
-- Staff face their desks while stationary.
-- Workstations include monitor body, stand/base, keyboard and mouse.
-- Stationary non-executive HUD is hidden.
-- Full-width office stage replaces the old debug-heavy split layout.
-- Dev controls are now compact overlays.
+- Stationary staff face their workstations.
+- Workstations have monitor body, stand/base, keyboard and mouse.
+- Full-width office presentation with compact controls.
+- Route metrics are cached outside the frame loop.
+- HUD status nodes are cached and throttled.
+- Render density is pixel-budgeted for steadier 8-character performance.
 - JavaScript structural smoke/syntax check: PASS.
 
-## Promotion blockers
-1. One new visual review in Hermes is still required.
-2. Verify no wall/desk clipping with distance-weighted routes.
-3. Verify walk animation speed visually matches world movement.
-4. Verify character/furniture scale from normal camera angles.
-5. Verify window/door frames do not look oversized.
-6. Verify 8-character performance remains acceptable.
+## Still blocked before stable promotion
+1. Visual review of full-height partitions and door openings.
+2. Verify no route clipping through wall edges/door frames.
+3. Verify gait/world speed match from normal camera angles.
+4. Verify character/furniture scale after architectural wall correction.
+5. Verify workstation arm posture is acceptable.
+6. Verify 8-character performance in Hermes.
+7. Final lighting/material balance after visual review.
 
-Stable V1.3.0 remains untouched. Real MASB state integration remains OFF until the visual shell passes this new realism review.
+Stable V1.3.0 remains untouched. Real MASB state integration remains OFF until the 3D shell passes the next realism review.
