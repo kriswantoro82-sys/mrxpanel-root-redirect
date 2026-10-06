@@ -1,9 +1,9 @@
 {
   "channel": "stable",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "plugin_url": "https://raw.githubusercontent.com/kriswantoro82-sys/mrxpanel-root-redirect/main/mrxpanel-office-updates/plugin.js",
-  "sha256": "b17024bdcba9eee23341debd432851f73185f6ade29a652580fb136202a8b89d",
-  "released_at": "2026-10-06T08:20:00+07:00",
+  "sha256": "23fa9b2c2b4e3d279c5fa82715440a0a8d8dc6642d3bc47f4af4f4048480f495",
+  "released_at": "2026-10-06T08:55:00+07:00",
   "bootstrap_min": "1.0.0",
-  "notes": "Rigged human upgrade: actual skinned human mesh, 19-joint skeleton, native glTF walk cycle, WebGL2 GPU skinning. Cesium branded texture removed."
+  "notes": "Character Makeover: stylized 3D head overlay attached to animated head joint, hair, ears, eyes, pupils, eyebrows, nose and mouth; facing aligned with travel direction."
 }
