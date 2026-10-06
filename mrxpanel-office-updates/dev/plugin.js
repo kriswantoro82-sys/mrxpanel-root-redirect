@@ -324,7 +324,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   const torsoJ=jm.subarray(2*16,3*16)
   const turn=walking?Math.sin(time*1.35+p.offset)*.006:Math.sin(time*1.25+p.offset)*.032
   const headBase=mul4(mul4(modelM,headJ),trans(0,0,1.338))
-  const head=mul4(headBase,rotZ(turn))
+  const head=mul4(mul4(headBase,rotY(Math.PI/2)),rotZ(turn))
   const skin=p.skin,hair=p.hair,accent=p.accent
   const part=(x,y,z,sx,sy,sz,color)=>sphereDraw(vp,mul4(mul4(head,trans(x,y,z)),scale(sx,sy,sz)),color)
   const block=(x,y,z,sx,sy,sz,color,rz=0)=>boxDraw(vp,mul4(mul4(mul4(head,trans(x,y,z)),rotZ(rz)),scale(sx,sy,sz)),color)
@@ -614,7 +614,8 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     const motionTime=walking||gaitBlend>.02?gaitTime:sec+p.offset
     const st=localState(motionTime,gaitBlend,activity),world=worlds(st),mw=world[meshNode],invMw=invert4(mw),jm=p._jm
     for(let i=0;i<skin.joints.length;i++)jm.set(mul4(mul4(invMw,world[skin.joints[i]]),invBind[i]),i*16)
-    const placement=mul4(mul4(trans(px,yOffset,pz),rotY(yaw)),scale(p.scale,p.scale,p.scale)),modelM=mul4(placement,mw)
+    const bodyYaw=yaw-Math.PI/2
+    const placement=mul4(mul4(trans(px,yOffset,pz),rotY(bodyYaw)),scale(p.scale,p.scale,p.scale)),modelM=mul4(placement,mw)
 
     sphereDraw(vp,mul4(trans(px,.010,pz),scale(.18*p.scale,.006,.095*p.scale)),[.135,.140,.143])
     gl.useProgram(sp);gl.uniformMatrix4fv(u.svp,false,vp);gl.uniformMatrix4fv(u.sm,false,modelM);gl.uniformMatrix4fv(u.sj,false,jm)
@@ -646,7 +647,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • UPRIGHT WALK ALIGNMENT LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • BODY LEFT 90° LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -664,14 +665,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.18 DEV • UPRIGHT WALK ALIGNMENT'})
+   jsx('div',{className:'h3chip',children:'V3.19 DEV • BODY LEFT 90°'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
-     jsx('small',{children:'Upright-walk pass: the animated root/pelvis rotation and side sway are now damped directly, keeping the whole body vertical while preserving leg motion and a small natural weight shift.'})
+     jsx('small',{children:'Orientation pass: the skeletal body from neck downward is rotated 90° left relative to route heading, while the stylized head is counter-rotated so its current facing is preserved.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
@@ -682,7 +683,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.18 DEV keeps the previous realism work and fixes the remaining sideways lean at its source: root/pelvis rotation and lateral sway are damped before torso/neck stabilization. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.19 DEV keeps the V3.18 upright-walk work, rotates the body below the neck 90° left, and compensates the head so only the body orientation changes. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
