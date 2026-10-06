@@ -256,9 +256,9 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  const u={svp:gl.getUniformLocation(sp,'uVP'),sm:gl.getUniformLocation(sp,'uModel'),sj:gl.getUniformLocation(sp,'uJ[0]'),shirt:gl.getUniformLocation(sp,'uShirt'),skinTone:gl.getUniformLocation(sp,'uSkinTone'),pants:gl.getUniformLocation(sp,'uPants'),bvp:gl.getUniformLocation(bp,'uVP'),bm:gl.getUniformLocation(bp,'uModel'),bc:gl.getUniformLocation(bp,'uColor')}
  const invBind=[];for(let i=0;i<skin.joints.length;i++)invBind.push(new Float32Array(ibmAcc.array.slice(i*16,i*16+16)))
  const cam={yaw:.78,pitch:.40,dist:17.2},drag={active:false,x:0,y:0,yaw:0,pitch:0}
- const labelMap=new Map(),roomLabelMap=new Map()
+ const labelMap=new Map(),roomLabelMap=new Map(),gaitMap=new Map()
  const facingMap=new Map()
- let lastPhase='',start=performance.now(),raf=0,labelFrame=0
+ let lastPhase='',start=performance.now(),raf=0,labelFrame=0,lastNow=start
  function localState(t,w,activity='idle'){
   const st=base.map(x=>({t:x.t.slice(),r:x.r.slice(),s:x.s.slice(),m:x.m}))
   const at=((t-.0416666)%1.9583334+1.9583334)%1.9583334+.0416666
@@ -493,6 +493,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   ['LOBBY',0,1.45,3.72]
  ]
  function render(now){
+  const dt=Math.max(.001,Math.min(.05,(now-lastNow)/1000));lastNow=now
   const cssW=Math.max(1,canvas.clientWidth),cssH=Math.max(1,canvas.clientHeight),dpr=Math.min(1.6,window.devicePixelRatio||1)
   const rw=Math.round(cssW*dpr),rh=Math.round(cssH*dpr);if(canvas.width!==rw||canvas.height!==rh){canvas.width=rw;canvas.height=rh}
   gl.viewport(0,0,rw,rh);gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.clearColor(.045,.075,.095,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT)
@@ -537,27 +538,36 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     const homeHold=11,targetHold=7,returnHold=5,cycleLen=homeHold+moveDur+targetHold+moveDur+returnHold
     const cycle=((sec+(p.schedule||0))%cycleLen+cycleLen)%cycleLen
     const outStart=homeHold,outEnd=outStart+moveDur,reviewEnd=outEnd+targetHold,backEnd=reviewEnd+moveDur
-    let walking=false,px=p.home[0],pz=p.home[1],desiredYaw=0
+    let walking=false,px=p.home[0],pz=p.home[1],desiredYaw=0,gaitDistance=0
     if(mode==='walk'){
       const span=Math.max(1,routeLen/walkSpeed),q=((sec+p.offset)/span)%2,forward=q<1,f=forward?q:2-q,pt=pathAt(p,f)
-      px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,f,!forward)
+      px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,f,!forward);gaitDistance=routeLen*(forward?f:1-f)
     }else if(mode==='idle'){
       px=p.home[0];pz=p.home[1];walking=false;desiredYaw=(p.workYaw??dirAt(p,0,false))
     }else{
       if(cycle<outStart){px=p.home[0];pz=p.home[1];walking=false;desiredYaw=(p.workYaw??dirAt(p,0,false))}
-      else if(cycle<outEnd){const ff=(cycle-outStart)/moveDur,pt=pathAt(p,ff);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,ff,false)}
+      else if(cycle<outEnd){const ff=(cycle-outStart)/moveDur,pt=pathAt(p,ff);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,ff,false);gaitDistance=routeLen*ff}
       else if(cycle<reviewEnd){px=p.target[0];pz=p.target[1];walking=false;desiredYaw=dirAt(p,1,false)}
-      else if(cycle<backEnd){const ff=(cycle-reviewEnd)/moveDur,rf=1-ff,pt=pathAt(p,rf);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,rf,true)}
+      else if(cycle<backEnd){const ff=(cycle-reviewEnd)/moveDur,rf=1-ff,pt=pathAt(p,rf);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,rf,true);gaitDistance=routeLen*ff}
       else{px=p.home[0];pz=p.home[1];walking=false;desiredYaw=(p.workYaw??dirAt(p,0,false))}
     }
 
     const prevYaw=facingMap.has(p.name)?facingMap.get(p.name):desiredYaw
-    const yaw=prevYaw+angleDelta(prevYaw,desiredYaw)*(walking?.16:.09)
+    const turnRate=walking?9.0:5.0,turnAlpha=1-Math.exp(-turnRate*dt)
+    const yaw=prevYaw+angleDelta(prevYaw,desiredYaw)*turnAlpha
     facingMap.set(p.name,yaw)
+
+    const prevGait=gaitMap.has(p.name)?gaitMap.get(p.name):0
+    const gaitTarget=walking?1:0,gaitRate=walking?8.0:6.0,gaitAlpha=1-Math.exp(-gaitRate*dt)
+    const gaitBlend=prevGait+(gaitTarget-prevGait)*gaitAlpha
+    gaitMap.set(p.name,Math.abs(gaitBlend-gaitTarget)<.002?gaitTarget:gaitBlend)
+
     const activity=walking?'walk':(cycle>=outEnd&&cycle<reviewEnd?'review':'work')
     const yOffset=0
-    const motionTime=walking?(sec*.92+p.offset):sec+p.offset
-    const st=localState(motionTime,walking?1:0,activity),world=worlds(st),mw=world[meshNode],invMw=invert4(mw),jm=new Float32Array(skin.joints.length*16)
+    // Native gait cycle ≈1.958s; one full left-right cycle maps to ~1.25 world units.
+    const gaitTime=(gaitDistance/1.25)*1.9583334+p.offset*.11
+    const motionTime=walking||gaitBlend>.02?gaitTime:sec+p.offset
+    const st=localState(motionTime,gaitBlend,activity),world=worlds(st),mw=world[meshNode],invMw=invert4(mw),jm=new Float32Array(skin.joints.length*16)
     for(let i=0;i<skin.joints.length;i++)jm.set(mul4(mul4(invMw,world[skin.joints[i]]),invBind[i]),i*16)
     const placement=mul4(mul4(trans(px,yOffset,pz),rotY(yaw)),scale(p.scale,p.scale,p.scale)),modelM=mul4(placement,mw)
 
@@ -565,7 +575,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     gl.useProgram(sp);gl.uniformMatrix4fv(u.svp,false,vp);gl.uniformMatrix4fv(u.sm,false,modelM);gl.uniformMatrix4fv(u.sj,false,jm)
     gl.uniform3fv(u.shirt,p.shirt);gl.uniform3fv(u.skinTone,p.skin);gl.uniform3fv(u.pants,p.pants)
     gl.bindVertexArray(vao);gl.drawElements(gl.TRIANGLES,indices.count,indices.componentType===5123?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,0)
-    characterMakeover(vp,modelM,jm,sec+p.offset,walking,p)
+    characterMakeover(vp,modelM,jm,sec+p.offset,gaitBlend>.18,p)
     if(labelLayer&&updateHud){
       let el=labelMap.get(p.name)
       if(!el){
@@ -591,7 +601,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • PRESENTATION REALISM LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • GAIT & TURN REALISM LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -609,14 +619,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.8 DEV • PRESENTATION REALISM'})
+   jsx('div',{className:'h3chip',children:'V3.9 DEV • GAIT & TURN REALISM'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
-     jsx('small',{children:'Presentation realism: full-width 3D stage, restrained dev chrome, physical window/door framing, compact controls, distance-aware motion, and a cleaner office-first view.'})
+     jsx('small',{children:'Gait realism: walk-cycle phase follows actual distance travelled, walk blend eases in/out, and turning uses frame-rate-independent smoothing for steadier office movement.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
@@ -627,7 +637,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.8 DEV switches to a full-width office view, adds physical window/door framing, and moves dev controls into a compact overlay. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.9 DEV syncs the skeletal gait to world distance, eases walk blend in/out, and makes turning independent of frame rate. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
