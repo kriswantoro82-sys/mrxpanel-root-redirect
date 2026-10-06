@@ -270,15 +270,19 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   if(activity==='walk'&&w>.05){
    // Walking stabilization: preserve the leg cycle but keep the upper body upright.
    // The source clip exaggerates torso/neck rotation when used at office scale.
-   st[12].r=slerp(st[12].r,base[12].r,.48)
-   st[13].r=slerp(st[13].r,base[13].r,.42)
-   st[20].r=slerp(st[20].r,base[20].r,.78)
-   st[21].r=slerp(st[21].r,base[21].r,.86)
+   // Root/pelvis is the main source of the visible sideways lean in the source clip.
+   st[3].r=slerp(st[3].r,base[3].r,.72)
+   st[12].r=slerp(st[12].r,base[12].r,.58)
+   st[13].r=slerp(st[13].r,base[13].r,.52)
+   st[20].r=slerp(st[20].r,base[20].r,.82)
+   st[21].r=slerp(st[21].r,base[21].r,.90)
    // Keep arm swing, but damp the game-like shoulder/forearm exaggeration.
-   st[14].r=slerp(st[14].r,base[14].r,.18);st[17].r=slerp(st[17].r,base[17].r,.18)
-   st[15].r=slerp(st[15].r,base[15].r,.12);st[18].r=slerp(st[18].r,base[18].r,.12)
-   // Reduce root bob so the torso does not look as if it is bouncing or leaning.
-   st[3].t[2]=base[3].t[2]+(st[3].t[2]-base[3].t[2])*.42
+   st[14].r=slerp(st[14].r,base[14].r,.22);st[17].r=slerp(st[17].r,base[17].r,.22)
+   st[15].r=slerp(st[15].r,base[15].r,.16);st[18].r=slerp(st[18].r,base[18].r,.16)
+   // Reduce root side sway and bob while preserving a small natural weight shift.
+   st[3].t[0]=base[3].t[0]+(st[3].t[0]-base[3].t[0])*.35
+   st[3].t[1]=base[3].t[1]+(st[3].t[1]-base[3].t[1])*.30
+   st[3].t[2]=base[3].t[2]+(st[3].t[2]-base[3].t[2])*.30
   }else if(w<.05&&activity==='work'){
    const breathe=Math.sin(t*1.20),micro=Math.sin(t*2.10)
    // Geometry-calibrated standing desk pose:
@@ -642,7 +646,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • WALK BODY HEAD ALIGNMENT LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • UPRIGHT WALK ALIGNMENT LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -660,14 +664,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.17 DEV • WALK / BODY / HEAD ALIGNMENT'})
+   jsx('div',{className:'h3chip',children:'V3.18 DEV • UPRIGHT WALK ALIGNMENT'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
-     jsx('small',{children:'Walking alignment pass: leg motion stays active, while torso, shoulders and neck are stabilized so the body remains upright and the head tracks naturally instead of being dragged by the source gait clip.'})
+     jsx('small',{children:'Upright-walk pass: the animated root/pelvis rotation and side sway are now damped directly, keeping the whole body vertical while preserving leg motion and a small natural weight shift.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
@@ -678,7 +682,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.17 DEV keeps the V3.16 motion/performance work, then corrects walking posture by stabilizing torso and neck rotation, damping exaggerated arm swing and reducing root bob. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.18 DEV keeps the previous realism work and fixes the remaining sideways lean at its source: root/pelvis rotation and lateral sway are damped before torso/neck stabilization. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
