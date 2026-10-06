@@ -1,9 +1,9 @@
 {
   "channel": "dev",
-  "version": "3.15.0-dev",
+  "version": "3.16.0-dev",
   "plugin_path": "mrxpanel-office-updates/dev/plugin.js",
-  "sha256": "206c154852e6f258c0c0facb986e0e16aa005bf7091e67292a1e6317bb47244b",
-  "released_at": "2026-10-06T13:49:00+07:00",
-  "notes": "Human scale/work-pose and grounding pass: normalized character stature against 0.70m desks, skeleton-calibrated standing workstation arm pose, wall-mounted practical lights, contact shadows under major furniture, lighter character ground shadows, full-height architecture, clearance-audited routes, distance-synced gait and frame-stable rendering.",
+  "sha256": "1f95435e1907ba8e90c7124c7a400c82bf50823818b4a0269d006c2951194310",
+  "released_at": "2026-10-06T14:47:00+07:00",
+  "notes": "Motion/performance polish: eased acceleration and braking stay synchronized with world-distance gait, softer contact shadows reduce the dark-mat look, per-character joint buffers are reused to lower per-frame allocations, and the full 8-character realism baseline from V3.15 is preserved.",
   "stable_unchanged": true
 }
