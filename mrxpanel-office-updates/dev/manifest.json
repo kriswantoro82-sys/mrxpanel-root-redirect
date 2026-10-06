@@ -1,9 +1,9 @@
 {
   "channel": "dev",
-  "version": "3.6.0-dev",
+  "version": "3.8.0-dev",
   "plugin_path": "mrxpanel-office-updates/dev/plugin.js",
-  "sha256": "d3d9d2518b0e37e4b36ce8b82a05eb6eeb34a7825b714ff1cac67f1f58bfe70a",
-  "released_at": "2026-10-06T12:44:00+07:00",
-  "notes": "Behavior/material realism pass: calm work posture, staggered traffic schedules, reduced HUD clutter, neutral office palette, warmer walls, darker partitions, compact workstations, baseboards, muted server LEDs/plants, desk-facing staff, explicit collision-safe routes.",
+  "sha256": "67f8d67ab87546bebbd32c842e8e11c104ae3fb7580dc47593668a9e56fb3644",
+  "released_at": "2026-10-06T13:18:00+07:00",
+  "notes": "Realism continuation: distance-weighted constant-speed routes, travel duration based on route length, full-width office stage, compact overlay controls, physical window frames and doorway framing, neutral materials, calmer office behavior, collision-safe explicit routes.",
   "stable_unchanged": true
 }
