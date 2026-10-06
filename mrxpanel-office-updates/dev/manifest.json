@@ -1,9 +1,9 @@
 {
   "channel": "dev",
-  "version": "3.4.0-dev",
+  "version": "3.6.0-dev",
   "plugin_path": "mrxpanel-office-updates/dev/plugin.js",
-  "sha256": "c893005e7a9ffba95330a9473f3a25b8e08b27e8011a77af28259e62adb19c8a",
-  "released_at": "2026-10-06T12:28:00+07:00",
-  "notes": "Realism continuation: segmented room walls with door gaps, explicit collision-safe multi-waypoint routes, workstation chair clipping removed, tighter character/accessory proportions, softer key/fill lighting, smaller ground shadows, desk-facing work orientation, realistic monitor stands, keyboards and mice.",
+  "sha256": "d3d9d2518b0e37e4b36ce8b82a05eb6eeb34a7825b714ff1cac67f1f58bfe70a",
+  "released_at": "2026-10-06T12:44:00+07:00",
+  "notes": "Behavior/material realism pass: calm work posture, staggered traffic schedules, reduced HUD clutter, neutral office palette, warmer walls, darker partitions, compact workstations, baseboards, muted server LEDs/plants, desk-facing staff, explicit collision-safe routes.",
   "stable_unchanged": true
 }
