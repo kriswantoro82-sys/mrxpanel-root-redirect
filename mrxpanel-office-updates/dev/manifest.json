@@ -1,9 +1,9 @@
 {
   "channel": "dev",
-  "version": "3.20.0-dev",
+  "version": "3.21.0-dev",
   "plugin_path": "mrxpanel-office-updates/dev/plugin.js",
-  "sha256": "37dce300148f5a57d3ae284db4bce75d443b3b98e6a194ed3074a1331905646e",
-  "released_at": "2026-10-06T16:01:00+07:00",
-  "notes": "Correct left-orientation pass: the body uses the visually correct +90 degree offset, while head position is taken from the rotated neck anchor and head orientation is reconstructed from the original route-facing transform so the head stays attached.",
+  "sha256": "392703dcdc9f21140693d922bcbe87425fdd17e527f09e2bee202da45eb87e5c",
+  "released_at": "2026-10-06T16:08:00+07:00",
+  "notes": "Hair orientation pass: only the hair silhouette geometry is rotated 180 degrees around the head-local vertical axis. V3.20 body, neck, head anchoring, route motion, lighting, grounding and performance work are preserved.",
   "stable_unchanged": true
 }
