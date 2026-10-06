@@ -329,16 +329,18 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   const headAnchor=new Float32Array(neutralHeadAnchor)
   headAnchor[12]=bodyHeadAnchor[12];headAnchor[13]=bodyHeadAnchor[13];headAnchor[14]=bodyHeadAnchor[14]
   const head=mul4(headAnchor,rotZ(turn))
+  const headVisual=mul4(head,scale(.945,.945,.945))
   const skin=p.skin,hair=p.hair,accent=p.accent
-  const part=(x,y,z,sx,sy,sz,color)=>sphereDraw(vp,mul4(mul4(head,trans(x,y,z)),scale(sx,sy,sz)),color)
-  const block=(x,y,z,sx,sy,sz,color,rz=0)=>boxDraw(vp,mul4(mul4(mul4(head,trans(x,y,z)),rotZ(rz)),scale(sx,sy,sz)),color)
+  const part=(x,y,z,sx,sy,sz,color)=>sphereDraw(vp,mul4(mul4(headVisual,trans(x,y,z)),scale(sx,sy,sz)),color)
+  const block=(x,y,z,sx,sy,sz,color,rz=0)=>boxDraw(vp,mul4(mul4(mul4(headVisual,trans(x,y,z)),rotZ(rz)),scale(sx,sy,sz)),color)
+  const neckPart=(x,y,z,sx,sy,sz,color)=>sphereDraw(vp,mul4(mul4(head,trans(x,y,z)),scale(sx,sy,sz)),color)
 
-  part(0,0,-.205,.076,.076,.105,[skin[0]*.93,skin[1]*.93,skin[2]*.93])
+  neckPart(0,0,-.205,.074,.074,.102,[skin[0]*.93,skin[1]*.93,skin[2]*.93])
   part(0,0,.000,.148,.164,.171,skin)
   part(0,.018,.042,.141,.158,.145,[Math.min(1,skin[0]*1.05),Math.min(1,skin[1]*1.05),Math.min(1,skin[2]*1.05)])
 
   // Hair fit polish: keep the 180° orientation, but seat the silhouette back/down on the crown.
-  const hairHead=mul4(mul4(head,trans(0,-.095,-.018)),rotZ(Math.PI))
+  const hairHead=mul4(mul4(headVisual,trans(0,-.095,-.018)),rotZ(Math.PI))
   const hairPart=(x,y,z,sx,sy,sz,color)=>sphereDraw(vp,mul4(mul4(hairHead,trans(x,y,z)),scale(sx*.95,sy*.95,sz*.96)),color)
   if(p.hairStyle===1){
     hairPart(0,-.050,.132,.164,.126,.097,hair)
@@ -654,7 +656,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • HAIR FIT POLISH LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • HEAD PROPORTION POLISH LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -672,14 +674,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.23 DEV • HAIR FIT POLISH'})
+   jsx('div',{className:'h3chip',children:'V3.24 DEV • HEAD PROPORTION POLISH'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
-     jsx('small',{children:'Hair fit pass: the 180° hair silhouette is shifted back and slightly down onto the crown with a small volume reduction; V3.22 head/neck seating and accepted body/head orientation remain unchanged.'})
+     jsx('small',{children:'Head proportion pass: shrink the visible head assembly by 5.5% while keeping the neck bridge, head seating, body orientation and V3.23 hair fit intact.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
