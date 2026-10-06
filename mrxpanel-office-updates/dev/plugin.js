@@ -495,14 +495,20 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
 
 
 
+  const routeMetrics=(p)=>{
+    const pts=p.route||[p.home,p.target],lens=[],cum=[0];let total=0
+    for(let i=0;i<pts.length-1;i++){const dx=pts[i+1][0]-pts[i][0],dz=pts[i+1][1]-pts[i][1],l=Math.hypot(dx,dz);lens.push(l);total+=l;cum.push(total)}
+    return{pts,lens,cum,total:Math.max(.001,total)}
+  }
   const routeSeg=(p,f)=>{
-    const pts=p.route||[p.home,p.target],segs=Math.max(1,pts.length-1),cl=Math.max(0,Math.min(.999999,f))
-    const raw=cl*segs,i=Math.min(segs-1,Math.floor(raw)),q=smooth01(raw-i)
-    return{a:pts[i],b:pts[i+1],q}
+    const m=routeMetrics(p),dist=Math.max(0,Math.min(.999999,f))*m.total
+    let i=0;while(i<m.lens.length-1&&dist>m.cum[i+1])i++
+    const len=Math.max(.001,m.lens[i]||.001),q=(dist-m.cum[i])/len
+    return{a:m.pts[i],b:m.pts[i+1],q,total:m.total}
   }
   const pathAt=(p,f)=>{
     const {a,b,q}=routeSeg(p,f),dx=b[0]-a[0],dz=b[1]-a[1],len=Math.hypot(dx,dz)||1
-    const lane=(p.lane||0)*Math.sin(Math.PI*Math.max(0,Math.min(1,f)))
+    const edgeFade=Math.sin(Math.PI*Math.max(0,Math.min(1,f))),lane=(p.lane||0)*edgeFade
     return[a[0]+dx*q-dz/len*lane,a[1]+dz*q+dx/len*lane]
   }
   const dirAt=(p,f,reverse=false)=>{
@@ -516,27 +522,32 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
 
   let phaseSummary='OFFICE ACTIVE'
   for(const p of cast){
-    const cycle=(sec+(p.schedule||0))%32
+    const routeLen=routeMetrics(p).total,walkSpeed=1.10
+    const moveDur=Math.max(2.7,Math.min(8.5,routeLen/walkSpeed))
+    const homeHold=11,targetHold=7,returnHold=5,cycleLen=homeHold+moveDur+targetHold+moveDur+returnHold
+    const cycle=((sec+(p.schedule||0))%cycleLen+cycleLen)%cycleLen
+    const outStart=homeHold,outEnd=outStart+moveDur,reviewEnd=outEnd+targetHold,backEnd=reviewEnd+moveDur
     let walking=false,px=p.home[0],pz=p.home[1],desiredYaw=0
     if(mode==='walk'){
-      const q=(sec+p.offset)*.34,forward=Math.cos(q)>=0,f=(Math.sin(q)+1)/2,pt=pathAt(p,f)
+      const span=Math.max(1,routeLen/walkSpeed),q=((sec+p.offset)/span)%2,forward=q<1,f=forward?q:2-q,pt=pathAt(p,f)
       px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,f,!forward)
     }else if(mode==='idle'){
       px=p.home[0];pz=p.home[1];walking=false;desiredYaw=(p.workYaw??dirAt(p,0,false))
     }else{
-      if(cycle<13){px=p.home[0];pz=p.home[1];walking=false;desiredYaw=(p.workYaw??dirAt(p,0,false))}
-      else if(cycle<16){const ff=(cycle-13)/3,pt=pathAt(p,ff);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,ff,false)}
-      else if(cycle<24){px=p.target[0];pz=p.target[1];walking=false;desiredYaw=dirAt(p,1,false)}
-      else if(cycle<27){const ff=(cycle-24)/3,rf=1-ff,pt=pathAt(p,rf);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,rf,true)}
+      if(cycle<outStart){px=p.home[0];pz=p.home[1];walking=false;desiredYaw=(p.workYaw??dirAt(p,0,false))}
+      else if(cycle<outEnd){const ff=(cycle-outStart)/moveDur,pt=pathAt(p,ff);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,ff,false)}
+      else if(cycle<reviewEnd){px=p.target[0];pz=p.target[1];walking=false;desiredYaw=dirAt(p,1,false)}
+      else if(cycle<backEnd){const ff=(cycle-reviewEnd)/moveDur,rf=1-ff,pt=pathAt(p,rf);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,rf,true)}
       else{px=p.home[0];pz=p.home[1];walking=false;desiredYaw=(p.workYaw??dirAt(p,0,false))}
     }
 
     const prevYaw=facingMap.has(p.name)?facingMap.get(p.name):desiredYaw
     const yaw=prevYaw+angleDelta(prevYaw,desiredYaw)*(walking?.16:.09)
     facingMap.set(p.name,yaw)
-    const activity=walking?'walk':(cycle>=16&&cycle<24?'review':'work')
+    const activity=walking?'walk':(cycle>=outEnd&&cycle<reviewEnd?'review':'work')
     const yOffset=0
-    const st=localState(sec+p.offset,walking?1:0,activity),world=worlds(st),mw=world[meshNode],invMw=invert4(mw),jm=new Float32Array(skin.joints.length*16)
+    const motionTime=walking?(sec*.92+p.offset):sec+p.offset
+    const st=localState(motionTime,walking?1:0,activity),world=worlds(st),mw=world[meshNode],invMw=invert4(mw),jm=new Float32Array(skin.joints.length*16)
     for(let i=0;i<skin.joints.length;i++)jm.set(mul4(mul4(invMw,world[skin.joints[i]]),invBind[i]),i*16)
     const placement=mul4(mul4(trans(px,yOffset,pz),rotY(yaw)),scale(p.scale,p.scale,p.scale)),modelM=mul4(placement,mw)
 
@@ -570,7 +581,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • MATERIAL & SCALE POLISH LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • MOTION & SPEED REALISM LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -588,14 +599,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.6 DEV • MATERIAL & SCALE POLISH'})
+   jsx('div',{className:'h3chip',children:'V3.7 DEV • MOTION & SPEED REALISM'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'CHARACTER MAKEOVER'}),
-     jsx('small',{children:'Material/scale polish: neutral office carpet, warmer walls, darker partitions, restrained wood/metal tones, cleaner server racks, baseboards, and calmer presentation.'})
+     jsx('small',{children:'Motion realism: route distance now controls walking time, unequal waypoint segments use distance-weighted traversal, and characters keep a consistent office walking speed instead of skating.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag = orbit camera'}),jsx('div',{className:'h3pill',children:'Wheel = zoom'}),
@@ -603,7 +614,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.6 DEV replaces the teal prototype palette with neutral carpet/walls, darker architectural partitions, restrained wood/metal tones, baseboards and cleaner workstation scale. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.7 DEV gives every route a distance-aware travel time and constant-speed polyline traversal, reducing skating and stop-start waypoint motion. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
