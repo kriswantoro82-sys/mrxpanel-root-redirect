@@ -220,7 +220,7 @@ function init(canvas,setStatus,setPhase,modeRef){
  const sib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,sib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,sph.i,gl.STATIC_DRAW);gl.bindVertexArray(null)
  const u={svp:gl.getUniformLocation(sp,'uVP'),sm:gl.getUniformLocation(sp,'uModel'),sj:gl.getUniformLocation(sp,'uJ[0]'),shirt:gl.getUniformLocation(sp,'uShirt'),skinTone:gl.getUniformLocation(sp,'uSkinTone'),pants:gl.getUniformLocation(sp,'uPants'),bvp:gl.getUniformLocation(bp,'uVP'),bm:gl.getUniformLocation(bp,'uModel'),bc:gl.getUniformLocation(bp,'uColor')}
  const invBind=[];for(let i=0;i<skin.joints.length;i++)invBind.push(new Float32Array(ibmAcc.array.slice(i*16,i*16+16)))
- const cam={yaw:.72,pitch:.48,dist:16.8},drag={active:false,x:0,y:0,yaw:0,pitch:0}
+ const cam={yaw:.76,pitch:.54,dist:17.6},drag={active:false,x:0,y:0,yaw:0,pitch:0}
  let lastPhase='',start=performance.now(),raf=0
  function localState(t,w){
   const st=base.map(x=>({t:x.t.slice(),r:x.r.slice(),s:x.s.slice(),m:x.m}))
@@ -304,9 +304,24 @@ function init(canvas,setStatus,setPhase,modeRef){
   const B=(x,y,z,sx,sy,sz,c)=>boxDraw(vp,mul4(trans(x,y,z),scale(sx,sy,sz)),c)
   // Main floor + perimeter.
   B(0,-.10,0,6.2,.08,4.7,[.29,.43,.42])
+  // Subtle room floor zoning.
+  B(-4.10,-.010,-2.65,1.85,.018,1.60,[.39,.43,.38])
+  B(4.10,-.010,-2.65,1.85,.018,1.60,[.30,.43,.48])
+  B(-2.85,-.010,.05,3.00,.018,.86,[.28,.41,.44])
+  B(3.95,-.010,.05,2.05,.018,.86,[.24,.34,.40])
+  B(-3.60,-.010,2.35,2.25,.018,.88,[.34,.43,.38])
+  B(1.85,-.010,2.35,2.55,.018,.88,[.32,.40,.42])
+  B(0,-.008,4.00,1.55,.020,.58,[.42,.39,.33])
   B(0,1.30,-4.65,6.2,1.4,.08,[.74,.70,.63])
   B(-6.15,1.30,0,.08,1.4,4.7,[.60,.65,.63])
   B(6.15,1.30,0,.08,1.4,4.7,[.60,.65,.63])
+  // Back-wall windows and warm office lighting.
+  for(const xx of [-4.25,-1.45,1.45,4.25]){
+    B(xx,1.62,-4.56,1.05,.58,.025,[.10,.25,.34])
+    B(xx,1.62,-4.525,.90,.44,.012,[.20,.48,.64])
+  }
+  for(const xx of [-4.2,-1.4,1.4,4.2])B(xx,2.66,-1.00,.60,.025,.18,[.96,.80,.46])
+  for(const xx of [-4.2,-1.4,1.4,4.2])B(xx,2.66,2.35,.60,.025,.18,[.96,.80,.46])
 
   // Low partitions define real office zones without blocking the camera.
   B(-1.5,.42,-1.05,.05,.42,3.45,[.42,.52,.54])
@@ -317,12 +332,16 @@ function init(canvas,setStatus,setPhase,modeRef){
   B(-4.25,.78,-3.20,1.38,.08,.55,[.48,.28,.13])
   for(const xx of [-5.35,-3.15])for(const zz of [-3.55,-2.85])B(xx,.38,zz,.06,.38,.06,[.30,.17,.08])
   B(-4.25,1.15,-3.68,.62,.38,.05,[.035,.06,.08])
+  B(-4.25,2.15,-4.52,1.15,.025,.03,[.86,.65,.22])
+  B(-4.25,2.05,-4.49,.72,.20,.02,[.12,.16,.18])
   B(-5.35,.48,-2.35,.36,.05,.34,[.16,.21,.25]);B(-5.35,.86,-2.07,.36,.40,.05,[.16,.21,.25])
   B(-3.20,.48,-2.35,.36,.05,.34,[.16,.21,.25]);B(-3.20,.86,-2.07,.36,.40,.05,[.16,.21,.25])
 
   // Meeting room.
   B(4.05,.56,-3.05,1.20,.08,.68,[.42,.25,.12])
   for(const xx of [2.90,5.20])for(const zz of [-3.55,-2.55])B(xx,.34,zz,.28,.05,.28,[.17,.22,.26])
+  B(4.05,1.70,-4.50,1.15,.025,.025,[.16,.29,.34])
+  B(4.05,1.70,-4.46,.92,.32,.018,[.08,.13,.17])
 
   // Operations desks.
   for(const xx of [-4.75,-3.05,-.55,1.15]){
@@ -340,6 +359,15 @@ function init(canvas,setStatus,setPhase,modeRef){
   B(.45,.32,2.35,1.05,.30,.42,[.20,.28,.34]);B(.45,.72,2.70,1.05,.45,.08,[.20,.28,.34])
   B(2.55,.48,2.42,.62,.05,.42,[.72,.68,.60]);B(2.55,.87,2.70,.32,.35,.05,[.48,.50,.48])
   B(3.55,.75,2.55,.25,.42,.25,[.72,.68,.60])
+
+  // Decorative office plants.
+  const plant=(x,z)=>{
+    B(x,.20,z,.16,.20,.16,[.38,.22,.11])
+    sphereDraw(vp,mul4(trans(x,.52,z),scale(.25,.34,.25)),[.10,.36,.20])
+    sphereDraw(vp,mul4(trans(x-.16,.63,z+.04),scale(.16,.24,.16)),[.12,.43,.24])
+    sphereDraw(vp,mul4(trans(x+.16,.61,z-.03),scale(.16,.23,.16)),[.09,.39,.20])
+  }
+  plant(-5.55,-1.25);plant(5.55,-1.25);plant(-.20,2.85);plant(4.25,2.80)
 
   // Lobby / reception.
   B(0,.62,4.02,1.15,.45,.28,[.48,.30,.16])
@@ -402,7 +430,7 @@ function init(canvas,setStatus,setPhase,modeRef){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(5.8,Math.min(14,cam.dist+Math.sign(e.deltaY)*.55))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • LIVING 3D OFFICE LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • ENVIRONMENT POLISH LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh)}
 }
 
@@ -420,14 +448,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V2.0 DEV • LIVING 3D OFFICE'})
+   jsx('div',{className:'h3chip',children:'V2.1 DEV • ENVIRONMENT POLISH'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'CHARACTER MAKEOVER'}),
-     jsx('small',{children:'Full-office 3D simulation: multi-character cast, distinct outfits, executive/operations/meeting/VPS/support/finance/lounge zones, autonomous walk cycles, and game-style camera.'})
+     jsx('small',{children:'Living 3D office + environment polish: zoned floors, windows, warm ceiling lights, plants, richer executive/meeting/tech areas, and autonomous multi-character cast.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag = orbit camera'}),jsx('div',{className:'h3pill',children:'Wheel = zoom'}),
