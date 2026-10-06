@@ -249,7 +249,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  const cam={yaw:.76,pitch:.54,dist:17.6},drag={active:false,x:0,y:0,yaw:0,pitch:0}
  const labelMap=new Map(),roomLabelMap=new Map()
  const facingMap=new Map()
- let lastPhase='',start=performance.now(),raf=0
+ let lastPhase='',start=performance.now(),raf=0,labelFrame=0
  function localState(t,w,activity='idle'){
   const st=base.map(x=>({t:x.t.slice(),r:x.r.slice(),s:x.s.slice(),m:x.m}))
   const at=((t-.0416666)%1.9583334+1.9583334)%1.9583334+.0416666
@@ -429,6 +429,28 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   B(0,.62,4.02,1.15,.45,.28,[.48,.30,.16])
   B(0,1.07,3.78,1.15,.06,.28,[.58,.37,.20])
  }
+ const cast=[
+  {name:'Kris',home:[-5.20,-2.45],seatY:-.34,mid:[-4.70,-1.55],target:[-4.15,-1.55],shirt:[.07,.11,.17],pants:[.05,.07,.10],skin:[.72,.44,.31],hair:[.055,.035,.025],eye:[.05,.06,.07],lip:[.24,.07,.065],accent:[.92,.70,.26],hairStyle:2,accessory:'none',offset:0,scale:1.04},
+  {name:'Maya',home:[-3.30,-2.45],seatY:-.34,mid:[-2.80,-1.55],target:[-2.25,-1.55],shirt:[.48,.20,.38],pants:[.10,.08,.14],skin:[.76,.48,.34],hair:[.10,.055,.035],eye:[.08,.06,.055],lip:[.45,.09,.16],accent:[.94,.73,.32],hairStyle:1,accessory:'none',offset:3.1,scale:1.00},
+  {name:'Team 1',home:[-4.75,.65],seatY:-.36,mid:[-3.20,1.25],target:[-1.95,.65],shirt:[.10,.30,.58],pants:[.06,.10,.16],skin:[.72,.43,.30],hair:[.08,.05,.035],eye:[.05,.06,.07],lip:[.28,.08,.07],accent:[.91,.69,.25],hairStyle:2,accessory:'headset',offset:1.3,scale:.96},
+  {name:'Team 2',home:[-3.05,.65],seatY:-.36,mid:[.35,1.25],target:[3.55,-2.15],shirt:[.32,.22,.50],pants:[.08,.08,.13],skin:[.67,.39,.28],hair:[.055,.035,.028],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.76,.60,.22],hairStyle:0,accessory:'glasses',offset:5.7,scale:.96},
+  {name:'Team 3',home:[-.55,.65],seatY:-.36,mid:[-.20,1.35],target:[.45,2.05],shirt:[.10,.39,.30],pants:[.055,.11,.10],skin:[.76,.48,.34],hair:[.12,.075,.045],eye:[.045,.06,.06],lip:[.34,.08,.08],accent:[.90,.68,.24],hairStyle:1,accessory:'none',offset:8.4,scale:.96},
+  {name:'VPS Operator',home:[3.15,.65],seatY:-.36,mid:[4.00,1.15],target:[4.90,.80],shirt:[.28,.20,.48],pants:[.07,.07,.12],skin:[.67,.40,.30],hair:[.06,.04,.032],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.93,.70,.26],hairStyle:0,accessory:'headset',offset:2.4,scale:.96},
+  {name:'Maya Support',home:[-4.80,2.60],seatY:-.36,mid:[-2.25,3.45],target:[0,3.25],shirt:[.52,.20,.38],pants:[.10,.08,.13],skin:[.76,.48,.34],hair:[.12,.06,.04],eye:[.07,.06,.06],lip:[.46,.09,.16],accent:[.95,.73,.30],hairStyle:1,accessory:'headset',offset:6.3,scale:.95},
+  {name:'Finance',home:[-2.35,2.60],seatY:-.36,mid:[.10,3.40],target:[2.55,2.25],shirt:[.63,.48,.14],pants:[.11,.09,.07],skin:[.72,.44,.31],hair:[.07,.045,.032],eye:[.05,.06,.07],lip:[.30,.075,.07],accent:[.96,.78,.36],hairStyle:2,accessory:'glasses',offset:10.2,scale:.95}
+ ]
+
+ const rooms=[
+  ['RUANG PIMPINAN',-4.25,2.45,-4.42],
+  ['MEETING',4.05,2.35,-4.42],
+  ['OPERASIONAL',-2.60,1.15,-.90],
+  ['VPS / TECH',4.10,1.15,-.90],
+  ['SUPPORT',-4.80,1.20,1.45],
+  ['FINANCE',-2.35,1.20,1.45],
+  ['LOUNGE',.45,1.05,1.75],
+  ['PANTRY',2.85,1.15,1.78],
+  ['LOBBY',0,1.45,3.72]
+ ]
  function render(now){
   const cssW=Math.max(1,canvas.clientWidth),cssH=Math.max(1,canvas.clientHeight),dpr=Math.min(1.6,window.devicePixelRatio||1)
   const rw=Math.round(cssW*dpr),rh=Math.round(cssH*dpr);if(canvas.width!==rw||canvas.height!==rh){canvas.width=rw;canvas.height=rh}
@@ -438,17 +460,9 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   sceneBoxes(vp)
   const sec=(now-start)/1000
   const mode=modeRef.current
+  const updateHud=(++labelFrame%3===0)
 
-  const cast=[
-   {name:'Kris',home:[-5.20,-2.45],seatY:-.34,mid:[-4.70,-1.55],target:[-4.15,-1.55],shirt:[.07,.11,.17],pants:[.05,.07,.10],skin:[.72,.44,.31],hair:[.055,.035,.025],eye:[.05,.06,.07],lip:[.24,.07,.065],accent:[.92,.70,.26],hairStyle:2,accessory:'none',offset:0,scale:1.04},
-   {name:'Maya',home:[-3.30,-2.45],seatY:-.34,mid:[-2.80,-1.55],target:[-2.25,-1.55],shirt:[.48,.20,.38],pants:[.10,.08,.14],skin:[.76,.48,.34],hair:[.10,.055,.035],eye:[.08,.06,.055],lip:[.45,.09,.16],accent:[.94,.73,.32],hairStyle:1,accessory:'none',offset:3.1,scale:1.00},
-   {name:'Team 1',home:[-4.75,.65],seatY:-.36,mid:[-3.20,1.25],target:[-1.95,.65],shirt:[.10,.30,.58],pants:[.06,.10,.16],skin:[.72,.43,.30],hair:[.08,.05,.035],eye:[.05,.06,.07],lip:[.28,.08,.07],accent:[.91,.69,.25],hairStyle:2,accessory:'headset',offset:1.3,scale:.96},
-   {name:'Team 2',home:[-3.05,.65],seatY:-.36,mid:[.35,1.25],target:[3.55,-2.15],shirt:[.32,.22,.50],pants:[.08,.08,.13],skin:[.67,.39,.28],hair:[.055,.035,.028],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.76,.60,.22],hairStyle:0,accessory:'glasses',offset:5.7,scale:.96},
-   {name:'Team 3',home:[-.55,.65],seatY:-.36,mid:[-.20,1.35],target:[.45,2.05],shirt:[.10,.39,.30],pants:[.055,.11,.10],skin:[.76,.48,.34],hair:[.12,.075,.045],eye:[.045,.06,.06],lip:[.34,.08,.08],accent:[.90,.68,.24],hairStyle:1,accessory:'none',offset:8.4,scale:.96},
-   {name:'VPS Operator',home:[3.15,.65],seatY:-.36,mid:[4.00,1.15],target:[4.90,.80],shirt:[.28,.20,.48],pants:[.07,.07,.12],skin:[.67,.40,.30],hair:[.06,.04,.032],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.93,.70,.26],hairStyle:0,accessory:'headset',offset:2.4,scale:.96},
-   {name:'Maya Support',home:[-4.80,2.60],seatY:-.36,mid:[-2.25,3.45],target:[0,3.25],shirt:[.52,.20,.38],pants:[.10,.08,.13],skin:[.76,.48,.34],hair:[.12,.06,.04],eye:[.07,.06,.06],lip:[.46,.09,.16],accent:[.95,.73,.30],hairStyle:1,accessory:'headset',offset:6.3,scale:.95},
-   {name:'Finance',home:[-2.35,2.60],seatY:-.36,mid:[.10,3.40],target:[2.55,2.25],shirt:[.63,.48,.14],pants:[.11,.09,.07],skin:[.72,.44,.31],hair:[.07,.045,.032],eye:[.05,.06,.07],lip:[.30,.075,.07],accent:[.96,.78,.36],hairStyle:2,accessory:'glasses',offset:10.2,scale:.95}
-  ]
+
 
   const pathAt=(p,f)=>{
     const a=p.home,m=p.mid||[(a[0]+p.target[0])/2,(a[1]+p.target[1])/2],b=p.target
@@ -463,18 +477,8 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     return Math.atan2(-dz,dx)
   }
 
-  const rooms=[
-   ['RUANG PIMPINAN',-4.25,2.45,-4.42],
-   ['MEETING',4.05,2.35,-4.42],
-   ['OPERASIONAL',-2.60,1.15,-.90],
-   ['VPS / TECH',4.10,1.15,-.90],
-   ['SUPPORT',-4.80,1.20,1.45],
-   ['FINANCE',-2.35,1.20,1.45],
-   ['LOUNGE',.45,1.05,1.75],
-   ['PANTRY',2.85,1.15,1.78],
-   ['LOBBY',0,1.45,3.72]
-  ]
-  if(labelLayer){
+
+  if(labelLayer&&updateHud){
    for(const [name,rx,ry,rz] of rooms){
     let el=roomLabelMap.get(name)
     if(!el){el=document.createElement('div');el.className='h3room';el.textContent=name;labelLayer.appendChild(el);roomLabelMap.set(name,el)}
@@ -515,7 +519,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     gl.uniform3fv(u.shirt,p.shirt);gl.uniform3fv(u.skinTone,p.skin);gl.uniform3fv(u.pants,p.pants)
     gl.bindVertexArray(vao);gl.drawElements(gl.TRIANGLES,indices.count,indices.componentType===5123?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,0)
     characterMakeover(vp,modelM,jm,sec+p.offset,walking,p)
-    if(labelLayer){
+    if(labelLayer&&updateHud){
       let el=labelMap.get(p.name)
       if(!el){
         el=document.createElement('div');el.className='h3name'
@@ -539,7 +543,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • PRESENTATION POLISH LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • PERFORMANCE POLISH LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -557,14 +561,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V2.7 DEV • PRESENTATION POLISH'})
+   jsx('div',{className:'h3chip',children:'V2.8 RC • PERFORMANCE POLISH'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'CHARACTER MAKEOVER'}),
-     jsx('small',{children:'Presentation polish: room signage, stable character HUD, adaptive render density, desk interaction, smooth routing, and readable office zones.'})
+     jsx('small',{children:'Release-candidate polish: static cast/room data, throttled HUD updates, adaptive render density, desk interaction, smooth routing, and readable 3D office zones.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag = orbit camera'}),jsx('div',{className:'h3pill',children:'Wheel = zoom'}),
@@ -572,7 +576,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'DEV V2.7 adds projected room signage, adaptive render density, desk interaction, smooth routing, and persistent character HUD. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V2.8 RC moves static cast/room data out of the frame loop and throttles DOM HUD updates for smoother rendering. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
