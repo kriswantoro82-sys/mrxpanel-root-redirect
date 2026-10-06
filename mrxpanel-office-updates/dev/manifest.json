@@ -1,9 +1,9 @@
 {
   "channel": "dev",
-  "version": "3.19.0-dev",
+  "version": "3.20.0-dev",
   "plugin_path": "mrxpanel-office-updates/dev/plugin.js",
-  "sha256": "71ef1b4193dc6433f06b6462d9e6887b320ee18cf84822f750bf95fb72ec9524",
-  "released_at": "2026-10-06T15:45:00+07:00",
-  "notes": "Body orientation pass: the skeletal body below the neck is rotated 90 degrees left relative to route heading, while the stylized head receives a compensating rotation so its current facing is preserved.",
+  "sha256": "37dce300148f5a57d3ae284db4bce75d443b3b98e6a194ed3074a1331905646e",
+  "released_at": "2026-10-06T16:01:00+07:00",
+  "notes": "Correct left-orientation pass: the body uses the visually correct +90 degree offset, while head position is taken from the rotated neck anchor and head orientation is reconstructed from the original route-facing transform so the head stays attached.",
   "stable_unchanged": true
 }
