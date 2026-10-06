@@ -13,7 +13,7 @@ const CSS=`
 .h3body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(760px,1fr) 330px}
 .h3stage{padding:12px;min-height:0;background:#090d12}.h3wrap{position:relative;width:100%;height:100%;min-height:650px;border:1px solid #323b47;border-radius:16px;overflow:hidden;background:#15252f}
 .h3canvas{display:block;width:100%;height:100%;min-height:650px;touch-action:none;cursor:grab}.h3canvas:active{cursor:grabbing}
-.h3labels{pointer-events:none;position:absolute;inset:0;overflow:hidden}.h3name{position:absolute;left:0;top:0;transform:translate(-50%,-100%);padding:4px 7px;border-radius:7px;background:rgba(9,13,18,.86);border:1px solid rgba(241,204,108,.38);box-shadow:0 4px 12px rgba(0,0,0,.28);font-size:7px;font-weight:900;color:#fff;white-space:nowrap;transition:opacity .15s ease}.h3name small{display:block;margin-top:1px;font-size:6px;font-weight:800;color:#9aa6b2;letter-spacing:.04em}
+.h3labels{pointer-events:none;position:absolute;inset:0;overflow:hidden}.h3name{position:absolute;left:0;top:0;transform:translate(-50%,-100%);padding:3px 5px;border-radius:5px;background:rgba(9,13,18,.72);border:1px solid rgba(241,204,108,.28);box-shadow:0 3px 8px rgba(0,0,0,.22);font-size:6px;font-weight:850;color:#fff;white-space:nowrap;transition:opacity .15s ease}.h3name small{display:block;margin-top:1px;font-size:5px;font-weight:750;color:#9aa6b2;letter-spacing:.035em}
 .h3room{position:absolute;left:0;top:0;transform:translate(-50%,-50%);padding:4px 8px;border-radius:5px;background:rgba(244,236,222,.90);border:1px solid rgba(144,124,93,.72);box-shadow:0 4px 10px rgba(0,0,0,.18);font-size:7px;font-weight:950;color:#3b3329;letter-spacing:.06em;white-space:nowrap;opacity:.86}
 .h3over{pointer-events:none;position:absolute;left:16px;top:16px;max-width:360px;padding:10px 12px;border:1px solid rgba(241,204,108,.3);border-radius:10px;background:rgba(10,15,20,.75);backdrop-filter:blur(8px)}
 .h3over strong{font-size:12px;color:#f1cc6c}.h3over small{display:block;margin-top:4px;font-size:8px;line-height:1.5;color:#b3bcc5}
@@ -246,7 +246,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  const sib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,sib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,sph.i,gl.STATIC_DRAW);gl.bindVertexArray(null)
  const u={svp:gl.getUniformLocation(sp,'uVP'),sm:gl.getUniformLocation(sp,'uModel'),sj:gl.getUniformLocation(sp,'uJ[0]'),shirt:gl.getUniformLocation(sp,'uShirt'),skinTone:gl.getUniformLocation(sp,'uSkinTone'),pants:gl.getUniformLocation(sp,'uPants'),bvp:gl.getUniformLocation(bp,'uVP'),bm:gl.getUniformLocation(bp,'uModel'),bc:gl.getUniformLocation(bp,'uColor')}
  const invBind=[];for(let i=0;i<skin.joints.length;i++)invBind.push(new Float32Array(ibmAcc.array.slice(i*16,i*16+16)))
- const cam={yaw:.76,pitch:.54,dist:17.6},drag={active:false,x:0,y:0,yaw:0,pitch:0}
+ const cam={yaw:.78,pitch:.40,dist:17.2},drag={active:false,x:0,y:0,yaw:0,pitch:0}
  const labelMap=new Map(),roomLabelMap=new Map(),seatMap=new Map()
  const facingMap=new Map()
  let lastPhase='',start=performance.now(),raf=0,labelFrame=0
@@ -301,30 +301,30 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   const block=(x,y,z,sx,sy,sz,color,rz=0)=>boxDraw(vp,mul4(mul4(mul4(head,trans(x,y,z)),rotZ(rz)),scale(sx,sy,sz)),color)
 
   part(0,0,-.205,.076,.076,.105,[skin[0]*.93,skin[1]*.93,skin[2]*.93])
-  part(0,0,.000,.163,.181,.188,skin)
-  part(0,.020,.045,.155,.176,.160,[Math.min(1,skin[0]*1.05),Math.min(1,skin[1]*1.05),Math.min(1,skin[2]*1.05)])
+  part(0,0,.000,.148,.164,.171,skin)
+  part(0,.018,.042,.141,.158,.145,[Math.min(1,skin[0]*1.05),Math.min(1,skin[1]*1.05),Math.min(1,skin[2]*1.05)])
 
   // Individual hair silhouettes.
   if(p.hairStyle===1){
-    part(0,-.055,.142,.184,.142,.110,hair)
+    part(0,-.050,.132,.164,.126,.097,hair)
     part(-.120,-.028,.074,.070,.100,.120,hair);part(.120,-.028,.074,.070,.100,.120,hair)
     part(.135,-.020,-.015,.048,.075,.120,hair)
   }else if(p.hairStyle===2){
-    part(0,-.060,.138,.186,.140,.108,hair)
+    part(0,-.052,.130,.166,.124,.096,hair)
     part(-.074,-.050,.200,.120,.102,.050,hair);part(.082,-.045,.195,.105,.105,.052,hair)
   }else{
-    part(0,-.060,.135,.181,.135,.102,hair)
+    part(0,-.052,.127,.162,.120,.091,hair)
     part(-.105,-.035,.072,.060,.090,.095,hair);part(.105,-.035,.072,.060,.090,.095,hair)
   }
 
   part(-.162,.000,-.006,.032,.023,.052,[skin[0]*.92,skin[1]*.92,skin[2]*.92])
   part(.162,.000,-.006,.032,.023,.052,[skin[0]*.92,skin[1]*.92,skin[2]*.92])
-  part(-.060,.169,.044,.030,.014,.024,[.965,.965,.945]);part(.060,.169,.044,.030,.014,.024,[.965,.965,.945])
-  part(-.060,.182,.044,.012,.010,.013,p.eye);part(.060,.182,.044,.012,.010,.013,p.eye)
+  part(-.054,.153,.040,.023,.011,.019,[.965,.965,.945]);part(.054,.153,.040,.023,.011,.019,[.965,.965,.945])
+  part(-.054,.163,.040,.009,.008,.010,p.eye);part(.054,.163,.040,.009,.008,.010,p.eye)
   part(-.056,.191,.049,.004,.004,.005,[1,1,1]);part(.064,.191,.049,.004,.004,.005,[1,1,1])
   block(-.060,.174,.087,.043,.007,.010,hair,-.08);block(.060,.174,.087,.043,.007,.010,hair,.08)
-  part(0,.181,-.004,.025,.031,.039,[skin[0]*.90,skin[1]*.86,skin[2]*.84])
-  block(0,.176,-.065,.050,.008,.010,p.lip)
+  part(0,.162,-.004,.020,.025,.032,[skin[0]*.90,skin[1]*.86,skin[2]*.84])
+  block(0,.158,-.058,.040,.006,.008,p.lip)
   part(-.032,.174,-.036,.030,.010,.022,[Math.min(1,skin[0]*1.08),Math.min(1,skin[1]*1.02),Math.min(1,skin[2]*1.02)])
   part(.032,.174,-.036,.030,.010,.022,[Math.min(1,skin[0]*1.08),Math.min(1,skin[1]*1.02),Math.min(1,skin[2]*1.02)])
 
@@ -362,13 +362,13 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   // Main floor + perimeter.
   B(0,-.10,0,6.2,.08,4.7,[.29,.43,.42])
   // Subtle room floor zoning.
-  B(-4.10,-.010,-2.65,1.85,.018,1.60,[.39,.43,.38])
-  B(4.10,-.010,-2.65,1.85,.018,1.60,[.30,.43,.48])
-  B(-2.85,-.010,.05,3.00,.018,.86,[.28,.41,.44])
-  B(3.95,-.010,.05,2.05,.018,.86,[.24,.34,.40])
-  B(-3.60,-.010,2.35,2.25,.018,.88,[.34,.43,.38])
-  B(1.85,-.010,2.35,2.55,.018,.88,[.32,.40,.42])
-  B(0,-.008,4.00,1.55,.020,.58,[.42,.39,.33])
+  B(-4.10,-.010,-2.65,1.85,.018,1.60,[.30,.34,.32])
+  B(4.10,-.010,-2.65,1.85,.018,1.60,[.29,.35,.38])
+  B(-2.85,-.010,.05,3.00,.018,.86,[.28,.34,.35])
+  B(3.95,-.010,.05,2.05,.018,.86,[.27,.33,.36])
+  B(-3.60,-.010,2.35,2.25,.018,.88,[.30,.35,.32])
+  B(1.85,-.010,2.35,2.55,.018,.88,[.29,.35,.36])
+  B(0,-.008,4.00,1.55,.020,.58,[.34,.32,.29])
   B(0,1.30,-4.65,6.2,1.4,.08,[.74,.70,.63])
   B(-6.15,1.30,0,.08,1.4,4.7,[.60,.65,.63])
   B(6.15,1.30,0,.08,1.4,4.7,[.60,.65,.63])
@@ -377,13 +377,11 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     B(xx,1.62,-4.56,1.05,.58,.025,[.10,.25,.34])
     B(xx,1.62,-4.525,.90,.44,.012,[.20,.48,.64])
   }
-  for(const xx of [-4.2,-1.4,1.4,4.2])B(xx,2.66,-1.00,.60,.025,.18,[.96,.80,.46])
-  for(const xx of [-4.2,-1.4,1.4,4.2])B(xx,2.66,2.35,.60,.025,.18,[.96,.80,.46])
 
   // Low partitions define real office zones without blocking the camera.
-  B(-1.5,.42,-1.05,.05,.42,3.45,[.42,.52,.54])
-  B(2.15,.42,-1.05,.05,.42,3.45,[.42,.52,.54])
-  B(0,.42,.95,6.0,.42,.05,[.42,.52,.54])
+  B(-1.5,.68,-1.05,.055,.68,3.45,[.40,.45,.46])
+  B(2.15,.68,-1.05,.055,.68,3.45,[.40,.45,.46])
+  B(0,.68,.95,6.0,.68,.055,[.40,.45,.46])
 
   // Executive room: Kris + Maya.
   B(-4.25,.78,-3.20,1.38,.08,.55,[.48,.28,.13])
@@ -494,18 +492,12 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   }
 
 
-  if(labelLayer&&updateHud){
-   for(const [name,rx,ry,rz] of rooms){
-    let el=roomLabelMap.get(name)
-    if(!el){el=document.createElement('div');el.className='h3room';el.textContent=name;labelLayer.appendChild(el);roomLabelMap.set(name,el)}
-    const pt=project3(vp,[rx,ry,rz],cssW,cssH)
-    if(pt){el.style.opacity='.86';el.style.left=pt[0]+'px';el.style.top=pt[1]+'px'}else el.style.opacity='0'
-   }
-  }
+  // Room labels intentionally hidden in realism mode; architecture should explain the space.
+
 
   let phaseSummary='OFFICE ACTIVE'
   for(const p of cast){
-    const cycle=(sec+p.offset)%18
+    const cycle=(sec+p.offset*2.2)%32
     let walking=false,px=p.home[0],pz=p.home[1],desiredYaw=0
     if(mode==='walk'){
       const q=(sec+p.offset)*.34,forward=Math.cos(q)>=0,f=(Math.sin(q)+1)/2,pt=pathAt(p,f)
@@ -513,19 +505,19 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     }else if(mode==='idle'){
       px=p.home[0];pz=p.home[1];walking=false;desiredYaw=dirAt(p,0,false)
     }else{
-      if(cycle<5){px=p.home[0];pz=p.home[1];walking=false;desiredYaw=dirAt(p,0,false)}
-      else if(cycle<9){const ff=(cycle-5)/4,pt=pathAt(p,ff);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,ff,false)}
-      else if(cycle<13){px=p.target[0];pz=p.target[1];walking=false;desiredYaw=dirAt(p,1,false)}
-      else if(cycle<17){const ff=(cycle-13)/4,rf=1-ff,pt=pathAt(p,rf);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,rf,true)}
+      if(cycle<12){px=p.home[0];pz=p.home[1];walking=false;desiredYaw=dirAt(p,0,false)}
+      else if(cycle<16){const ff=(cycle-12)/4,pt=pathAt(p,ff);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,ff,false)}
+      else if(cycle<23){px=p.target[0];pz=p.target[1];walking=false;desiredYaw=dirAt(p,1,false)}
+      else if(cycle<27){const ff=(cycle-23)/4,rf=1-ff,pt=pathAt(p,rf);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,rf,true)}
       else{px=p.home[0];pz=p.home[1];walking=false;desiredYaw=dirAt(p,0,false)}
     }
 
     const prevYaw=facingMap.has(p.name)?facingMap.get(p.name):desiredYaw
     const yaw=prevYaw+angleDelta(prevYaw,desiredYaw)*(walking?.16:.09)
     facingMap.set(p.name,yaw)
-    const activity=walking?'walk':(cycle>=9&&cycle<13?'review':'work')
-    const seated=!walking&&activity==='work'
-    const seatTarget=seated?(p.seatY||-.34):0
+    const activity=walking?'walk':(cycle>=16&&cycle<23?'review':'work')
+    const seated=false // realism reset: no fake body-sinking sit pose
+    const seatTarget=0
     const seatPrev=seatMap.has(p.name)?seatMap.get(p.name):0
     const yOffset=seatPrev+(seatTarget-seatPrev)*(seated?.10:.16)
     seatMap.set(p.name,Math.abs(yOffset-seatTarget)<.006?seatTarget:yOffset)
@@ -548,7 +540,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
       const pt=project3(vp,[px,1.78+yOffset,pz],cssW,cssH)
       if(pt){
         const transitioning=Math.abs(yOffset-seatTarget)>.025
-        const status=walking?'MOVING':(activity==='review'?'REVIEWING':transitioning?(seated?'SITTING':'STANDING'):(seated?'TYPING':'WORKING'))
+        const status=walking?'MOVING':(activity==='review'?'REVIEWING':'WORKING')
         el.style.opacity='1';el.style.left=pt[0]+'px';el.style.top=pt[1]+'px'
         el.style.borderColor=p.executive?'rgba(241,204,108,.75)':status==='MOVING'?'rgba(88,166,255,.55)':status==='REVIEWING'?'rgba(184,146,255,.58)':status==='TYPING'?'rgba(241,204,108,.62)':status==='SITTING'||status==='STANDING'?'rgba(255,191,82,.58)':'rgba(84,201,135,.55)'
         el.querySelector('small').textContent=(p.role?p.role+' • ':'')+status
@@ -563,7 +555,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • EXECUTIVE IDENTITY LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • REALISM RESET LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -581,14 +573,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.0 RC • EXECUTIVE IDENTITY'})
+   jsx('div',{className:'h3chip',children:'V3.1 DEV • REALISM RESET'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'CHARACTER MAKEOVER'}),
-     jsx('small',{children:'V3 release-candidate identity pass: Kris and Maya receive distinct executive silhouettes/details while the living office keeps routed motion, sit/stand settling, desk interaction, and HUD.'})
+     jsx('small',{children:'Realism reset: calmer office behavior, cleaner silhouettes, less HUD clutter, corrected proportions, safer workstation behavior, muted materials, and fewer visually impossible interactions.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag = orbit camera'}),jsx('div',{className:'h3pill',children:'Wheel = zoom'}),
@@ -596,7 +588,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.0 RC adds distinct Kris/Maya executive visual identity and role-aware HUD while keeping natural transitions and lane spacing. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.1 DEV deliberately removes fake sitting, floating room labels and detached ceiling panels; it reduces face exaggeration, calms traffic, and cleans the office presentation. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
