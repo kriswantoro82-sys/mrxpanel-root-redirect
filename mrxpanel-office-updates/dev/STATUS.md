@@ -1,23 +1,25 @@
 # MRXPANEL OFFICE — DEV STATUS
 
-Current dev build: **V3.22 DEV — HEAD / NECK SEATING**
+Current dev build: **V3.23 DEV — HAIR FIT POLISH**
 
 Stable channel: **V1.3.0** (unchanged)
 
-## Head / neck seating change
-- Lowered the complete head assembly by reducing the head-seat offset from 1.338 to 1.248.
-- Head position remains anchored to the body-rotated neck position.
-- Head facing/orientation from the accepted V3.20 correction is preserved.
-- V3.21 hair rotation remains preserved.
-- Body orientation, route motion, lighting, grounding and performance work remain unchanged.
-- JavaScript syntax preflight: PASS.
-- Target SHA256: `519db9c029659c286baadb56af1ab978077feafb1027a18b05c4db04d09581be`.
+## Hair fit polish
+- Preserved the 180° hair orientation.
+- Shifted the entire hair silhouette backward by 0.095 head-local units.
+- Lowered the hair by 0.018 head-local units.
+- Reduced hair volume slightly: X/Y 95%, Z 96%.
+- V3.22 head/neck seating is unchanged.
+- V3.20 accepted body/head orientation is unchanged.
+- Eyebrows, eyes, glasses/headset and facial geometry are unchanged.
+- JavaScript syntax/preflight: PASS.
+- Target SHA256: `eb42c2b0ccefe60edbf89845a8ee34b2733df020074b91543ec4292aaca8957c`.
 
 ## Visual review target
-1. Head should sit lower and closer to the neck/shoulders.
-2. Neck should no longer look stretched or detached.
-3. Head must remain correctly oriented while walking.
-4. Hair should remain attached and keep the current 180° orientation.
+1. Hair should sit on the crown instead of hovering forward.
+2. Hair should no longer dominate the forehead/eyes.
+3. Hair should remain attached while walking/turning.
+4. Head/neck seating must remain unchanged.
 
 ## Still blocked before stable promotion
 - Live Hermes visual review.
