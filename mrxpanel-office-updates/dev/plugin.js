@@ -187,11 +187,11 @@ function init(canvas,setStatus,setPhase,modeRef){
  }`
  const skinFS=`#version 300 es
  precision highp float;in vec3 vN;in float vSkin;in float vLeg;in float vHead;in vec3 vW;out vec4 outColor;
+ uniform vec3 uShirt;uniform vec3 uSkinTone;uniform vec3 uPants;
  void main(){
   if(vHead>.28)discard;
   vec3 L=normalize(vec3(-.45,.85,.55));float d=.44+.56*max(dot(normalize(vN),L),0.0);
-  vec3 shirt=vec3(.10,.29,.56),skin=vec3(.72,.43,.30),pants=vec3(.075,.11,.16);
-  vec3 base=mix(shirt,pants,smoothstep(.42,.72,vLeg));base=mix(base,skin,smoothstep(.35,.68,vSkin));
+  vec3 base=mix(uShirt,uPants,smoothstep(.42,.72,vLeg));base=mix(base,uSkinTone,smoothstep(.35,.68,vSkin));
   outColor=vec4(base*d,1.0);
  }`
  const boxVS=`#version 300 es
@@ -218,9 +218,9 @@ function init(canvas,setStatus,setPhase,modeRef){
  b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,sph.p,gl.STATIC_DRAW);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,0,0)
  b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,sph.n,gl.STATIC_DRAW);gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,0,0)
  const sib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,sib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,sph.i,gl.STATIC_DRAW);gl.bindVertexArray(null)
- const u={svp:gl.getUniformLocation(sp,'uVP'),sm:gl.getUniformLocation(sp,'uModel'),sj:gl.getUniformLocation(sp,'uJ[0]'),bvp:gl.getUniformLocation(bp,'uVP'),bm:gl.getUniformLocation(bp,'uModel'),bc:gl.getUniformLocation(bp,'uColor')}
+ const u={svp:gl.getUniformLocation(sp,'uVP'),sm:gl.getUniformLocation(sp,'uModel'),sj:gl.getUniformLocation(sp,'uJ[0]'),shirt:gl.getUniformLocation(sp,'uShirt'),skinTone:gl.getUniformLocation(sp,'uSkinTone'),pants:gl.getUniformLocation(sp,'uPants'),bvp:gl.getUniformLocation(bp,'uVP'),bm:gl.getUniformLocation(bp,'uModel'),bc:gl.getUniformLocation(bp,'uColor')}
  const invBind=[];for(let i=0;i<skin.joints.length;i++)invBind.push(new Float32Array(ibmAcc.array.slice(i*16,i*16+16)))
- const cam={yaw:1.16,pitch:.28,dist:7.9},drag={active:false,x:0,y:0,yaw:0,pitch:0}
+ const cam={yaw:.72,pitch:.48,dist:16.8},drag={active:false,x:0,y:0,yaw:0,pitch:0}
  let lastPhase='',start=performance.now(),raf=0
  function localState(t,w){
   const st=base.map(x=>({t:x.t.slice(),r:x.r.slice(),s:x.s.slice(),m:x.m}))
@@ -246,90 +246,155 @@ function init(canvas,setStatus,setPhase,modeRef){
  }
  function boxDraw(vp,m,color){geoDraw(cvao,cube.i.length,vp,m,color)}
  function sphereDraw(vp,m,color){geoDraw(svao,sph.i.length,vp,m,color)}
- function characterMakeover(vp,modelM,jm,time,walking){
+ function characterMakeover(vp,modelM,jm,time,walking,p){
   const headJ=new Float32Array(jm.slice(4*16,5*16))
   const torsoJ=new Float32Array(jm.slice(2*16,3*16))
-  const turn=walking?0:Math.sin(time*1.25)*.055
+  const turn=walking?0:Math.sin(time*1.25+p.offset)*.045
   const headBase=mul4(mul4(modelM,headJ),trans(0,0,1.338))
   const head=mul4(headBase,rotZ(turn))
+  const skin=p.skin,hair=p.hair,accent=p.accent
   const part=(x,y,z,sx,sy,sz,color)=>sphereDraw(vp,mul4(mul4(head,trans(x,y,z)),scale(sx,sy,sz)),color)
   const block=(x,y,z,sx,sy,sz,color,rz=0)=>boxDraw(vp,mul4(mul4(mul4(head,trans(x,y,z)),rotZ(rz)),scale(sx,sy,sz)),color)
 
-  // neck + stylized game head
-  part(0,0,-.205,.078,.078,.105,[.67,.39,.28])
-  part(0,0,.000,.166,.184,.190,[.72,.44,.31])
-  part(0,.020,.045,.158,.178,.162,[.76,.48,.34])
+  part(0,0,-.205,.076,.076,.105,[skin[0]*.93,skin[1]*.93,skin[2]*.93])
+  part(0,0,.000,.163,.181,.188,skin)
+  part(0,.020,.045,.155,.176,.160,[Math.min(1,skin[0]*1.05),Math.min(1,skin[1]*1.05),Math.min(1,skin[2]*1.05)])
 
-  // layered hair cap / side locks
-  part(0,-.060,.135,.184,.145,.112,[.075,.045,.032])
-  part(-.115,-.030,.078,.074,.096,.112,[.080,.048,.034])
-  part(.115,-.030,.078,.074,.096,.112,[.080,.048,.034])
-  part(-.060,-.050,.202,.095,.105,.048,[.070,.042,.030])
-  part(.070,-.040,.197,.105,.108,.050,[.070,.042,.030])
+  // Individual hair silhouettes.
+  if(p.hairStyle===1){
+    part(0,-.055,.142,.184,.142,.110,hair)
+    part(-.120,-.028,.074,.070,.100,.120,hair);part(.120,-.028,.074,.070,.100,.120,hair)
+    part(.135,-.020,-.015,.048,.075,.120,hair)
+  }else if(p.hairStyle===2){
+    part(0,-.060,.138,.186,.140,.108,hair)
+    part(-.074,-.050,.200,.120,.102,.050,hair);part(.082,-.045,.195,.105,.105,.052,hair)
+  }else{
+    part(0,-.060,.135,.181,.135,.102,hair)
+    part(-.105,-.035,.072,.060,.090,.095,hair);part(.105,-.035,.072,.060,.090,.095,hair)
+  }
 
-  // ears
-  part(-.166,.000,-.005,.033,.024,.055,[.67,.39,.28])
-  part(.166,.000,-.005,.033,.024,.055,[.67,.39,.28])
+  part(-.162,.000,-.006,.032,.023,.052,[skin[0]*.92,skin[1]*.92,skin[2]*.92])
+  part(.162,.000,-.006,.032,.023,.052,[skin[0]*.92,skin[1]*.92,skin[2]*.92])
+  part(-.060,.169,.044,.030,.014,.024,[.965,.965,.945]);part(.060,.169,.044,.030,.014,.024,[.965,.965,.945])
+  part(-.060,.182,.044,.012,.010,.013,p.eye);part(.060,.182,.044,.012,.010,.013,p.eye)
+  part(-.056,.191,.049,.004,.004,.005,[1,1,1]);part(.064,.191,.049,.004,.004,.005,[1,1,1])
+  block(-.060,.174,.087,.043,.007,.010,hair,-.08);block(.060,.174,.087,.043,.007,.010,hair,.08)
+  part(0,.181,-.004,.025,.031,.039,[skin[0]*.90,skin[1]*.86,skin[2]*.84])
+  block(0,.176,-.065,.050,.008,.010,p.lip)
+  part(-.032,.174,-.036,.030,.010,.022,[Math.min(1,skin[0]*1.08),Math.min(1,skin[1]*1.02),Math.min(1,skin[2]*1.02)])
+  part(.032,.174,-.036,.030,.010,.022,[Math.min(1,skin[0]*1.08),Math.min(1,skin[1]*1.02),Math.min(1,skin[2]*1.02)])
 
-  // eyes / pupils / catchlights - face is +Y in source model coordinates
-  part(-.060,.172,.045,.030,.014,.024,[.965,.965,.945])
-  part(.060,.172,.045,.030,.014,.024,[.965,.965,.945])
-  part(-.060,.185,.045,.012,.010,.013,[.055,.065,.070])
-  part(.060,.185,.045,.012,.010,.013,[.055,.065,.070])
-  part(-.056,.194,.050,.004,.004,.005,[1,1,1])
-  part(.064,.194,.050,.004,.004,.005,[1,1,1])
+  // Headset / glasses by role.
+  if(p.accessory==='headset'){
+    block(-.185,-.002,.030,.018,.020,.105,[.05,.07,.09])
+    block(.185,-.002,.030,.018,.020,.105,[.05,.07,.09])
+    block(.150,.035,.128,.045,.012,.012,[.05,.07,.09],-.22)
+  }
+  if(p.accessory==='glasses'){
+    block(-.060,.188,.044,.042,.006,.032,[.06,.07,.08])
+    block(.060,.188,.044,.042,.006,.032,[.06,.07,.08])
+    block(0,.190,.044,.020,.005,.005,[.06,.07,.08])
+  }
 
-  // eyebrows
-  block(-.060,.176,.088,.043,.007,.010,[.075,.045,.032],-.08)
-  block(.060,.176,.088,.043,.007,.010,[.075,.045,.032],.08)
-
-  // nose + mouth
-  part(0,.184,-.002,.026,.032,.040,[.67,.38,.27])
-  block(0,.178,-.065,.050,.008,.010,[.30,.075,.070])
-  part(-.032,.176,-.036,.030,.010,.022,[.80,.46,.37])
-  part(.032,.176,-.036,.030,.010,.022,[.80,.46,.37])
-
-  // small MRXPANEL gold chest detail
   const torso=mul4(mul4(modelM,torsoJ),trans(0,.130,.995))
-  boxDraw(vp,mul4(torso,scale(.028,.010,.095)),[.84,.62,.18])
-  boxDraw(vp,mul4(mul4(torso,trans(0,0,-.105)),scale(.050,.011,.022)),[.94,.78,.37])
+  boxDraw(vp,mul4(torso,scale(.028,.010,.095)),accent)
+  boxDraw(vp,mul4(mul4(torso,trans(0,0,-.105)),scale(.050,.011,.022)),[Math.min(1,accent[0]*1.12),Math.min(1,accent[1]*1.12),Math.min(1,accent[2]*1.12)])
  }
  function sceneBoxes(vp){
-  boxDraw(vp,mul4(trans(0,-.08,0),scale(4,.06,3)),[.32,.47,.43])
-  boxDraw(vp,mul4(trans(0,1.55,-3),scale(4,1.6,.06)),[.78,.74,.66])
-  boxDraw(vp,mul4(trans(-4,1.55,0),scale(.06,1.6,3)),[.67,.70,.66])
-  boxDraw(vp,mul4(trans(1.45,.92,-1.25),scale(1.2,.08,.45)),[.48,.28,.13])
-  for(const x of [.35,2.55])for(const z of [-1.60,-.90])boxDraw(vp,mul4(trans(x,.43,z),scale(.07,.43,.07)),[.30,.17,.08])
-  boxDraw(vp,mul4(trans(1.45,1.30,-1.49),scale(.48,.30,.05)),[.04,.07,.09])
-  boxDraw(vp,mul4(trans(1.45,.52,.05),scale(.34,.06,.32)),[.16,.21,.25])
-  boxDraw(vp,mul4(trans(1.45,.91,.31),scale(.34,.42,.06)),[.16,.21,.25])
+  const B=(x,y,z,sx,sy,sz,c)=>boxDraw(vp,mul4(trans(x,y,z),scale(sx,sy,sz)),c)
+  // Main floor + perimeter.
+  B(0,-.10,0,6.2,.08,4.7,[.29,.43,.42])
+  B(0,1.30,-4.65,6.2,1.4,.08,[.74,.70,.63])
+  B(-6.15,1.30,0,.08,1.4,4.7,[.60,.65,.63])
+  B(6.15,1.30,0,.08,1.4,4.7,[.60,.65,.63])
+
+  // Low partitions define real office zones without blocking the camera.
+  B(-1.5,.42,-1.05,.05,.42,3.45,[.42,.52,.54])
+  B(2.15,.42,-1.05,.05,.42,3.45,[.42,.52,.54])
+  B(0,.42,.95,6.0,.42,.05,[.42,.52,.54])
+
+  // Executive room: Kris + Maya.
+  B(-4.25,.78,-3.20,1.38,.08,.55,[.48,.28,.13])
+  for(const xx of [-5.35,-3.15])for(const zz of [-3.55,-2.85])B(xx,.38,zz,.06,.38,.06,[.30,.17,.08])
+  B(-4.25,1.15,-3.68,.62,.38,.05,[.035,.06,.08])
+  B(-5.35,.48,-2.35,.36,.05,.34,[.16,.21,.25]);B(-5.35,.86,-2.07,.36,.40,.05,[.16,.21,.25])
+  B(-3.20,.48,-2.35,.36,.05,.34,[.16,.21,.25]);B(-3.20,.86,-2.07,.36,.40,.05,[.16,.21,.25])
+
+  // Meeting room.
+  B(4.05,.56,-3.05,1.20,.08,.68,[.42,.25,.12])
+  for(const xx of [2.90,5.20])for(const zz of [-3.55,-2.55])B(xx,.34,zz,.28,.05,.28,[.17,.22,.26])
+
+  // Operations desks.
+  for(const xx of [-4.75,-3.05,-.55,1.15]){
+    B(xx,.70,.05,.62,.06,.40,[.48,.28,.13]);B(xx,.98,-.30,.32,.24,.04,[.035,.06,.08])
+  }
+  // VPS / tech desks + server racks.
+  for(const xx of [3.15,4.65]){B(xx,.70,.05,.62,.06,.40,[.44,.27,.14]);B(xx,.98,-.30,.32,.24,.04,[.035,.06,.08])}
+  for(const xx of [5.65,5.20,4.75]){B(xx,.85,.55,.18,.85,.32,[.035,.065,.085]);for(let k=0;k<4;k++)B(xx,.55+k*.22,.20,.12,.025,.02,k%2?[.20,.80,.55]:[.18,.55,.95])}
+
+  // Support / Finance.
+  B(-4.80,.65,2.05,.70,.06,.42,[.50,.30,.15]);B(-4.80,.96,1.72,.34,.22,.04,[.035,.06,.08])
+  B(-2.35,.65,2.05,.70,.06,.42,[.50,.30,.15]);B(-2.35,.96,1.72,.34,.22,.04,[.035,.06,.08])
+
+  // Lounge / pantry.
+  B(.45,.32,2.35,1.05,.30,.42,[.20,.28,.34]);B(.45,.72,2.70,1.05,.45,.08,[.20,.28,.34])
+  B(2.55,.48,2.42,.62,.05,.42,[.72,.68,.60]);B(2.55,.87,2.70,.32,.35,.05,[.48,.50,.48])
+  B(3.55,.75,2.55,.25,.42,.25,[.72,.68,.60])
+
+  // Lobby / reception.
+  B(0,.62,4.02,1.15,.45,.28,[.48,.30,.16])
+  B(0,1.07,3.78,1.15,.06,.28,[.58,.37,.20])
  }
  function render(now){
   const cssW=Math.max(1,canvas.clientWidth),cssH=Math.max(1,canvas.clientHeight),dpr=Math.min(2,window.devicePixelRatio||1)
   const rw=Math.round(cssW*dpr),rh=Math.round(cssH*dpr);if(canvas.width!==rw||canvas.height!==rh){canvas.width=rw;canvas.height=rh}
-  gl.viewport(0,0,rw,rh);gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.clearColor(.055,.095,.12,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT)
-  const eye=[Math.sin(cam.yaw)*Math.cos(cam.pitch)*cam.dist,1.05+Math.sin(cam.pitch)*cam.dist,Math.cos(cam.yaw)*Math.cos(cam.pitch)*cam.dist]
-  const vp=mul4(perspective(Math.PI/4,cssW/cssH,.05,50),lookAt(eye,[0,1.0,-.25]))
+  gl.viewport(0,0,rw,rh);gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.clearColor(.045,.075,.095,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT)
+  const eye=[Math.sin(cam.yaw)*Math.cos(cam.pitch)*cam.dist,1.65+Math.sin(cam.pitch)*cam.dist,Math.cos(cam.yaw)*Math.cos(cam.pitch)*cam.dist]
+  const vp=mul4(perspective(Math.PI/4,cssW/cssH,.05,60),lookAt(eye,[0,.85,.15]))
   sceneBoxes(vp)
-  const sec=(now-start)/1000,mode=modeRef.current
-  let walk=false,x=-1.65,yaw=Math.PI/2,phase='IDLE'
-  if(mode==='walk'){walk=true;x=-.35+Math.sin(sec*.55)*1.45;yaw=Math.cos(sec*.55)>=0?0:Math.PI;phase='WALK'}
-  else if(mode==='idle'){walk=false;x=-.25;phase='IDLE'}
-  else{
-   const q=sec%12
-   if(q<2){x=-1.65;phase='IDLE'}
-   else if(q<6.5){const f=(q-2)/4.5;x=-1.65+f*2.75;walk=true;yaw=0;phase='WALK'}
-   else if(q<8){x=1.10;phase='IDLE'}
-   else{const f=(q-8)/4;x=1.10-f*2.75;walk=true;yaw=Math.PI;phase='WALK'}
+  const sec=(now-start)/1000
+  const mode=modeRef.current
+
+  const cast=[
+   {name:'Kris',home:[-5.20,-2.45],target:[-4.15,-1.55],shirt:[.07,.11,.17],pants:[.05,.07,.10],skin:[.72,.44,.31],hair:[.055,.035,.025],eye:[.05,.06,.07],lip:[.24,.07,.065],accent:[.92,.70,.26],hairStyle:2,accessory:'none',offset:0,scale:1.04},
+   {name:'Maya',home:[-3.30,-2.45],target:[-2.25,-1.55],shirt:[.48,.20,.38],pants:[.10,.08,.14],skin:[.76,.48,.34],hair:[.10,.055,.035],eye:[.08,.06,.055],lip:[.45,.09,.16],accent:[.94,.73,.32],hairStyle:1,accessory:'none',offset:3.1,scale:1.00},
+   {name:'Team 1',home:[-4.75,.65],target:[-1.95,.65],shirt:[.10,.30,.58],pants:[.06,.10,.16],skin:[.72,.43,.30],hair:[.08,.05,.035],eye:[.05,.06,.07],lip:[.28,.08,.07],accent:[.91,.69,.25],hairStyle:2,accessory:'headset',offset:1.3,scale:.96},
+   {name:'Team 2',home:[-3.05,.65],target:[3.55,-2.15],shirt:[.32,.22,.50],pants:[.08,.08,.13],skin:[.67,.39,.28],hair:[.055,.035,.028],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.76,.60,.22],hairStyle:0,accessory:'glasses',offset:5.7,scale:.96},
+   {name:'Team 3',home:[-.55,.65],target:[.45,2.05],shirt:[.10,.39,.30],pants:[.055,.11,.10],skin:[.76,.48,.34],hair:[.12,.075,.045],eye:[.045,.06,.06],lip:[.34,.08,.08],accent:[.90,.68,.24],hairStyle:1,accessory:'none',offset:8.4,scale:.96},
+   {name:'VPS Operator',home:[3.15,.65],target:[4.90,.80],shirt:[.28,.20,.48],pants:[.07,.07,.12],skin:[.67,.40,.30],hair:[.06,.04,.032],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.93,.70,.26],hairStyle:0,accessory:'headset',offset:2.4,scale:.96},
+   {name:'Maya Support',home:[-4.80,2.60],target:[0,3.25],shirt:[.52,.20,.38],pants:[.10,.08,.13],skin:[.76,.48,.34],hair:[.12,.06,.04],eye:[.07,.06,.06],lip:[.46,.09,.16],accent:[.95,.73,.30],hairStyle:1,accessory:'headset',offset:6.3,scale:.95},
+   {name:'Finance',home:[-2.35,2.60],target:[2.55,2.25],shirt:[.63,.48,.14],pants:[.11,.09,.07],skin:[.72,.44,.31],hair:[.07,.045,.032],eye:[.05,.06,.07],lip:[.30,.075,.07],accent:[.96,.78,.36],hairStyle:2,accessory:'glasses',offset:10.2,scale:.95}
+  ]
+
+  let phaseSummary='OFFICE ACTIVE'
+  for(const p of cast){
+    const cycle=(sec+p.offset)%18
+    let walking=false,px=p.home[0],pz=p.home[1],yaw=0
+    if(mode==='walk'){
+      const q=(sec+p.offset)*.34,f=(Math.sin(q)+1)/2
+      px=p.home[0]+(p.target[0]-p.home[0])*f;pz=p.home[1]+(p.target[1]-p.home[1])*f;walking=true
+      const sign=Math.cos(q)>=0?1:-1,dx=(p.target[0]-p.home[0])*sign,dz=(p.target[1]-p.home[1])*sign;yaw=Math.atan2(-dz,dx)
+    }else if(mode==='idle'){
+      px=p.home[0];pz=p.home[1];walking=false;yaw=0
+    }else{
+      if(cycle<5){px=p.home[0];pz=p.home[1];walking=false}
+      else if(cycle<9){const f=(cycle-5)/4;px=p.home[0]+(p.target[0]-p.home[0])*f;pz=p.home[1]+(p.target[1]-p.home[1])*f;walking=true;const dx=p.target[0]-p.home[0],dz=p.target[1]-p.home[1];yaw=Math.atan2(-dz,dx)}
+      else if(cycle<13){px=p.target[0];pz=p.target[1];walking=false;const dx=p.target[0]-p.home[0],dz=p.target[1]-p.home[1];yaw=Math.atan2(-dz,dx)}
+      else if(cycle<17){const f=(cycle-13)/4;px=p.target[0]+(p.home[0]-p.target[0])*f;pz=p.target[1]+(p.home[1]-p.target[1])*f;walking=true;const dx=p.home[0]-p.target[0],dz=p.home[1]-p.target[1];yaw=Math.atan2(-dz,dx)}
+      else{px=p.home[0];pz=p.home[1];walking=false}
+    }
+
+    const st=localState(sec+p.offset,walking?1:0),world=worlds(st),mw=world[meshNode],invMw=invert4(mw),jm=new Float32Array(skin.joints.length*16)
+    for(let i=0;i<skin.joints.length;i++)jm.set(mul4(mul4(invMw,world[skin.joints[i]]),invBind[i]),i*16)
+    const placement=mul4(mul4(trans(px,0,pz),rotY(yaw)),scale(p.scale,p.scale,p.scale)),modelM=mul4(placement,mw)
+
+    sphereDraw(vp,mul4(trans(px,.012,pz),scale(.30*p.scale,.016,.16*p.scale)),[.04,.05,.06])
+    gl.useProgram(sp);gl.uniformMatrix4fv(u.svp,false,vp);gl.uniformMatrix4fv(u.sm,false,modelM);gl.uniformMatrix4fv(u.sj,false,jm)
+    gl.uniform3fv(u.shirt,p.shirt);gl.uniform3fv(u.skinTone,p.skin);gl.uniform3fv(u.pants,p.pants)
+    gl.bindVertexArray(vao);gl.drawElements(gl.TRIANGLES,indices.count,indices.componentType===5123?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,0)
+    characterMakeover(vp,modelM,jm,sec+p.offset,walking,p)
   }
-  if(phase!==lastPhase){lastPhase=phase;setPhase(phase)}
-  const st=localState(sec,walk?1:0),world=worlds(st),mw=world[meshNode],invMw=invert4(mw),jm=new Float32Array(skin.joints.length*16)
-  for(let i=0;i<skin.joints.length;i++)jm.set(mul4(mul4(invMw,world[skin.joints[i]]),invBind[i]),i*16)
-  const placement=mul4(trans(x,0,.65),rotY(yaw)),modelM=mul4(placement,mw)
-  sphereDraw(vp,mul4(trans(x,.012,.65),scale(.34,.018,.18)),[.045,.060,.065])
-  gl.useProgram(sp);gl.uniformMatrix4fv(u.svp,false,vp);gl.uniformMatrix4fv(u.sm,false,modelM);gl.uniformMatrix4fv(u.sj,false,jm);gl.bindVertexArray(vao)
-  gl.drawElements(gl.TRIANGLES,indices.count,indices.componentType===5123?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,0)
-  characterMakeover(vp,modelM,jm,sec,walk)
+  if(phaseSummary!==lastPhase){lastPhase=phaseSummary;setPhase(phaseSummary)}
   raf=requestAnimationFrame(render)
  }
  function pd(e){drag.active=true;drag.x=e.clientX;drag.y=e.clientY;drag.yaw=cam.yaw;drag.pitch=cam.pitch;canvas.setPointerCapture?.(e.pointerId)}
@@ -337,7 +402,7 @@ function init(canvas,setStatus,setPhase,modeRef){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(5.8,Math.min(14,cam.dist+Math.sign(e.deltaY)*.55))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • GAME CHARACTER POLISH LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • LIVING 3D OFFICE LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh)}
 }
 
@@ -355,14 +420,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V1.3 • GAME CHARACTER POLISH'})
+   jsx('div',{className:'h3chip',children:'V2.0 DEV • LIVING 3D OFFICE'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'CHARACTER MAKEOVER'}),
-     jsx('small',{children:'Kepala lama diganti penuh dengan kepala MRXPANEL stylized 3D: wajah 3/4 lebih jelas, rambut berlapis, mata, alis, hidung, mulut, telinga, leher, bayangan kaki, dan detail gold.'})
+     jsx('small',{children:'Full-office 3D simulation: multi-character cast, distinct outfits, executive/operations/meeting/VPS/support/finance/lounge zones, autonomous walk cycles, and game-style camera.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag = orbit camera'}),jsx('div',{className:'h3pill',children:'Wheel = zoom'}),
@@ -370,20 +435,20 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Character Lab'}),jsx('small',{children:'V1.3 memoles silhouette, wajah, rambut, orientasi karakter, lighting, dan detail pakaian agar terasa seperti karakter game tycoon.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'DEV V2.0 menggabungkan karakter rigged ke kantor 3D hidup. Stable V1.3 tetap aman sampai build ini matang.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
-      jsx('span',{children:'Mesh'}),jsx('span',{children:'3,273 vertices'}),
+      jsx('span',{children:'Cast'}),jsx('span',{children:'8 rigged characters'}),
       jsx('span',{children:'Skeleton'}),jsx('span',{children:'19 skin joints'}),
-      jsx('span',{children:'Animation'}),jsx('span',{children:'Native skeletal walk cycle'}),
+      jsx('span',{children:'Simulation'}),jsx('span',{children:'Per-character autonomous routes'}),
       jsx('span',{children:'Renderer'}),jsx('span',{children:'WebGL2 GPU skinning'}),
-      jsx('span',{children:'Face'}),jsx('span',{children:'MRXPANEL stylized replacement'}),
+      jsx('span',{children:'Office'}),jsx('span',{children:'Executive / Ops / Meeting / VPS / Support / Finance / Lounge'}),
       jsx('span',{children:'Status'}),jsx('span',{className:status.startsWith('ERROR')?'h3err':'',children:status})
      ]})
     ]}),
     jsxs('section',{className:'h3card',children:[
-     jsx('h3',{children:'Motion Test'}),jsx('div',{className:'h3sub',children:'AUTO membuat karakter berdiri → berjalan melintasi ruangan → berhenti → kembali. WALK memutar siklus berjalan terus.'}),
+     jsx('h3',{children:'Motion Test'}),jsx('div',{className:'h3sub',children:'AUTO menjalankan jadwal berbeda untuk setiap karakter. WALK LOOP membuat seluruh cast terus bergerak di jalur masing-masing.'}),
      jsxs('div',{className:'h3grid',children:[
       jsx('button',{className:'h3btn '+(mode==='auto'?'active':''),onClick:()=>choose('auto'),children:'AUTO'}),
       jsx('button',{className:'h3btn '+(mode==='walk'?'active':''),onClick:()=>choose('walk'),children:'WALK LOOP'}),
@@ -391,7 +456,7 @@ function HumanLab(){
      ]})
     ]}),
     jsxs('section',{className:'h3card',children:[
-     jsx('h3',{children:'Next if approved'}),jsx('div',{className:'h3sub',children:'V1.3 adalah baseline karakter game. Berikutnya: pose turn/sit/typing, outfit variants, karakter Kris + Maya, lalu mengembalikan seluruh layout kantor 3D.'})
+     jsx('h3',{children:'Next if approved'}),jsx('div',{className:'h3sub',children:'DEV V2.0 sudah menggabungkan 8 karakter rigged ke satu kantor 3D. Stable V1.3 belum diganti sampai build ini dianggap layak.'})
     ]}),
     jsx('div',{className:'h3warn',style:{padding:'0 12px 14px'},children:'Temporary rig test geometry: Cesium Man © 2017 Cesium, CC BY 4.0. Original branded texture/logo is removed and not distributed in this build. Used only to validate the rigged-human pipeline; final MRXPANEL characters will use our own assets.'})
    ]})
