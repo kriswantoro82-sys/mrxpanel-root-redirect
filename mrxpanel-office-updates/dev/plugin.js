@@ -337,9 +337,9 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   part(0,0,.000,.148,.164,.171,skin)
   part(0,.018,.042,.141,.158,.145,[Math.min(1,skin[0]*1.05),Math.min(1,skin[1]*1.05),Math.min(1,skin[2]*1.05)])
 
-  // Individual hair silhouettes — rotated 180° around the head vertical axis.
-  const hairHead=mul4(head,rotZ(Math.PI))
-  const hairPart=(x,y,z,sx,sy,sz,color)=>sphereDraw(vp,mul4(mul4(hairHead,trans(x,y,z)),scale(sx,sy,sz)),color)
+  // Hair fit polish: keep the 180° orientation, but seat the silhouette back/down on the crown.
+  const hairHead=mul4(mul4(head,trans(0,-.095,-.018)),rotZ(Math.PI))
+  const hairPart=(x,y,z,sx,sy,sz,color)=>sphereDraw(vp,mul4(mul4(hairHead,trans(x,y,z)),scale(sx*.95,sy*.95,sz*.96)),color)
   if(p.hairStyle===1){
     hairPart(0,-.050,.132,.164,.126,.097,hair)
     hairPart(-.106,-.026,.068,.058,.086,.102,hair);hairPart(.106,-.026,.068,.058,.086,.102,hair)
@@ -654,7 +654,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • HEAD / NECK SEATING LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • HAIR FIT POLISH LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -672,14 +672,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.22 DEV • HEAD / NECK SEATING'})
+   jsx('div',{className:'h3chip',children:'V3.23 DEV • HAIR FIT POLISH'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
-     jsx('small',{children:'Head/neck seating pass: the complete head assembly is lowered toward the neck anchor while preserving the accepted body orientation, head facing and 180° hair rotation.'})
+     jsx('small',{children:'Hair fit pass: the 180° hair silhouette is shifted back and slightly down onto the crown with a small volume reduction; V3.22 head/neck seating and accepted body/head orientation remain unchanged.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
