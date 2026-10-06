@@ -372,6 +372,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  }
  function sceneBoxes(vp){
   const B=(x,y,z,sx,sy,sz,c)=>boxDraw(vp,mul4(trans(x,y,z),scale(sx,sy,sz)),c)
+  const contact=(x,z,sx,sz)=>sphereDraw(vp,mul4(trans(x,.014,z),scale(sx,.008,sz)),[.105,.112,.116])
   // Main floor + perimeter.
   B(0,-.10,0,6.2,.08,4.7,[.18,.21,.23])
   // Subtle room floor zoning.
@@ -398,6 +399,13 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     B(xx-1.00,1.62,-4.49,.035,.56,.025,[.12,.13,.14]);B(xx+1.00,1.62,-4.49,.035,.56,.025,[.12,.13,.14])
     B(xx,1.62,-4.49,.025,.56,.025,[.12,.13,.14])
   }
+  // Warm wall-mounted practicals explain the interior lighting in an open dollhouse view.
+  for(const xx of [-4.25,-1.45,1.45,4.25]){
+    B(xx,2.47,-4.48,.38,.030,.030,[.92,.72,.38])
+    B(xx,2.43,-4.46,.46,.018,.018,[.48,.36,.20])
+  }
+  B(-6.02,2.15,-1.85,.025,.26,.20,[.78,.61,.34])
+  B(6.02,2.15,-1.85,.025,.26,.20,[.78,.61,.34])
 
   // Segmented partitions: visible rooms with actual walk-through gaps.
   // Left divider: rear wall, door gap around z=-1.55, short front return.
@@ -436,7 +444,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   // Meeting room.
   B(4.05,.72,-3.05,1.20,.055,.68,[.30,.19,.11])
   B(4.05,.36,-3.05,.11,.36,.11,[.13,.14,.15])
-  B(4.05,.08,-3.05,.62,.035,.16,[.13,.14,.15])
+  B(4.05,.08,-3.05,.62,.035,.16,[.13,.14,.15]);contact(4.05,-3.05,1.28,.75)
   for(const xx of [2.90,5.20])for(const zz of [-3.55,-2.55])B(xx,.34,zz,.28,.05,.28,[.17,.22,.26])
   B(4.05,1.70,-4.50,1.15,.025,.025,[.16,.29,.34])
   B(4.05,1.70,-4.46,.92,.32,.018,[.08,.13,.17])
@@ -457,19 +465,20 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     // Keyboard + mouse.
     B(x,.765,z+.15,.23,.016,.060,[.10,.11,.12])
     B(x+.31,.765,z+.15,.040,.016,.050,[.11,.12,.13])
+    contact(x,z,.70,.42)
   }
   for(const xx of [-4.75,-3.05,-.55,1.15])workstation(xx,.05,[.32,.21,.12])
   // VPS / tech desks + server racks.
   for(const xx of [3.15,4.65])workstation(xx,.05,[.28,.19,.12])
-  for(const xx of [5.65,5.20,4.75]){B(xx,.85,.55,.18,.85,.32,[.035,.065,.085]);for(let k=0;k<4;k++)B(xx,.55+k*.22,.20,.12,.025,.02,k%2?[.16,.50,.34]:[.14,.36,.58])}
+  for(const xx of [5.65,5.20,4.75]){B(xx,.85,.55,.18,.85,.32,[.035,.065,.085]);for(let k=0;k<4;k++)B(xx,.55+k*.22,.20,.12,.025,.02,k%2?[.16,.50,.34]:[.14,.36,.58]);contact(xx,.55,.24,.38)}
 
   // Support / Finance.
   workstation(-4.80,2.05,[.32,.21,.12])
   workstation(-2.35,2.05,[.32,.21,.12])
 
   // Lounge / pantry.
-  B(.45,.32,2.35,1.05,.30,.42,[.20,.28,.34]);B(.45,.72,2.70,1.05,.45,.08,[.20,.28,.34])
-  B(2.55,.42,2.42,.58,.42,.36,[.38,.39,.37])
+  B(.45,.32,2.35,1.05,.30,.42,[.20,.28,.34]);B(.45,.72,2.70,1.05,.45,.08,[.20,.28,.34]);contact(.45,2.35,1.12,.50)
+  B(2.55,.42,2.42,.58,.42,.36,[.38,.39,.37]);contact(2.55,2.42,.66,.44)
   B(2.55,.86,2.42,.62,.045,.42,[.65,.63,.58])
   B(2.55,.92,2.70,.32,.28,.035,[.46,.47,.45])
   B(3.55,.45,2.55,.24,.45,.24,[.48,.46,.42])
@@ -485,7 +494,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   plant(-5.55,-1.25);plant(5.55,-1.25);plant(-.20,2.85);plant(4.25,2.80)
 
   // Lobby / reception.
-  B(0,.48,4.02,1.15,.48,.28,[.24,.18,.13])
+  B(0,.48,4.02,1.15,.48,.28,[.24,.18,.13]);contact(0,4.02,1.24,.38)
   B(0,.96,3.96,1.15,.055,.32,[.38,.25,.14])
   B(0,.55,3.72,1.05,.34,.035,[.15,.16,.17])
   B(-.72,.22,4.02,.035,.22,.24,[.12,.13,.14]);B(.72,.22,4.02,.035,.22,.24,[.12,.13,.14])
@@ -589,7 +598,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     for(let i=0;i<skin.joints.length;i++)jm.set(mul4(mul4(invMw,world[skin.joints[i]]),invBind[i]),i*16)
     const placement=mul4(mul4(trans(px,yOffset,pz),rotY(yaw)),scale(p.scale,p.scale,p.scale)),modelM=mul4(placement,mw)
 
-    sphereDraw(vp,mul4(trans(px,.010,pz),scale(.22*p.scale,.011,.12*p.scale)),[.055,.060,.062])
+    sphereDraw(vp,mul4(trans(px,.012,pz),scale(.20*p.scale,.009,.11*p.scale)),[.090,.095,.098])
     gl.useProgram(sp);gl.uniformMatrix4fv(u.svp,false,vp);gl.uniformMatrix4fv(u.sm,false,modelM);gl.uniformMatrix4fv(u.sj,false,jm)
     gl.uniform3fv(u.shirt,p.shirt);gl.uniform3fv(u.skinTone,p.skin);gl.uniform3fv(u.pants,p.pants)
     gl.bindVertexArray(vao);gl.drawElements(gl.TRIANGLES,indices.count,indices.componentType===5123?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,0)
@@ -619,7 +628,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • HUMAN SCALE & WORK POSE LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • GROUNDING & LIGHTING LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -637,14 +646,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.14 DEV • HUMAN SCALE & WORK POSE'})
+   jsx('div',{className:'h3chip',children:'V3.15 DEV • GROUNDING & LIGHTING'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
-     jsx('small',{children:'Human-scale/work-pose pass: character stature is normalized against 0.70m desks, and the standing workstation pose brings both arms inward/down toward keyboard height without fake rapid typing.'})
+     jsx('small',{children:'Grounding/lighting pass: wall-attached practical lights and subtle contact shadows anchor furniture and characters without reintroducing floating ceiling panels.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
@@ -655,7 +664,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.14 DEV normalizes character stature against 0.70m desks and uses a skeleton-calibrated standing work pose that brings both arms toward keyboard height without fake sitting. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.15 DEV adds wall-attached practical lights and restrained contact shadows so desks, server racks, meeting furniture, pantry, reception and characters feel grounded. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
