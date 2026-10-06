@@ -84,6 +84,7 @@ function trs(t,q,s){
 }
 function trans(x,y,z){const o=id4();o[12]=x;o[13]=y;o[14]=z;return o}
 function rotY(a){const c=Math.cos(a),s=Math.sin(a),o=id4();o[0]=c;o[2]=-s;o[8]=s;o[10]=c;return o}
+function rotZ(a){const c=Math.cos(a),q=Math.sin(a),o=id4();o[0]=c;o[1]=q;o[4]=-q;o[5]=c;return o}
 function scale(x,y,z){const o=id4();o[0]=x;o[5]=y;o[10]=z;return o}
 function invert4(a){
  const o=new Float32Array(16)
@@ -172,21 +173,24 @@ function init(canvas,setStatus,setPhase,modeRef){
  layout(location=2) in uvec4 aJoints;
  layout(location=3) in vec4 aWeights;
  uniform mat4 uVP;uniform mat4 uModel;uniform mat4 uJ[19];
- out vec3 vN;out float vSkin;out float vLeg;out vec3 vW;
+ out vec3 vN;out float vSkin;out float vLeg;out float vHead;out vec3 vW;
  float mask(uint j,uint a,uint b,uint c){return (j==a||j==b||j==c)?1.0:0.0;}
+ float one(uint j,uint a){return j==a?1.0:0.0;}
  void main(){
   mat4 sm=aWeights.x*uJ[int(aJoints.x)]+aWeights.y*uJ[int(aJoints.y)]+aWeights.z*uJ[int(aJoints.z)]+aWeights.w*uJ[int(aJoints.w)];
   vec4 lp=sm*vec4(aPos,1.0),wp=uModel*lp;
   vN=normalize(mat3(uModel*sm)*aNor);vW=wp.xyz;
+  vHead=aWeights.x*one(aJoints.x,4u)+aWeights.y*one(aJoints.y,4u)+aWeights.z*one(aJoints.z,4u)+aWeights.w*one(aJoints.w,4u);
   vSkin=aWeights.x*mask(aJoints.x,4u,9u,10u)+aWeights.y*mask(aJoints.y,4u,9u,10u)+aWeights.z*mask(aJoints.z,4u,9u,10u)+aWeights.w*mask(aJoints.w,4u,9u,10u);
   vLeg=aWeights.x*step(10.5,float(aJoints.x))+aWeights.y*step(10.5,float(aJoints.y))+aWeights.z*step(10.5,float(aJoints.z))+aWeights.w*step(10.5,float(aJoints.w));
   gl_Position=uVP*wp;
  }`
  const skinFS=`#version 300 es
- precision highp float;in vec3 vN;in float vSkin;in float vLeg;in vec3 vW;out vec4 outColor;
+ precision highp float;in vec3 vN;in float vSkin;in float vLeg;in float vHead;in vec3 vW;out vec4 outColor;
  void main(){
-  vec3 L=normalize(vec3(-.45,.85,.55));float d=.42+.58*max(dot(normalize(vN),L),0.0);
-  vec3 shirt=vec3(.12,.34,.62),skin=vec3(.72,.43,.30),pants=vec3(.10,.15,.20);
+  if(vHead>.28)discard;
+  vec3 L=normalize(vec3(-.45,.85,.55));float d=.44+.56*max(dot(normalize(vN),L),0.0);
+  vec3 shirt=vec3(.10,.29,.56),skin=vec3(.72,.43,.30),pants=vec3(.075,.11,.16);
   vec3 base=mix(shirt,pants,smoothstep(.42,.72,vLeg));base=mix(base,skin,smoothstep(.35,.68,vSkin));
   outColor=vec4(base*d,1.0);
  }`
@@ -216,7 +220,7 @@ function init(canvas,setStatus,setPhase,modeRef){
  const sib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,sib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,sph.i,gl.STATIC_DRAW);gl.bindVertexArray(null)
  const u={svp:gl.getUniformLocation(sp,'uVP'),sm:gl.getUniformLocation(sp,'uModel'),sj:gl.getUniformLocation(sp,'uJ[0]'),bvp:gl.getUniformLocation(bp,'uVP'),bm:gl.getUniformLocation(bp,'uModel'),bc:gl.getUniformLocation(bp,'uColor')}
  const invBind=[];for(let i=0;i<skin.joints.length;i++)invBind.push(new Float32Array(ibmAcc.array.slice(i*16,i*16+16)))
- const cam={yaw:.62,pitch:.34,dist:8.8},drag={active:false,x:0,y:0,yaw:0,pitch:0}
+ const cam={yaw:1.16,pitch:.28,dist:7.9},drag={active:false,x:0,y:0,yaw:0,pitch:0}
  let lastPhase='',start=performance.now(),raf=0
  function localState(t,w){
   const st=base.map(x=>({t:x.t.slice(),r:x.r.slice(),s:x.s.slice(),m:x.m}))
@@ -242,19 +246,53 @@ function init(canvas,setStatus,setPhase,modeRef){
  }
  function boxDraw(vp,m,color){geoDraw(cvao,cube.i.length,vp,m,color)}
  function sphereDraw(vp,m,color){geoDraw(svao,sph.i.length,vp,m,color)}
- function characterMakeover(vp,modelM,jm){
+ function characterMakeover(vp,modelM,jm,time,walking){
   const headJ=new Float32Array(jm.slice(4*16,5*16))
-  const head=mul4(mul4(modelM,headJ),trans(0,0,1.338))
+  const torsoJ=new Float32Array(jm.slice(2*16,3*16))
+  const turn=walking?0:Math.sin(time*1.25)*.055
+  const headBase=mul4(mul4(modelM,headJ),trans(0,0,1.338))
+  const head=mul4(headBase,rotZ(turn))
   const part=(x,y,z,sx,sy,sz,color)=>sphereDraw(vp,mul4(mul4(head,trans(x,y,z)),scale(sx,sy,sz)),color)
-  part(0,0,0,.180,.190,.205,[.72,.44,.31])
-  part(0,-.018,.145,.194,.188,.105,[.095,.060,.045])
-  part(-.175,0,.000,.040,.030,.055,[.68,.39,.28]);part(.175,0,.000,.040,.030,.055,[.68,.39,.28])
-  part(-.062,.174,.045,.030,.018,.030,[.96,.96,.94]);part(.062,.174,.045,.030,.018,.030,[.96,.96,.94])
-  part(-.062,.191,.045,.012,.008,.014,[.055,.060,.065]);part(.062,.191,.045,.012,.008,.014,[.055,.060,.065])
-  part(0,.190,.000,.032,.045,.045,[.67,.38,.27])
-  boxDraw(vp,mul4(mul4(head,trans(0,.190,-.066)),scale(.052,.010,.012)),[.26,.075,.070])
-  boxDraw(vp,mul4(mul4(head,trans(-.062,.188,.085)),scale(.040,.008,.009)),[.080,.050,.038])
-  boxDraw(vp,mul4(mul4(head,trans(.062,.188,.085)),scale(.040,.008,.009)),[.080,.050,.038])
+  const block=(x,y,z,sx,sy,sz,color,rz=0)=>boxDraw(vp,mul4(mul4(mul4(head,trans(x,y,z)),rotZ(rz)),scale(sx,sy,sz)),color)
+
+  // neck + stylized game head
+  part(0,0,-.205,.078,.078,.105,[.67,.39,.28])
+  part(0,0,.000,.166,.184,.190,[.72,.44,.31])
+  part(0,.020,.045,.158,.178,.162,[.76,.48,.34])
+
+  // layered hair cap / side locks
+  part(0,-.060,.135,.184,.145,.112,[.075,.045,.032])
+  part(-.115,-.030,.078,.074,.096,.112,[.080,.048,.034])
+  part(.115,-.030,.078,.074,.096,.112,[.080,.048,.034])
+  part(-.060,-.050,.202,.095,.105,.048,[.070,.042,.030])
+  part(.070,-.040,.197,.105,.108,.050,[.070,.042,.030])
+
+  // ears
+  part(-.166,.000,-.005,.033,.024,.055,[.67,.39,.28])
+  part(.166,.000,-.005,.033,.024,.055,[.67,.39,.28])
+
+  // eyes / pupils / catchlights - face is +Y in source model coordinates
+  part(-.060,.172,.045,.030,.014,.024,[.965,.965,.945])
+  part(.060,.172,.045,.030,.014,.024,[.965,.965,.945])
+  part(-.060,.185,.045,.012,.010,.013,[.055,.065,.070])
+  part(.060,.185,.045,.012,.010,.013,[.055,.065,.070])
+  part(-.056,.194,.050,.004,.004,.005,[1,1,1])
+  part(.064,.194,.050,.004,.004,.005,[1,1,1])
+
+  // eyebrows
+  block(-.060,.176,.088,.043,.007,.010,[.075,.045,.032],-.08)
+  block(.060,.176,.088,.043,.007,.010,[.075,.045,.032],.08)
+
+  // nose + mouth
+  part(0,.184,-.002,.026,.032,.040,[.67,.38,.27])
+  block(0,.178,-.065,.050,.008,.010,[.30,.075,.070])
+  part(-.032,.176,-.036,.030,.010,.022,[.80,.46,.37])
+  part(.032,.176,-.036,.030,.010,.022,[.80,.46,.37])
+
+  // small MRXPANEL gold chest detail
+  const torso=mul4(mul4(modelM,torsoJ),trans(0,.130,.995))
+  boxDraw(vp,mul4(torso,scale(.028,.010,.095)),[.84,.62,.18])
+  boxDraw(vp,mul4(mul4(torso,trans(0,0,-.105)),scale(.050,.011,.022)),[.94,.78,.37])
  }
  function sceneBoxes(vp){
   boxDraw(vp,mul4(trans(0,-.08,0),scale(4,.06,3)),[.32,.47,.43])
@@ -288,9 +326,10 @@ function init(canvas,setStatus,setPhase,modeRef){
   const st=localState(sec,walk?1:0),world=worlds(st),mw=world[meshNode],invMw=invert4(mw),jm=new Float32Array(skin.joints.length*16)
   for(let i=0;i<skin.joints.length;i++)jm.set(mul4(mul4(invMw,world[skin.joints[i]]),invBind[i]),i*16)
   const placement=mul4(trans(x,0,.65),rotY(yaw)),modelM=mul4(placement,mw)
+  sphereDraw(vp,mul4(trans(x,.012,.65),scale(.34,.018,.18)),[.045,.060,.065])
   gl.useProgram(sp);gl.uniformMatrix4fv(u.svp,false,vp);gl.uniformMatrix4fv(u.sm,false,modelM);gl.uniformMatrix4fv(u.sj,false,jm);gl.bindVertexArray(vao)
   gl.drawElements(gl.TRIANGLES,indices.count,indices.componentType===5123?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,0)
-  characterMakeover(vp,modelM,jm)
+  characterMakeover(vp,modelM,jm,sec,walk)
   raf=requestAnimationFrame(render)
  }
  function pd(e){drag.active=true;drag.x=e.clientX;drag.y=e.clientY;drag.yaw=cam.yaw;drag.pitch=cam.pitch;canvas.setPointerCapture?.(e.pointerId)}
@@ -298,7 +337,7 @@ function init(canvas,setStatus,setPhase,modeRef){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(5.8,Math.min(14,cam.dist+Math.sign(e.deltaY)*.55))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • CHARACTER MAKEOVER LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • GAME CHARACTER POLISH LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh)}
 }
 
@@ -316,14 +355,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V1.2 • CHARACTER MAKEOVER'})
+   jsx('div',{className:'h3chip',children:'V1.3 • GAME CHARACTER POLISH'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'CHARACTER MAKEOVER'}),
-     jsx('small',{children:'Rigged human tetap dipakai, sekarang ditambah kepala stylized 3D, rambut, mata, hidung, mulut, telinga, dan proporsi wajah game-like.'})
+     jsx('small',{children:'Kepala lama diganti penuh dengan kepala MRXPANEL stylized 3D: wajah 3/4 lebih jelas, rambut berlapis, mata, alis, hidung, mulut, telinga, leher, bayangan kaki, dan detail gold.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag = orbit camera'}),jsx('div',{className:'h3pill',children:'Wheel = zoom'}),
@@ -331,7 +370,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Character Lab'}),jsx('small',{children:'Fokus V1.2: wajah dan kepala harus terasa seperti karakter game sebelum kita gandakan menjadi Kris, Maya, dan semua Team.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Character Lab'}),jsx('small',{children:'V1.3 memoles silhouette, wajah, rambut, orientasi karakter, lighting, dan detail pakaian agar terasa seperti karakter game tycoon.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
@@ -339,7 +378,7 @@ function HumanLab(){
       jsx('span',{children:'Skeleton'}),jsx('span',{children:'19 skin joints'}),
       jsx('span',{children:'Animation'}),jsx('span',{children:'Native skeletal walk cycle'}),
       jsx('span',{children:'Renderer'}),jsx('span',{children:'WebGL2 GPU skinning'}),
-      jsx('span',{children:'Face'}),jsx('span',{children:'Stylized 3D makeover'}),
+      jsx('span',{children:'Face'}),jsx('span',{children:'MRXPANEL stylized replacement'}),
       jsx('span',{children:'Status'}),jsx('span',{className:status.startsWith('ERROR')?'h3err':'',children:status})
      ]})
     ]}),
@@ -352,7 +391,7 @@ function HumanLab(){
      ]})
     ]}),
     jsxs('section',{className:'h3card',children:[
-     jsx('h3',{children:'Next if approved'}),jsx('div',{className:'h3sub',children:'Kalau kepala/wajah V1.2 sudah cocok, berikutnya kita buat varian karakter MRXPANEL: Kris, Maya, Team, rambut/pakaian berbeda, lalu idle/turn/sit/typing dan seluruh office.'})
+     jsx('h3',{children:'Next if approved'}),jsx('div',{className:'h3sub',children:'V1.3 adalah baseline karakter game. Berikutnya: pose turn/sit/typing, outfit variants, karakter Kris + Maya, lalu mengembalikan seluruh layout kantor 3D.'})
     ]}),
     jsx('div',{className:'h3warn',style:{padding:'0 12px 14px'},children:'Temporary rig test geometry: Cesium Man © 2017 Cesium, CC BY 4.0. Original branded texture/logo is removed and not distributed in this build. Used only to validate the rigged-human pipeline; final MRXPANEL characters will use our own assets.'})
    ]})
