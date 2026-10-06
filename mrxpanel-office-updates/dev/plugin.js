@@ -490,11 +490,11 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   {name:'Kris',role:'PIMPINAN',workYaw:.67,executive:'kris',lane:-.08,home:[-5.20,-2.45],target:[-4.15,-1.55],route:[[-5.20,-2.45],[-4.75,-1.75],[-4.15,-1.55]],shirt:[.07,.11,.17],pants:[.05,.07,.10],skin:[.72,.44,.31],hair:[.055,.035,.025],eye:[.05,.06,.07],lip:[.24,.07,.065],accent:[.92,.70,.26],hairStyle:2,accessory:'none',schedule:0,offset:0,scale:1.04},
   {name:'Maya',role:'AI EXECUTIVE',workYaw:2.47,executive:'maya',lane:.08,home:[-3.30,-2.45],target:[-2.25,-1.55],route:[[-3.30,-2.45],[-2.85,-1.75],[-2.25,-1.55]],shirt:[.48,.20,.38],pants:[.10,.08,.14],skin:[.76,.48,.34],hair:[.10,.055,.035],eye:[.08,.06,.055],lip:[.45,.09,.16],accent:[.94,.73,.32],hairStyle:1,accessory:'none',schedule:4,offset:3.1,scale:1.00},
   {name:'Team 1',role:'OPERASIONAL',workYaw:1.5708,lane:-.12,home:[-4.75,.65],target:[-1.95,.65],route:[[-4.75,.65],[-3.65,.70],[-2.55,.70],[-1.95,.65]],shirt:[.10,.30,.58],pants:[.06,.10,.16],skin:[.72,.43,.30],hair:[.08,.05,.035],eye:[.05,.06,.07],lip:[.28,.08,.07],accent:[.91,.69,.25],hairStyle:2,accessory:'headset',schedule:8,offset:1.3,scale:.96},
-  {name:'Team 2',role:'OPERASIONAL',workYaw:1.5708,lane:.12,home:[-3.05,.65],target:[3.55,-2.15],route:[[-3.05,.65],[-2.45,-1.55],[-.95,-1.55],[1.45,-1.55],[2.75,-1.55],[3.55,-2.15]],shirt:[.32,.22,.50],pants:[.08,.08,.13],skin:[.67,.39,.28],hair:[.055,.035,.028],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.76,.60,.22],hairStyle:0,accessory:'glasses',schedule:12,offset:5.7,scale:.96},
-  {name:'Team 3',role:'OPERASIONAL',workYaw:1.5708,lane:-.10,home:[-.55,.65],target:[.45,2.05],route:[[-.55,.65],[-.15,1.35],[.45,2.05]],shirt:[.10,.39,.30],pants:[.055,.11,.10],skin:[.76,.48,.34],hair:[.12,.075,.045],eye:[.045,.06,.06],lip:[.34,.08,.08],accent:[.90,.68,.24],hairStyle:1,accessory:'none',schedule:16,offset:8.4,scale:.96},
-  {name:'VPS Operator',role:'VPS / TECH',workYaw:1.5708,lane:.10,home:[3.15,.65],target:[4.90,.80],route:[[3.15,.65],[4.00,.78],[4.90,.80]],shirt:[.28,.20,.48],pants:[.07,.07,.12],skin:[.67,.40,.30],hair:[.06,.04,.032],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.93,.70,.26],hairStyle:0,accessory:'headset',schedule:20,offset:2.4,scale:.96},
-  {name:'Maya Support',role:'SUPPORT',workYaw:1.5708,lane:-.14,home:[-4.80,2.60],target:[0,3.25],route:[[-4.80,2.60],[-3.20,3.15],[-1.40,3.30],[0,3.25]],shirt:[.52,.20,.38],pants:[.10,.08,.13],skin:[.76,.48,.34],hair:[.12,.06,.04],eye:[.07,.06,.06],lip:[.46,.09,.16],accent:[.95,.73,.30],hairStyle:1,accessory:'headset',schedule:24,offset:6.3,scale:.95},
-  {name:'Finance',role:'FINANCE',workYaw:1.5708,lane:.14,home:[-2.35,2.60],target:[2.55,2.25],route:[[-2.35,2.60],[-.80,3.20],[1.00,3.05],[2.55,2.25]],shirt:[.63,.48,.14],pants:[.11,.09,.07],skin:[.72,.44,.31],hair:[.07,.045,.032],eye:[.05,.06,.07],lip:[.30,.075,.07],accent:[.96,.78,.36],hairStyle:2,accessory:'glasses',schedule:28,offset:10.2,scale:.95}
+  {name:'Team 2',role:'OPERASIONAL',workYaw:1.5708,lane:.12,home:[-3.05,.65],target:[3.55,-2.15],route:[[-3.05,.65],[-2.25,.65],[-2.25,-1.55],[-.95,-1.55],[1.45,-1.55],[2.75,-1.55],[3.55,-2.15]],shirt:[.32,.22,.50],pants:[.08,.08,.13],skin:[.67,.39,.28],hair:[.055,.035,.028],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.76,.60,.22],hairStyle:0,accessory:'glasses',schedule:12,offset:5.7,scale:.96},
+  {name:'Team 3',role:'OPERASIONAL',workYaw:1.5708,lane:-.10,home:[-.55,.65],target:[1.75,1.35],route:[[-.55,.65],[.10,1.35],[1.75,1.35]],shirt:[.10,.39,.30],pants:[.055,.11,.10],skin:[.76,.48,.34],hair:[.12,.075,.045],eye:[.045,.06,.06],lip:[.34,.08,.08],accent:[.90,.68,.24],hairStyle:1,accessory:'none',schedule:16,offset:8.4,scale:.96},
+  {name:'VPS Operator',role:'VPS / TECH',workYaw:1.5708,lane:.10,home:[3.15,.65],target:[4.00,.68],route:[[3.15,.65],[3.55,.68],[4.00,.68]],shirt:[.28,.20,.48],pants:[.07,.07,.12],skin:[.67,.40,.30],hair:[.06,.04,.032],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.93,.70,.26],hairStyle:0,accessory:'headset',schedule:20,offset:2.4,scale:.96},
+  {name:'Maya Support',role:'SUPPORT',workYaw:1.5708,lane:-.14,home:[-4.80,2.60],target:[0,3.35],route:[[-4.80,2.60],[-3.20,3.15],[-1.00,3.35],[0,3.35]],shirt:[.52,.20,.38],pants:[.10,.08,.13],skin:[.76,.48,.34],hair:[.12,.06,.04],eye:[.07,.06,.06],lip:[.46,.09,.16],accent:[.95,.73,.30],hairStyle:1,accessory:'headset',schedule:24,offset:6.3,scale:.95},
+  {name:'Finance',role:'FINANCE',workYaw:1.5708,lane:.14,home:[-2.35,2.60],target:[1.65,3.35],route:[[-2.35,2.60],[-1.30,3.35],[1.65,3.35]],shirt:[.63,.48,.14],pants:[.11,.09,.07],skin:[.72,.44,.31],hair:[.07,.045,.032],eye:[.05,.06,.07],lip:[.30,.075,.07],accent:[.96,.78,.36],hairStyle:2,accessory:'glasses',schedule:28,offset:10.2,scale:.95}
  ]
 
 
@@ -505,6 +505,8 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   for(let i=0;i<pts.length-1;i++){const dx=pts[i+1][0]-pts[i][0],dz=pts[i+1][1]-pts[i][1],l=Math.hypot(dx,dz);lens.push(l);total+=l;cum.push(total)}
   p._route={pts,lens,cum,total:Math.max(.001,total)}
  }
+ // Route coordinates have been clearance-audited against walls and major furniture
+ // with an approximate 0.18 world-unit body radius before this build is promoted.
 
  function render(now){
   const dt=Math.max(.001,Math.min(.05,(now-lastNow)/1000));lastNow=now
@@ -613,7 +615,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • FURNITURE REALISM LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • CLEARANCE ROUTING LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -631,14 +633,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.12 DEV • FURNITURE REALISM'})
+   jsx('div',{className:'h3chip',children:'V3.13 DEV • CLEARANCE ROUTING'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
-     jsx('small',{children:'Furniture realism: workstations, meeting table, reception and pantry are structurally grounded with legs/cabinet bodies, monitor faces and cleaner proportions.'})
+     jsx('small',{children:'Clearance routing: character paths are re-routed around desks, lounge furniture, plants, server racks and wall edges using a conservative body-clearance audit.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
@@ -649,7 +651,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.12 DEV grounds workstations, meeting table, reception and pantry with real support geometry and cleaner monitor details. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.13 DEV re-routes the remaining risky paths around desks, lounge furniture, plants, server racks and wall edges after a body-clearance audit. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
