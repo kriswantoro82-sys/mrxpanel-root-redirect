@@ -1,9 +1,9 @@
 {
   "channel": "dev",
-  "version": "3.16.0-dev",
+  "version": "3.17.0-dev",
   "plugin_path": "mrxpanel-office-updates/dev/plugin.js",
-  "sha256": "1f95435e1907ba8e90c7124c7a400c82bf50823818b4a0269d006c2951194310",
-  "released_at": "2026-10-06T14:47:00+07:00",
-  "notes": "Motion/performance polish: eased acceleration and braking stay synchronized with world-distance gait, softer contact shadows reduce the dark-mat look, per-character joint buffers are reused to lower per-frame allocations, and the full 8-character realism baseline from V3.15 is preserved.",
+  "sha256": "43eeef36bae14cc5f9c5099fb3b3eec7299a3f12902e4298987b653423c108da",
+  "released_at": "2026-10-06T15:05:00+07:00",
+  "notes": "Walk/body/head alignment pass: torso and neck are stabilized toward the base rig during locomotion, root bob and exaggerated arm swing are reduced, head roll is nearly neutral while walking, and gait cadence is slowed slightly to better match world travel.",
   "stable_unchanged": true
 }
