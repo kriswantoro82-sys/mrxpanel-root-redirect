@@ -1,9 +1,9 @@
 {
   "channel": "dev",
-  "version": "3.8.0-dev",
+  "version": "3.11.0-dev",
   "plugin_path": "mrxpanel-office-updates/dev/plugin.js",
-  "sha256": "67f8d67ab87546bebbd32c842e8e11c104ae3fb7580dc47593668a9e56fb3644",
-  "released_at": "2026-10-06T13:18:00+07:00",
-  "notes": "Realism continuation: distance-weighted constant-speed routes, travel duration based on route length, full-width office stage, compact overlay controls, physical window frames and doorway framing, neutral materials, calmer office behavior, collision-safe explicit routes.",
+  "sha256": "eceb0ab7e2eda003a3669178080c990d9f4b0aa9a02bdb357415c576cd2a30e8",
+  "released_at": "2026-10-06T13:24:00+07:00",
+  "notes": "Architectural/gait/frame realism: full-height interior walls with door openings and upper glass bands, distance-synced gait, frame-rate-independent turning, cached route metrics/HUD nodes, pixel-budgeted DPR, full-width office presentation, neutral materials and collision-aware explicit routes.",
   "stable_unchanged": true
 }
