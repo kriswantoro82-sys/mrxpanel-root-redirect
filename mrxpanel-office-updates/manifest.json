@@ -1,8 +1,9 @@
 {
   "channel": "stable",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "plugin_url": "https://raw.githubusercontent.com/kriswantoro82-sys/mrxpanel-root-redirect/main/mrxpanel-office-updates/plugin.js",
-  "sha256": "be64d9281dd291744053a44cf88397fb349b4e22162eaa388ac1333a893676ce",
-  "released_at": "2026-10-06T06:55:00+07:00",
-  "bootstrap_min": "1.0.0"
+  "sha256": "76f05e69895df04df2822c82a6690bae05cae579a411e0b417a8346b2e355212",
+  "released_at": "2026-10-06T07:47:00+07:00",
+  "bootstrap_min": "1.0.0",
+  "notes": "Door routing, corridor navigation, waypoint motion, anti-overlap destination slots."
 }
