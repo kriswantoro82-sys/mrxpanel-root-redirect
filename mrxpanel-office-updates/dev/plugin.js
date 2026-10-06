@@ -481,20 +481,20 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   {name:'Finance',role:'FINANCE',workYaw:1.5708,lane:.14,home:[-2.35,2.60],target:[2.55,2.25],route:[[-2.35,2.60],[-.80,3.20],[1.00,3.05],[2.55,2.25]],shirt:[.63,.48,.14],pants:[.11,.09,.07],skin:[.72,.44,.31],hair:[.07,.045,.032],eye:[.05,.06,.07],lip:[.30,.075,.07],accent:[.96,.78,.36],hairStyle:2,accessory:'glasses',schedule:28,offset:10.2,scale:.95}
  ]
 
- const rooms=[
-  ['RUANG PIMPINAN',-4.25,2.45,-4.42],
-  ['MEETING',4.05,2.35,-4.42],
-  ['OPERASIONAL',-2.60,1.15,-.90],
-  ['VPS / TECH',4.10,1.15,-.90],
-  ['SUPPORT',-4.80,1.20,1.45],
-  ['FINANCE',-2.35,1.20,1.45],
-  ['LOUNGE',.45,1.05,1.75],
-  ['PANTRY',2.85,1.15,1.78],
-  ['LOBBY',0,1.45,3.72]
- ]
+
+
+ // Precompute route metrics once; avoid rebuilding segment arrays every frame.
+ for(const p of cast){
+  const pts=p.route||[p.home,p.target],lens=[],cum=[0];let total=0
+  for(let i=0;i<pts.length-1;i++){const dx=pts[i+1][0]-pts[i][0],dz=pts[i+1][1]-pts[i][1],l=Math.hypot(dx,dz);lens.push(l);total+=l;cum.push(total)}
+  p._route={pts,lens,cum,total:Math.max(.001,total)}
+ }
+
  function render(now){
   const dt=Math.max(.001,Math.min(.05,(now-lastNow)/1000));lastNow=now
-  const cssW=Math.max(1,canvas.clientWidth),cssH=Math.max(1,canvas.clientHeight),dpr=Math.min(1.6,window.devicePixelRatio||1)
+  const cssW=Math.max(1,canvas.clientWidth),cssH=Math.max(1,canvas.clientHeight)
+  const nativeDpr=Math.min(1.55,window.devicePixelRatio||1),maxPixels=2400000
+  const budgetDpr=Math.sqrt(maxPixels/Math.max(1,cssW*cssH)),dpr=Math.max(.85,Math.min(nativeDpr,budgetDpr))
   const rw=Math.round(cssW*dpr),rh=Math.round(cssH*dpr);if(canvas.width!==rw||canvas.height!==rh){canvas.width=rw;canvas.height=rh}
   gl.viewport(0,0,rw,rh);gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.clearColor(.045,.075,.095,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT)
   const eye=[Math.sin(cam.yaw)*Math.cos(cam.pitch)*cam.dist,1.65+Math.sin(cam.pitch)*cam.dist,Math.cos(cam.yaw)*Math.cos(cam.pitch)*cam.dist]
@@ -502,15 +502,11 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   sceneBoxes(vp)
   const sec=(now-start)/1000
   const mode=modeRef.current
-  const updateHud=(++labelFrame%3===0)
+  const updateHud=(++labelFrame%4===0)
 
 
 
-  const routeMetrics=(p)=>{
-    const pts=p.route||[p.home,p.target],lens=[],cum=[0];let total=0
-    for(let i=0;i<pts.length-1;i++){const dx=pts[i+1][0]-pts[i][0],dz=pts[i+1][1]-pts[i][1],l=Math.hypot(dx,dz);lens.push(l);total+=l;cum.push(total)}
-    return{pts,lens,cum,total:Math.max(.001,total)}
-  }
+  const routeMetrics=(p)=>p._route
   const routeSeg=(p,f)=>{
     const m=routeMetrics(p),dist=Math.max(0,Math.min(.999999,f))*m.total
     let i=0;while(i<m.lens.length-1&&dist>m.cum[i+1])i++
@@ -580,7 +576,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
       let el=labelMap.get(p.name)
       if(!el){
         el=document.createElement('div');el.className='h3name'
-        el.innerHTML='<b>'+p.name+'</b><small></small>'
+        el.innerHTML='<b>'+p.name+'</b><small></small>';el._status=el.querySelector('small')
         labelLayer.appendChild(el);labelMap.set(p.name,el)
       }
       const pt=project3(vp,[px,1.78+yOffset,pz],cssW,cssH)
@@ -589,7 +585,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
         const showLabel=!!p.executive||walking||activity==='review'
         el.style.opacity=showLabel?'1':'0';el.style.left=pt[0]+'px';el.style.top=pt[1]+'px'
         el.style.borderColor=p.executive?'rgba(241,204,108,.70)':status==='MOVING'?'rgba(88,166,255,.40)':status==='REVIEWING'?'rgba(184,146,255,.42)':'rgba(84,201,135,.32)'
-        el.querySelector('small').textContent=(p.role?p.role+' • ':'')+status
+        el._status.textContent=(p.role?p.role+' • ':'')+status
       }else el.style.opacity='0'
     }
   }
@@ -601,7 +597,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • GAIT & TURN REALISM LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • FRAME STABILITY LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -619,14 +615,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.9 DEV • GAIT & TURN REALISM'})
+   jsx('div',{className:'h3chip',children:'V3.10 DEV • FRAME STABILITY'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
-     jsx('small',{children:'Gait realism: walk-cycle phase follows actual distance travelled, walk blend eases in/out, and turning uses frame-rate-independent smoothing for steadier office movement.'})
+     jsx('small',{children:'Frame stability: route geometry is precomputed, HUD nodes are cached, render density is pixel-budgeted, and gait/turn realism remains distance-aware and frame-rate independent.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
@@ -637,7 +633,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.9 DEV syncs the skeletal gait to world distance, eases walk blend in/out, and makes turning independent of frame rate. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.10 DEV precomputes route metrics, caches HUD status nodes, and caps render pixels for steadier 8-character performance. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
