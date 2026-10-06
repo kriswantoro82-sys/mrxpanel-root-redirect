@@ -267,7 +267,19 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
    else if(path==='scale')st[n].s=mix3(base[n].s,samp,w)
    else if(path==='rotation')st[n].r=slerp(base[n].r,samp,w)
   }
-  if(w<.05&&activity==='work'){
+  if(activity==='walk'&&w>.05){
+   // Walking stabilization: preserve the leg cycle but keep the upper body upright.
+   // The source clip exaggerates torso/neck rotation when used at office scale.
+   st[12].r=slerp(st[12].r,base[12].r,.48)
+   st[13].r=slerp(st[13].r,base[13].r,.42)
+   st[20].r=slerp(st[20].r,base[20].r,.78)
+   st[21].r=slerp(st[21].r,base[21].r,.86)
+   // Keep arm swing, but damp the game-like shoulder/forearm exaggeration.
+   st[14].r=slerp(st[14].r,base[14].r,.18);st[17].r=slerp(st[17].r,base[17].r,.18)
+   st[15].r=slerp(st[15].r,base[15].r,.12);st[18].r=slerp(st[18].r,base[18].r,.12)
+   // Reduce root bob so the torso does not look as if it is bouncing or leaning.
+   st[3].t[2]=base[3].t[2]+(st[3].t[2]-base[3].t[2])*.42
+  }else if(w<.05&&activity==='work'){
    const breathe=Math.sin(t*1.20),micro=Math.sin(t*2.10)
    // Geometry-calibrated standing desk pose:
    // shoulder X/Z rotations bring terminal hand joints near ~0.72-0.77m local height,
@@ -306,7 +318,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function characterMakeover(vp,modelM,jm,time,walking,p){
   const headJ=jm.subarray(4*16,5*16)
   const torsoJ=jm.subarray(2*16,3*16)
-  const turn=walking?0:Math.sin(time*1.25+p.offset)*.045
+  const turn=walking?Math.sin(time*1.35+p.offset)*.006:Math.sin(time*1.25+p.offset)*.032
   const headBase=mul4(mul4(modelM,headJ),trans(0,0,1.338))
   const head=mul4(headBase,rotZ(turn))
   const skin=p.skin,hair=p.hair,accent=p.accent
@@ -594,7 +606,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     const activity=walking?'walk':(cycle>=outEnd&&cycle<reviewEnd?'review':'work')
     const yOffset=0
     // Native gait cycle ≈1.958s; one full left-right cycle maps to ~1.25 world units.
-    const gaitTime=(gaitDistance/1.25)*1.9583334+p.offset*.11
+    const gaitTime=(gaitDistance/1.42)*1.9583334+p.offset*.11
     const motionTime=walking||gaitBlend>.02?gaitTime:sec+p.offset
     const st=localState(motionTime,gaitBlend,activity),world=worlds(st),mw=world[meshNode],invMw=invert4(mw),jm=p._jm
     for(let i=0;i<skin.joints.length;i++)jm.set(mul4(mul4(invMw,world[skin.joints[i]]),invBind[i]),i*16)
@@ -630,7 +642,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • MOTION & PERFORMANCE POLISH LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • WALK BODY HEAD ALIGNMENT LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -648,14 +660,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.16 DEV • MOTION & PERFORMANCE'})
+   jsx('div',{className:'h3chip',children:'V3.17 DEV • WALK / BODY / HEAD ALIGNMENT'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
-     jsx('small',{children:'Motion/performance pass: eased acceleration and braking stay synced to gait distance, while lighter contact shadows and lower per-frame allocations keep the 8-character office grounded and stable.'})
+     jsx('small',{children:'Walking alignment pass: leg motion stays active, while torso, shoulders and neck are stabilized so the body remains upright and the head tracks naturally instead of being dragged by the source gait clip.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
@@ -666,7 +678,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.16 DEV keeps the V3.15 grounding/lighting work, then smooths travel acceleration/deceleration, softens contact shadows and reuses per-character joint buffers to reduce frame garbage. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.17 DEV keeps the V3.16 motion/performance work, then corrects walking posture by stabilizing torso and neck rotation, damping exaggerated arm swing and reducing root bob. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
