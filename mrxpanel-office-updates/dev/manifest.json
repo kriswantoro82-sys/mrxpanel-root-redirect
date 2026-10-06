@@ -1,9 +1,9 @@
 {
   "channel": "dev",
-  "version": "3.13.0-dev",
+  "version": "3.15.0-dev",
   "plugin_path": "mrxpanel-office-updates/dev/plugin.js",
-  "sha256": "a20157406de0898e4ff086034f340a415b91c1cc2e7ca85c1f7e9f630c504968",
-  "released_at": "2026-10-06T13:36:00+07:00",
-  "notes": "Furniture and clearance realism: grounded desks/meeting/reception/pantry, physical support geometry, monitor faces, full-height walls, human-scale doors, distance-synced gait, frame-stable routing, and clearance-audited routes around walls, desks, lounge, plants and server racks.",
+  "sha256": "206c154852e6f258c0c0facb986e0e16aa005bf7091e67292a1e6317bb47244b",
+  "released_at": "2026-10-06T13:49:00+07:00",
+  "notes": "Human scale/work-pose and grounding pass: normalized character stature against 0.70m desks, skeleton-calibrated standing workstation arm pose, wall-mounted practical lights, contact shadows under major furniture, lighter character ground shadows, full-height architecture, clearance-audited routes, distance-synced gait and frame-stable rendering.",
   "stable_unchanged": true
 }
