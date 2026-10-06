@@ -14,7 +14,6 @@ const CSS=`
 .h3stage{padding:8px;min-height:0;background:#090d12}.h3wrap{position:relative;width:100%;height:100%;min-height:650px;border:1px solid #2b333d;border-radius:12px;overflow:hidden;background:#15252f}
 .h3canvas{display:block;width:100%;height:100%;min-height:650px;touch-action:none;cursor:grab}.h3canvas:active{cursor:grabbing}
 .h3labels{pointer-events:none;position:absolute;inset:0;overflow:hidden}.h3name{position:absolute;left:0;top:0;transform:translate(-50%,-100%);padding:3px 5px;border-radius:5px;background:rgba(9,13,18,.72);border:1px solid rgba(241,204,108,.28);box-shadow:0 3px 8px rgba(0,0,0,.22);font-size:6px;font-weight:850;color:#fff;white-space:nowrap;transition:opacity .15s ease}.h3name small{display:block;margin-top:1px;font-size:5px;font-weight:750;color:#9aa6b2;letter-spacing:.035em}
-.h3room{position:absolute;left:0;top:0;transform:translate(-50%,-50%);padding:4px 8px;border-radius:5px;background:rgba(244,236,222,.90);border:1px solid rgba(144,124,93,.72);box-shadow:0 4px 10px rgba(0,0,0,.18);font-size:7px;font-weight:950;color:#3b3329;letter-spacing:.06em;white-space:nowrap;opacity:.86}
 .h3over{pointer-events:none;position:absolute;left:14px;top:14px;max-width:300px;padding:8px 10px;border:1px solid rgba(241,204,108,.22);border-radius:8px;background:rgba(10,15,20,.62);backdrop-filter:blur(6px)}
 .h3over strong{font-size:12px;color:#f1cc6c}.h3over small{display:block;margin-top:4px;font-size:8px;line-height:1.5;color:#b3bcc5}
 .h3legend{position:absolute;left:14px;bottom:14px;display:flex;gap:5px;align-items:center;flex-wrap:wrap}.h3pill{padding:5px 7px;border:1px solid #33404b;border-radius:999px;background:rgba(10,15,20,.82);font-size:7px;color:#d2d8de}
@@ -256,7 +255,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  const u={svp:gl.getUniformLocation(sp,'uVP'),sm:gl.getUniformLocation(sp,'uModel'),sj:gl.getUniformLocation(sp,'uJ[0]'),shirt:gl.getUniformLocation(sp,'uShirt'),skinTone:gl.getUniformLocation(sp,'uSkinTone'),pants:gl.getUniformLocation(sp,'uPants'),bvp:gl.getUniformLocation(bp,'uVP'),bm:gl.getUniformLocation(bp,'uModel'),bc:gl.getUniformLocation(bp,'uColor')}
  const invBind=[];for(let i=0;i<skin.joints.length;i++)invBind.push(new Float32Array(ibmAcc.array.slice(i*16,i*16+16)))
  const cam={yaw:.78,pitch:.46,dist:17.8},drag={active:false,x:0,y:0,yaw:0,pitch:0}
- const labelMap=new Map(),roomLabelMap=new Map(),gaitMap=new Map()
+ const labelMap=new Map(),gaitMap=new Map()
  const facingMap=new Map()
  let lastPhase='',start=performance.now(),raf=0,labelFrame=0,lastNow=start
  function localState(t,w,activity='idle'){
@@ -431,7 +430,9 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   B(-4.25,2.05,-4.49,.72,.20,.02,[.12,.16,.18])
 
   // Meeting room.
-  B(4.05,.56,-3.05,1.20,.08,.68,[.30,.19,.11])
+  B(4.05,.72,-3.05,1.20,.055,.68,[.30,.19,.11])
+  B(4.05,.36,-3.05,.11,.36,.11,[.13,.14,.15])
+  B(4.05,.08,-3.05,.62,.035,.16,[.13,.14,.15])
   for(const xx of [2.90,5.20])for(const zz of [-3.55,-2.55])B(xx,.34,zz,.28,.05,.28,[.17,.22,.26])
   B(4.05,1.70,-4.50,1.15,.025,.025,[.16,.29,.34])
   B(4.05,1.70,-4.46,.92,.32,.018,[.08,.13,.17])
@@ -441,10 +442,15 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
 
   // Operations workstations: desk, monitor body + stand/base, keyboard and mouse.
   const workstation=(x,z,wood=[.31,.20,.12])=>{
+    // 0.70m desk with four grounded legs.
     B(x,.70,z,.60,.055,.34,wood)
+    for(const dx of [-.52,.52])for(const dz of [-.26,.26])B(x+dx,.34,z+dz,.035,.34,.035,[.12,.13,.14])
+    // Monitor body, subtle screen face, stand and base.
     B(x,.98,z-.35,.31,.23,.035,[.040,.055,.065])
+    B(x,.98,z-.388,.275,.195,.010,[.10,.20,.24])
     B(x,.80,z-.35,.030,.10,.030,[.09,.10,.11])
     B(x,.715,z-.35,.15,.018,.075,[.10,.11,.12])
+    // Keyboard + mouse.
     B(x,.765,z+.15,.23,.016,.060,[.10,.11,.12])
     B(x+.31,.765,z+.15,.040,.016,.050,[.11,.12,.13])
   }
@@ -459,8 +465,11 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
 
   // Lounge / pantry.
   B(.45,.32,2.35,1.05,.30,.42,[.20,.28,.34]);B(.45,.72,2.70,1.05,.45,.08,[.20,.28,.34])
-  B(2.55,.48,2.42,.62,.05,.42,[.72,.68,.60]);B(2.55,.87,2.70,.32,.35,.05,[.48,.50,.48])
-  B(3.55,.75,2.55,.25,.42,.25,[.72,.68,.60])
+  B(2.55,.42,2.42,.58,.42,.36,[.38,.39,.37])
+  B(2.55,.86,2.42,.62,.045,.42,[.65,.63,.58])
+  B(2.55,.92,2.70,.32,.28,.035,[.46,.47,.45])
+  B(3.55,.45,2.55,.24,.45,.24,[.48,.46,.42])
+  B(3.55,.92,2.55,.26,.025,.26,[.66,.63,.57])
 
   // Decorative office plants.
   const plant=(x,z)=>{
@@ -472,8 +481,10 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   plant(-5.55,-1.25);plant(5.55,-1.25);plant(-.20,2.85);plant(4.25,2.80)
 
   // Lobby / reception.
-  B(0,.62,4.02,1.15,.45,.28,[.30,.21,.14])
-  B(0,1.07,3.78,1.15,.06,.28,[.38,.25,.14])
+  B(0,.48,4.02,1.15,.48,.28,[.24,.18,.13])
+  B(0,.96,3.96,1.15,.055,.32,[.38,.25,.14])
+  B(0,.55,3.72,1.05,.34,.035,[.15,.16,.17])
+  B(-.72,.22,4.02,.035,.22,.24,[.12,.13,.14]);B(.72,.22,4.02,.035,.22,.24,[.12,.13,.14])
  }
  const cast=[
   {name:'Kris',role:'PIMPINAN',workYaw:.67,executive:'kris',lane:-.08,home:[-5.20,-2.45],target:[-4.15,-1.55],route:[[-5.20,-2.45],[-4.75,-1.75],[-4.15,-1.55]],shirt:[.07,.11,.17],pants:[.05,.07,.10],skin:[.72,.44,.31],hair:[.055,.035,.025],eye:[.05,.06,.07],lip:[.24,.07,.065],accent:[.92,.70,.26],hairStyle:2,accessory:'none',schedule:0,offset:0,scale:1.04},
@@ -602,7 +613,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • ARCHITECTURAL SCALE LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • FURNITURE REALISM LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -620,14 +631,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.11 DEV • ARCHITECTURAL SCALE'})
+   jsx('div',{className:'h3chip',children:'V3.12 DEV • FURNITURE REALISM'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
-     jsx('small',{children:'Architectural scale: interior partitions are now full office height, door openings match human scale, and the elevated dollhouse camera can read rooms without waist-high prototype walls.'})
+     jsx('small',{children:'Furniture realism: workstations, meeting table, reception and pantry are structurally grounded with legs/cabinet bodies, monitor faces and cleaner proportions.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
@@ -638,7 +649,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.11 DEV replaces waist-high prototype partitions with full-height office walls, human-scale door frames and restrained upper glass bands. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.12 DEV grounds workstations, meeting table, reception and pantry with real support geometry and cleaner monitor details. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
