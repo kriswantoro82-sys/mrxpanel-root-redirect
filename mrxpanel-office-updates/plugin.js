@@ -140,6 +140,21 @@ function cubeGeometry(){
  const idx=[];for(let f=0;f<6;f++){const o=f*4;idx.push(o,o+1,o+2,o,o+2,o+3)}
  return{p:new Float32Array(p),n:new Float32Array(n),i:new Uint16Array(idx)}
 }
+function sphereGeometry(lat=12,lon=16){
+ const p=[],n=[],idx=[]
+ for(let a=0;a<=lat;a++){
+  const ph=a*Math.PI/lat,sp=Math.sin(ph),cp=Math.cos(ph)
+  for(let b=0;b<=lon;b++){
+   const th=b*Math.PI*2/lon,x=sp*Math.cos(th),y=cp,z=sp*Math.sin(th)
+   p.push(x,y,z);n.push(x,y,z)
+  }
+ }
+ for(let a=0;a<lat;a++)for(let b=0;b<lon;b++){
+  const i=a*(lon+1)+b,j=i+lon+1
+  idx.push(i,j,i+1,j,j+1,i+1)
+ }
+ return{p:new Float32Array(p),n:new Float32Array(n),i:new Uint16Array(idx)}
+}
 function init(canvas,setStatus,setPhase,modeRef){
  const gl=canvas.getContext('webgl2',{antialias:true,alpha:false})
  if(!gl)throw new Error('WebGL2 tidak tersedia')
@@ -195,6 +210,10 @@ function init(canvas,setStatus,setPhase,modeRef){
  let b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,cube.p,gl.STATIC_DRAW);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,0,0)
  b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,cube.n,gl.STATIC_DRAW);gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,0,0)
  const cib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,cib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,cube.i,gl.STATIC_DRAW);gl.bindVertexArray(null)
+ const sph=sphereGeometry(),svao=gl.createVertexArray();gl.bindVertexArray(svao)
+ b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,sph.p,gl.STATIC_DRAW);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,0,0)
+ b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,sph.n,gl.STATIC_DRAW);gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,0,0)
+ const sib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,sib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,sph.i,gl.STATIC_DRAW);gl.bindVertexArray(null)
  const u={svp:gl.getUniformLocation(sp,'uVP'),sm:gl.getUniformLocation(sp,'uModel'),sj:gl.getUniformLocation(sp,'uJ[0]'),bvp:gl.getUniformLocation(bp,'uVP'),bm:gl.getUniformLocation(bp,'uModel'),bc:gl.getUniformLocation(bp,'uColor')}
  const invBind=[];for(let i=0;i<skin.joints.length;i++)invBind.push(new Float32Array(ibmAcc.array.slice(i*16,i*16+16)))
  const cam={yaw:.62,pitch:.34,dist:8.8},drag={active:false,x:0,y:0,yaw:0,pitch:0}
@@ -218,8 +237,24 @@ function init(canvas,setStatus,setPhase,modeRef){
   ;(j.scenes[j.scene||0].nodes||[]).forEach(r=>visit(r,id4()))
   return out
  }
- function boxDraw(vp,m,color){
-  gl.useProgram(bp);gl.uniformMatrix4fv(u.bvp,false,vp);gl.uniformMatrix4fv(u.bm,false,m);gl.uniform3fv(u.bc,color);gl.bindVertexArray(cvao);gl.drawElements(gl.TRIANGLES,cube.i.length,gl.UNSIGNED_SHORT,0)
+ function geoDraw(vao,count,vp,m,color){
+  gl.useProgram(bp);gl.uniformMatrix4fv(u.bvp,false,vp);gl.uniformMatrix4fv(u.bm,false,m);gl.uniform3fv(u.bc,color);gl.bindVertexArray(vao);gl.drawElements(gl.TRIANGLES,count,gl.UNSIGNED_SHORT,0)
+ }
+ function boxDraw(vp,m,color){geoDraw(cvao,cube.i.length,vp,m,color)}
+ function sphereDraw(vp,m,color){geoDraw(svao,sph.i.length,vp,m,color)}
+ function characterMakeover(vp,modelM,jm){
+  const headJ=new Float32Array(jm.slice(4*16,5*16))
+  const head=mul4(mul4(modelM,headJ),trans(0,0,1.338))
+  const part=(x,y,z,sx,sy,sz,color)=>sphereDraw(vp,mul4(mul4(head,trans(x,y,z)),scale(sx,sy,sz)),color)
+  part(0,0,0,.180,.190,.205,[.72,.44,.31])
+  part(0,-.018,.145,.194,.188,.105,[.095,.060,.045])
+  part(-.175,0,.000,.040,.030,.055,[.68,.39,.28]);part(.175,0,.000,.040,.030,.055,[.68,.39,.28])
+  part(-.062,.174,.045,.030,.018,.030,[.96,.96,.94]);part(.062,.174,.045,.030,.018,.030,[.96,.96,.94])
+  part(-.062,.191,.045,.012,.008,.014,[.055,.060,.065]);part(.062,.191,.045,.012,.008,.014,[.055,.060,.065])
+  part(0,.190,.000,.032,.045,.045,[.67,.38,.27])
+  boxDraw(vp,mul4(mul4(head,trans(0,.190,-.066)),scale(.052,.010,.012)),[.26,.075,.070])
+  boxDraw(vp,mul4(mul4(head,trans(-.062,.188,.085)),scale(.040,.008,.009)),[.080,.050,.038])
+  boxDraw(vp,mul4(mul4(head,trans(.062,.188,.085)),scale(.040,.008,.009)),[.080,.050,.038])
  }
  function sceneBoxes(vp){
   boxDraw(vp,mul4(trans(0,-.08,0),scale(4,.06,3)),[.32,.47,.43])
@@ -240,14 +275,14 @@ function init(canvas,setStatus,setPhase,modeRef){
   sceneBoxes(vp)
   const sec=(now-start)/1000,mode=modeRef.current
   let walk=false,x=-1.65,yaw=Math.PI/2,phase='IDLE'
-  if(mode==='walk'){walk=true;x=-.35+Math.sin(sec*.55)*1.45;yaw=Math.cos(sec*.55)>=0?Math.PI/2:-Math.PI/2;phase='WALK'}
+  if(mode==='walk'){walk=true;x=-.35+Math.sin(sec*.55)*1.45;yaw=Math.cos(sec*.55)>=0?0:Math.PI;phase='WALK'}
   else if(mode==='idle'){walk=false;x=-.25;phase='IDLE'}
   else{
    const q=sec%12
    if(q<2){x=-1.65;phase='IDLE'}
-   else if(q<6.5){const f=(q-2)/4.5;x=-1.65+f*2.75;walk=true;yaw=Math.PI/2;phase='WALK'}
+   else if(q<6.5){const f=(q-2)/4.5;x=-1.65+f*2.75;walk=true;yaw=0;phase='WALK'}
    else if(q<8){x=1.10;phase='IDLE'}
-   else{const f=(q-8)/4;x=1.10-f*2.75;walk=true;yaw=-Math.PI/2;phase='WALK'}
+   else{const f=(q-8)/4;x=1.10-f*2.75;walk=true;yaw=Math.PI;phase='WALK'}
   }
   if(phase!==lastPhase){lastPhase=phase;setPhase(phase)}
   const st=localState(sec,walk?1:0),world=worlds(st),mw=world[meshNode],invMw=invert4(mw),jm=new Float32Array(skin.joints.length*16)
@@ -255,6 +290,7 @@ function init(canvas,setStatus,setPhase,modeRef){
   const placement=mul4(trans(x,0,.65),rotY(yaw)),modelM=mul4(placement,mw)
   gl.useProgram(sp);gl.uniformMatrix4fv(u.svp,false,vp);gl.uniformMatrix4fv(u.sm,false,modelM);gl.uniformMatrix4fv(u.sj,false,jm);gl.bindVertexArray(vao)
   gl.drawElements(gl.TRIANGLES,indices.count,indices.componentType===5123?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,0)
+  characterMakeover(vp,modelM,jm)
   raf=requestAnimationFrame(render)
  }
  function pd(e){drag.active=true;drag.x=e.clientX;drag.y=e.clientY;drag.yaw=cam.yaw;drag.pitch=cam.pitch;canvas.setPointerCapture?.(e.pointerId)}
@@ -262,7 +298,7 @@ function init(canvas,setStatus,setPhase,modeRef){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(5.8,Math.min(14,cam.dist+Math.sign(e.deltaY)*.55))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • RIGGED HUMAN LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • CHARACTER MAKEOVER LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh)}
 }
 
@@ -280,14 +316,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V1.1 • RIGGED HUMAN'})
+   jsx('div',{className:'h3chip',children:'V1.2 • CHARACTER MAKEOVER'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),
     jsxs('div',{className:'h3over',children:[
-     jsx('strong',{children:'HUMAN CHARACTER UPGRADE'}),
-     jsx('small',{children:'Actual skinned 3D human mesh + 19-joint skeleton + native glTF animation. Bukan badan yang disusun dari kotak/cylinder lagi.'})
+     jsx('strong',{children:'CHARACTER MAKEOVER'}),
+     jsx('small',{children:'Rigged human tetap dipakai, sekarang ditambah kepala stylized 3D, rambut, mata, hidung, mulut, telinga, dan proporsi wajah game-like.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag = orbit camera'}),jsx('div',{className:'h3pill',children:'Wheel = zoom'}),
@@ -295,7 +331,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'Rigged Human Lab'}),jsx('small',{children:'Proof berikutnya sebelum semua karakter kantor dipindahkan ke sistem manusia 3D.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Character Lab'}),jsx('small',{children:'Fokus V1.2: wajah dan kepala harus terasa seperti karakter game sebelum kita gandakan menjadi Kris, Maya, dan semua Team.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
@@ -303,7 +339,7 @@ function HumanLab(){
       jsx('span',{children:'Skeleton'}),jsx('span',{children:'19 skin joints'}),
       jsx('span',{children:'Animation'}),jsx('span',{children:'Native skeletal walk cycle'}),
       jsx('span',{children:'Renderer'}),jsx('span',{children:'WebGL2 GPU skinning'}),
-      jsx('span',{children:'Texture'}),jsx('span',{children:'Removed — MRXPANEL colors'}),
+      jsx('span',{children:'Face'}),jsx('span',{children:'Stylized 3D makeover'}),
       jsx('span',{children:'Status'}),jsx('span',{className:status.startsWith('ERROR')?'h3err':'',children:status})
      ]})
     ]}),
@@ -316,7 +352,7 @@ function HumanLab(){
      ]})
     ]}),
     jsxs('section',{className:'h3card',children:[
-     jsx('h3',{children:'Next if approved'}),jsx('div',{className:'h3sub',children:'Setelah bentuk manusia dan cara jalannya sudah terasa seperti karakter game, tahap berikutnya: model karakter MRXPANEL sendiri, idle/turn/sit/typing, Kris + Maya, lalu seluruh office.'})
+     jsx('h3',{children:'Next if approved'}),jsx('div',{className:'h3sub',children:'Kalau kepala/wajah V1.2 sudah cocok, berikutnya kita buat varian karakter MRXPANEL: Kris, Maya, Team, rambut/pakaian berbeda, lalu idle/turn/sit/typing dan seluruh office.'})
     ]}),
     jsx('div',{className:'h3warn',style:{padding:'0 12px 14px'},children:'Temporary rig test geometry: Cesium Man © 2017 Cesium, CC BY 4.0. Original branded texture/logo is removed and not distributed in this build. Used only to validate the rigged-human pipeline; final MRXPANEL characters will use our own assets.'})
    ]})
