@@ -1,39 +1,29 @@
 # MRXPANEL OFFICE — DEV STATUS
 
-Current dev build: **V3.16 DEV — MOTION & PERFORMANCE POLISH**
+Current dev build: **V3.17 DEV — WALK / BODY / HEAD ALIGNMENT**
 
 Stable channel: **V1.3.0** (unchanged)
 
 ## Realism baseline now implemented
 - 8 rigged 3D characters with distinct roles/outfits.
-- Character stature normalized against 0.70m desks; current character scales are closer to plausible adult proportions.
-- Standing workstation arm pose remains calibrated to desk/keyboard height.
-- Fake seated body-sinking remains disabled; chairs remain withheld until a true sit rig exists.
-- Character face/hair/accessory proportions remain tightened.
-- Softer key/fill lighting and restrained material palette are preserved.
-- Warm wall-mounted practical fixtures remain in place.
-- Furniture contact grounding is preserved, but contact shadows are now lighter/thinner so they read less like dark mats.
-- Character ground shadows are lighter and smaller.
-- Human-scale walls, door openings, framed windows, upper glass bands and baseboards remain intact.
-- Workstations remain structurally grounded with monitor, stand/base, keyboard and mouse.
-- All 8 characters keep architecture-aware multi-waypoint routes.
-- Risky paths remain clearance-audited.
-- Route traversal stays distance weighted.
-- Travel now uses eased acceleration/deceleration while gait timing remains synchronized to world distance.
-- Turn smoothing remains frame-rate independent.
-- Per-character joint buffers are reused instead of allocated every frame.
-- Character makeover reads joint matrix slices without creating extra typed-array copies.
-- HUD throttling and render pixel budget remain active.
-- Full-width office presentation remains unchanged.
+- Character stature remains normalized against the 0.70m desk baseline.
+- Workstation hand/arm pose remains calibrated to keyboard height.
+- Lighting, contact grounding, architectural scale, clearance-aware routing and V3.16 performance improvements are preserved.
+- Walking upper-body motion is now stabilized against the base rig.
+- Torso joints are partially returned toward neutral while locomotion continues in the legs.
+- Neck/head joints are strongly stabilized so the head no longer inherits exaggerated source-clip tilt.
+- Shoulder and forearm swing is damped rather than removed.
+- Root vertical bob is reduced.
+- Gait cadence is slightly slower relative to world distance.
+- Walking head roll is reduced to a tiny natural micro-motion.
 - JavaScript structural smoke/syntax check: PASS.
 
 ## Still blocked before stable promotion
-1. Live Hermes visual review is required.
-2. Verify arm/hand position reads naturally from the actual in-app camera.
-3. Verify lighter contact shadows now feel grounded without disappearing.
-4. Verify full-height walls and door frames from multiple camera angles.
-5. Verify no route clipping remains around doorway/workstation corners.
-6. Verify gait cadence/world speed and 8-character performance in the shell.
-7. Final Kris/Maya executive polish after live visual feedback.
+1. Kris visual review in the live Hermes shell.
+2. Confirm body remains upright from front, rear and oblique camera angles.
+3. Confirm head position and facing now feel natural during turns.
+4. Confirm stride cadence does not foot-slide at route transitions.
+5. Re-check doorway/workstation clipping while all 8 characters are active.
+6. Final Kris/Maya executive polish after visual feedback.
 
 Stable V1.3.0 remains untouched. Real MASB state integration remains OFF until the 3D shell passes visual review.
