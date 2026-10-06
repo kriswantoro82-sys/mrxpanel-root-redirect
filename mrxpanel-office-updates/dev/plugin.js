@@ -10,18 +10,18 @@ const CSS=`
 .h3h{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid #29313c;background:#080c11}
 .h3corp{font-size:9px;letter-spacing:.18em;color:#9297a0;font-weight:800}.h3title{font-size:21px;font-weight:950}.h3title b{color:#f1cc6c}
 .h3chip{font-size:8px;border:1px solid #345843;border-radius:999px;padding:6px 8px;color:#8ce3a9}
-.h3body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(760px,1fr) 330px}
-.h3stage{padding:12px;min-height:0;background:#090d12}.h3wrap{position:relative;width:100%;height:100%;min-height:650px;border:1px solid #323b47;border-radius:16px;overflow:hidden;background:#15252f}
+.h3body{flex:1;min-height:0;display:grid;grid-template-columns:1fr}
+.h3stage{padding:8px;min-height:0;background:#090d12}.h3wrap{position:relative;width:100%;height:100%;min-height:650px;border:1px solid #2b333d;border-radius:12px;overflow:hidden;background:#15252f}
 .h3canvas{display:block;width:100%;height:100%;min-height:650px;touch-action:none;cursor:grab}.h3canvas:active{cursor:grabbing}
 .h3labels{pointer-events:none;position:absolute;inset:0;overflow:hidden}.h3name{position:absolute;left:0;top:0;transform:translate(-50%,-100%);padding:3px 5px;border-radius:5px;background:rgba(9,13,18,.72);border:1px solid rgba(241,204,108,.28);box-shadow:0 3px 8px rgba(0,0,0,.22);font-size:6px;font-weight:850;color:#fff;white-space:nowrap;transition:opacity .15s ease}.h3name small{display:block;margin-top:1px;font-size:5px;font-weight:750;color:#9aa6b2;letter-spacing:.035em}
 .h3room{position:absolute;left:0;top:0;transform:translate(-50%,-50%);padding:4px 8px;border-radius:5px;background:rgba(244,236,222,.90);border:1px solid rgba(144,124,93,.72);box-shadow:0 4px 10px rgba(0,0,0,.18);font-size:7px;font-weight:950;color:#3b3329;letter-spacing:.06em;white-space:nowrap;opacity:.86}
-.h3over{pointer-events:none;position:absolute;left:16px;top:16px;max-width:360px;padding:10px 12px;border:1px solid rgba(241,204,108,.3);border-radius:10px;background:rgba(10,15,20,.75);backdrop-filter:blur(8px)}
+.h3over{pointer-events:none;position:absolute;left:14px;top:14px;max-width:300px;padding:8px 10px;border:1px solid rgba(241,204,108,.22);border-radius:8px;background:rgba(10,15,20,.62);backdrop-filter:blur(6px)}
 .h3over strong{font-size:12px;color:#f1cc6c}.h3over small{display:block;margin-top:4px;font-size:8px;line-height:1.5;color:#b3bcc5}
-.h3legend{position:absolute;left:16px;bottom:16px;display:flex;gap:6px;flex-wrap:wrap}.h3pill{padding:5px 7px;border:1px solid #33404b;border-radius:999px;background:rgba(10,15,20,.82);font-size:7px;color:#d2d8de}
-.h3side{overflow:auto;background:#10151d;border-left:1px solid #29313c}.h3sideh{padding:14px;border-bottom:1px solid #29313c}.h3sideh strong{font-size:13px}.h3sideh small{display:block;margin-top:3px;font-size:8px;line-height:1.5;color:#9297a0}
+.h3legend{position:absolute;left:14px;bottom:14px;display:flex;gap:5px;align-items:center;flex-wrap:wrap}.h3pill{padding:5px 7px;border:1px solid #33404b;border-radius:999px;background:rgba(10,15,20,.82);font-size:7px;color:#d2d8de}
+.h3side{display:none}.h3sideh{padding:14px;border-bottom:1px solid #29313c}.h3sideh strong{font-size:13px}.h3sideh small{display:block;margin-top:3px;font-size:8px;line-height:1.5;color:#9297a0}
 .h3card{margin:10px;padding:12px;border:1px solid #2a323c;border-radius:10px;background:#171d26}.h3card h3{margin:0;font-size:11px}.h3sub{margin-top:4px;font-size:8px;line-height:1.55;color:#9297a0}
 .h3stats{display:grid;grid-template-columns:95px 1fr;gap:6px 8px;margin-top:10px;font-size:8px}.h3stats span:nth-child(odd){color:#7e8995}.h3stats span:nth-child(even){color:#e0e5e9}
-.h3grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}.h3btn{padding:8px;border:1px solid #394552;border-radius:7px;background:#111820;color:#dce2e7;font-size:8px;font-weight:900;cursor:pointer}.h3btn.active{border-color:#d6a73a;background:linear-gradient(#f1cc6c,#d6a73a);color:#19140c}
+.h3grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}.h3btn{padding:6px 8px;border:1px solid #394552;border-radius:999px;background:rgba(17,24,32,.88);color:#dce2e7;font-size:7px;font-weight:900;cursor:pointer}.h3btn.active{border-color:#d6a73a;background:linear-gradient(#f1cc6c,#d6a73a);color:#19140c}
 .h3warn{font-size:7px;line-height:1.55;color:#7f8a95}.h3err{color:#ff8c8c}
 @media(max-width:1020px){.h3body{grid-template-columns:1fr}.h3side{display:none}}
 `
@@ -388,8 +388,12 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   B(6.04,.07,0,.035,.07,4.55,[.16,.17,.18])
   // Back-wall windows and warm office lighting.
   for(const xx of [-4.25,-1.45,1.45,4.25]){
-    B(xx,1.62,-4.56,1.05,.58,.025,[.10,.25,.34])
-    B(xx,1.62,-4.525,.90,.44,.012,[.20,.48,.64])
+    B(xx,1.62,-4.56,1.05,.58,.025,[.10,.18,.22])
+    B(xx,1.62,-4.525,.90,.44,.012,[.18,.36,.46])
+    // Window frame + center mullion.
+    B(xx,2.18,-4.49,1.04,.035,.025,[.12,.13,.14]);B(xx,1.06,-4.49,1.04,.035,.025,[.12,.13,.14])
+    B(xx-1.00,1.62,-4.49,.035,.56,.025,[.12,.13,.14]);B(xx+1.00,1.62,-4.49,.035,.56,.025,[.12,.13,.14])
+    B(xx,1.62,-4.49,.025,.56,.025,[.12,.13,.14])
   }
 
   // Segmented partitions: visible rooms with actual walk-through gaps.
@@ -402,6 +406,12 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   // Front divider is broken into side wings, leaving a generous central aisle.
   B(-4.55,.72,.95,1.55,.72,.055,[.30,.32,.33])
   B(4.45,.72,.95,1.65,.72,.055,[.30,.32,.33])
+  // Door frames mark the two main cross-corridor openings.
+  for(const xx of [-1.5,2.15]){
+    B(xx,1.02,-2.07,.075,1.02,.075,[.18,.19,.20])
+    B(xx,1.02,-1.08,.075,1.02,.075,[.18,.19,.20])
+    B(xx,1.98,-1.575,.075,.075,.50,[.18,.19,.20])
+  }
 
   // Executive room: Kris + Maya.
   B(-4.25,.78,-3.20,1.38,.08,.55,[.31,.20,.12])
@@ -581,7 +591,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • MOTION & SPEED REALISM LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • PRESENTATION REALISM LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -599,22 +609,25 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.7 DEV • MOTION & SPEED REALISM'})
+   jsx('div',{className:'h3chip',children:'V3.8 DEV • PRESENTATION REALISM'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
-     jsx('strong',{children:'CHARACTER MAKEOVER'}),
-     jsx('small',{children:'Motion realism: route distance now controls walking time, unequal waypoint segments use distance-weighted traversal, and characters keep a consistent office walking speed instead of skating.'})
+     jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
+     jsx('small',{children:'Presentation realism: full-width 3D stage, restrained dev chrome, physical window/door framing, compact controls, distance-aware motion, and a cleaner office-first view.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
-     jsx('div',{className:'h3pill',children:'Drag = orbit camera'}),jsx('div',{className:'h3pill',children:'Wheel = zoom'}),
-     jsx('div',{className:'h3pill',children:'Pose: '+phase}),jsx('div',{className:'h3pill',children:status})
+     jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
+     jsx('button',{className:'h3btn '+(mode==='auto'?'active':''),onClick:()=>choose('auto'),children:'AUTO'}),
+     jsx('button',{className:'h3btn '+(mode==='walk'?'active':''),onClick:()=>choose('walk'),children:'WALK'}),
+     jsx('button',{className:'h3btn '+(mode==='idle'?'active':''),onClick:()=>choose('idle'),children:'IDLE'}),
+     jsx('div',{className:'h3pill',children:status})
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.7 DEV gives every route a distance-aware travel time and constant-speed polyline traversal, reducing skating and stop-start waypoint motion. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.8 DEV switches to a full-width office view, adds physical window/door framing, and moves dev controls into a compact overlay. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
