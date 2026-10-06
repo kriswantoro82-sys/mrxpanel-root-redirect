@@ -304,8 +304,8 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function boxDraw(vp,m,color){geoDraw(cvao,cube.i.length,vp,m,color)}
  function sphereDraw(vp,m,color){geoDraw(svao,sph.i.length,vp,m,color)}
  function characterMakeover(vp,modelM,jm,time,walking,p){
-  const headJ=new Float32Array(jm.slice(4*16,5*16))
-  const torsoJ=new Float32Array(jm.slice(2*16,3*16))
+  const headJ=jm.subarray(4*16,5*16)
+  const torsoJ=jm.subarray(2*16,3*16)
   const turn=walking?0:Math.sin(time*1.25+p.offset)*.045
   const headBase=mul4(mul4(modelM,headJ),trans(0,0,1.338))
   const head=mul4(headBase,rotZ(turn))
@@ -372,7 +372,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  }
  function sceneBoxes(vp){
   const B=(x,y,z,sx,sy,sz,c)=>boxDraw(vp,mul4(trans(x,y,z),scale(sx,sy,sz)),c)
-  const contact=(x,z,sx,sz)=>sphereDraw(vp,mul4(trans(x,.014,z),scale(sx,.008,sz)),[.105,.112,.116])
+  const contact=(x,z,sx,sz)=>sphereDraw(vp,mul4(trans(x,.010,z),scale(sx*.92,.006,sz*.88)),[.142,.148,.151])
   // Main floor + perimeter.
   B(0,-.10,0,6.2,.08,4.7,[.18,.21,.23])
   // Subtle room floor zoning.
@@ -517,6 +517,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   const pts=p.route||[p.home,p.target],lens=[],cum=[0];let total=0
   for(let i=0;i<pts.length-1;i++){const dx=pts[i+1][0]-pts[i][0],dz=pts[i+1][1]-pts[i][1],l=Math.hypot(dx,dz);lens.push(l);total+=l;cum.push(total)}
   p._route={pts,lens,cum,total:Math.max(.001,total)}
+  p._jm=new Float32Array(skin.joints.length*16)
  }
  // Route coordinates have been clearance-audited against walls and major furniture
  // with an approximate 0.18 world-unit body radius before this build is promoted.
@@ -554,6 +555,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     if(reverse){dx=-dx;dz=-dz}
     return Math.atan2(-dz,dx)
   }
+  const travelEase=(q)=>{q=Math.max(0,Math.min(1,q));return q*q*(3-2*q)}
 
   // Room labels intentionally hidden in realism mode; architecture should explain the space.
 
@@ -567,15 +569,15 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     const outStart=homeHold,outEnd=outStart+moveDur,reviewEnd=outEnd+targetHold,backEnd=reviewEnd+moveDur
     let walking=false,px=p.home[0],pz=p.home[1],desiredYaw=0,gaitDistance=0
     if(mode==='walk'){
-      const span=Math.max(1,routeLen/walkSpeed),q=((sec+p.offset)/span)%2,forward=q<1,f=forward?q:2-q,pt=pathAt(p,f)
+      const span=Math.max(1,routeLen/walkSpeed),q=((sec+p.offset)/span)%2,forward=q<1,leg=forward?q:2-q,f=travelEase(leg),pt=pathAt(p,f)
       px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,f,!forward);gaitDistance=routeLen*(forward?f:1-f)
     }else if(mode==='idle'){
       px=p.home[0];pz=p.home[1];walking=false;desiredYaw=(p.workYaw??dirAt(p,0,false))
     }else{
       if(cycle<outStart){px=p.home[0];pz=p.home[1];walking=false;desiredYaw=(p.workYaw??dirAt(p,0,false))}
-      else if(cycle<outEnd){const ff=(cycle-outStart)/moveDur,pt=pathAt(p,ff);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,ff,false);gaitDistance=routeLen*ff}
+      else if(cycle<outEnd){const raw=(cycle-outStart)/moveDur,ff=travelEase(raw),pt=pathAt(p,ff);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,ff,false);gaitDistance=routeLen*ff}
       else if(cycle<reviewEnd){px=p.target[0];pz=p.target[1];walking=false;desiredYaw=dirAt(p,1,false)}
-      else if(cycle<backEnd){const ff=(cycle-reviewEnd)/moveDur,rf=1-ff,pt=pathAt(p,rf);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,rf,true);gaitDistance=routeLen*ff}
+      else if(cycle<backEnd){const raw=(cycle-reviewEnd)/moveDur,ff=travelEase(raw),rf=1-ff,pt=pathAt(p,rf);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,rf,true);gaitDistance=routeLen*ff}
       else{px=p.home[0];pz=p.home[1];walking=false;desiredYaw=(p.workYaw??dirAt(p,0,false))}
     }
 
@@ -594,11 +596,11 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     // Native gait cycle ≈1.958s; one full left-right cycle maps to ~1.25 world units.
     const gaitTime=(gaitDistance/1.25)*1.9583334+p.offset*.11
     const motionTime=walking||gaitBlend>.02?gaitTime:sec+p.offset
-    const st=localState(motionTime,gaitBlend,activity),world=worlds(st),mw=world[meshNode],invMw=invert4(mw),jm=new Float32Array(skin.joints.length*16)
+    const st=localState(motionTime,gaitBlend,activity),world=worlds(st),mw=world[meshNode],invMw=invert4(mw),jm=p._jm
     for(let i=0;i<skin.joints.length;i++)jm.set(mul4(mul4(invMw,world[skin.joints[i]]),invBind[i]),i*16)
     const placement=mul4(mul4(trans(px,yOffset,pz),rotY(yaw)),scale(p.scale,p.scale,p.scale)),modelM=mul4(placement,mw)
 
-    sphereDraw(vp,mul4(trans(px,.012,pz),scale(.20*p.scale,.009,.11*p.scale)),[.090,.095,.098])
+    sphereDraw(vp,mul4(trans(px,.010,pz),scale(.18*p.scale,.006,.095*p.scale)),[.135,.140,.143])
     gl.useProgram(sp);gl.uniformMatrix4fv(u.svp,false,vp);gl.uniformMatrix4fv(u.sm,false,modelM);gl.uniformMatrix4fv(u.sj,false,jm)
     gl.uniform3fv(u.shirt,p.shirt);gl.uniform3fv(u.skinTone,p.skin);gl.uniform3fv(u.pants,p.pants)
     gl.bindVertexArray(vao);gl.drawElements(gl.TRIANGLES,indices.count,indices.componentType===5123?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,0)
@@ -628,7 +630,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • GROUNDING & LIGHTING LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • MOTION & PERFORMANCE POLISH LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -646,14 +648,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.15 DEV • GROUNDING & LIGHTING'})
+   jsx('div',{className:'h3chip',children:'V3.16 DEV • MOTION & PERFORMANCE'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
-     jsx('small',{children:'Grounding/lighting pass: wall-attached practical lights and subtle contact shadows anchor furniture and characters without reintroducing floating ceiling panels.'})
+     jsx('small',{children:'Motion/performance pass: eased acceleration and braking stay synced to gait distance, while lighter contact shadows and lower per-frame allocations keep the 8-character office grounded and stable.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
@@ -664,7 +666,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.15 DEV adds wall-attached practical lights and restrained contact shadows so desks, server racks, meeting furniture, pantry, reception and characters feel grounded. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.16 DEV keeps the V3.15 grounding/lighting work, then smooths travel acceleration/deceleration, softens contact shadows and reuses per-character joint buffers to reduce frame garbage. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
