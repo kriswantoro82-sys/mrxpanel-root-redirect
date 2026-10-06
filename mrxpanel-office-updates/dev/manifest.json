@@ -1,9 +1,9 @@
 {
   "channel": "dev",
-  "version": "3.18.0-dev",
+  "version": "3.19.0-dev",
   "plugin_path": "mrxpanel-office-updates/dev/plugin.js",
-  "sha256": "21b982641729dd634780b4da68bc368328ba83b624a7a142028b07f81f4280f2",
-  "released_at": "2026-10-06T15:42:00+07:00",
-  "notes": "Upright walk alignment: root/pelvis rotation and lateral sway are damped directly, upper torso and neck stabilization are strengthened, arm swing remains but is restrained, and root translation bob/sway is reduced while leg locomotion stays active.",
+  "sha256": "71ef1b4193dc6433f06b6462d9e6887b320ee18cf84822f750bf95fb72ec9524",
+  "released_at": "2026-10-06T15:45:00+07:00",
+  "notes": "Body orientation pass: the skeletal body below the neck is rotated 90 degrees left relative to route heading, while the stylized head receives a compensating rotation so its current facing is preserved.",
   "stable_unchanged": true
 }
