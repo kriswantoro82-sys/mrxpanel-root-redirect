@@ -339,10 +339,23 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     block(.060,.188,.044,.042,.006,.032,[.06,.07,.08])
     block(0,.190,.044,.020,.005,.005,[.06,.07,.08])
   }
+  if(p.executive==='maya'){
+    part(-.166,.012,-.032,.014,.012,.022,[.94,.73,.32])
+    part(.166,.012,-.032,.014,.012,.022,[.94,.73,.32])
+  }
 
   const torso=mul4(mul4(modelM,torsoJ),trans(0,.130,.995))
   boxDraw(vp,mul4(torso,scale(.028,.010,.095)),accent)
   boxDraw(vp,mul4(mul4(torso,trans(0,0,-.105)),scale(.050,.011,.022)),[Math.min(1,accent[0]*1.12),Math.min(1,accent[1]*1.12),Math.min(1,accent[2]*1.12)])
+  if(p.executive==='kris'){
+    boxDraw(vp,mul4(mul4(mul4(torso,trans(-.055,.014,.020)),rotZ(-.28)),scale(.065,.012,.14)),[.72,.72,.70])
+    boxDraw(vp,mul4(mul4(mul4(torso,trans(.055,.014,.020)),rotZ(.28)),scale(.065,.012,.14)),[.72,.72,.70])
+    boxDraw(vp,mul4(mul4(torso,trans(0,.018,-.025)),scale(.025,.013,.115)),[.82,.61,.18])
+  }else if(p.executive==='maya'){
+    boxDraw(vp,mul4(mul4(torso,trans(-.115,.010,.015)),scale(.018,.012,.18)),[.92,.70,.28])
+    boxDraw(vp,mul4(mul4(torso,trans(.115,.010,.015)),scale(.018,.012,.18)),[.92,.70,.28])
+    boxDraw(vp,mul4(mul4(torso,trans(0,.018,-.060)),scale(.090,.013,.018)),[.92,.70,.28])
+  }
  }
  function sceneBoxes(vp){
   const B=(x,y,z,sx,sy,sz,c)=>boxDraw(vp,mul4(trans(x,y,z),scale(sx,sy,sz)),c)
@@ -430,14 +443,14 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   B(0,1.07,3.78,1.15,.06,.28,[.58,.37,.20])
  }
  const cast=[
-  {name:'Kris',lane:-.08,home:[-5.20,-2.45],seatY:-.34,mid:[-4.70,-1.55],target:[-4.15,-1.55],shirt:[.07,.11,.17],pants:[.05,.07,.10],skin:[.72,.44,.31],hair:[.055,.035,.025],eye:[.05,.06,.07],lip:[.24,.07,.065],accent:[.92,.70,.26],hairStyle:2,accessory:'none',offset:0,scale:1.04},
-  {name:'Maya',lane:.08,home:[-3.30,-2.45],seatY:-.34,mid:[-2.80,-1.55],target:[-2.25,-1.55],shirt:[.48,.20,.38],pants:[.10,.08,.14],skin:[.76,.48,.34],hair:[.10,.055,.035],eye:[.08,.06,.055],lip:[.45,.09,.16],accent:[.94,.73,.32],hairStyle:1,accessory:'none',offset:3.1,scale:1.00},
-  {name:'Team 1',lane:-.12,home:[-4.75,.65],seatY:-.36,mid:[-3.20,1.25],target:[-1.95,.65],shirt:[.10,.30,.58],pants:[.06,.10,.16],skin:[.72,.43,.30],hair:[.08,.05,.035],eye:[.05,.06,.07],lip:[.28,.08,.07],accent:[.91,.69,.25],hairStyle:2,accessory:'headset',offset:1.3,scale:.96},
-  {name:'Team 2',lane:.12,home:[-3.05,.65],seatY:-.36,mid:[.35,1.25],target:[3.55,-2.15],shirt:[.32,.22,.50],pants:[.08,.08,.13],skin:[.67,.39,.28],hair:[.055,.035,.028],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.76,.60,.22],hairStyle:0,accessory:'glasses',offset:5.7,scale:.96},
-  {name:'Team 3',lane:-.10,home:[-.55,.65],seatY:-.36,mid:[-.20,1.35],target:[.45,2.05],shirt:[.10,.39,.30],pants:[.055,.11,.10],skin:[.76,.48,.34],hair:[.12,.075,.045],eye:[.045,.06,.06],lip:[.34,.08,.08],accent:[.90,.68,.24],hairStyle:1,accessory:'none',offset:8.4,scale:.96},
-  {name:'VPS Operator',lane:.10,home:[3.15,.65],seatY:-.36,mid:[4.00,1.15],target:[4.90,.80],shirt:[.28,.20,.48],pants:[.07,.07,.12],skin:[.67,.40,.30],hair:[.06,.04,.032],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.93,.70,.26],hairStyle:0,accessory:'headset',offset:2.4,scale:.96},
-  {name:'Maya Support',lane:-.14,home:[-4.80,2.60],seatY:-.36,mid:[-2.25,3.45],target:[0,3.25],shirt:[.52,.20,.38],pants:[.10,.08,.13],skin:[.76,.48,.34],hair:[.12,.06,.04],eye:[.07,.06,.06],lip:[.46,.09,.16],accent:[.95,.73,.30],hairStyle:1,accessory:'headset',offset:6.3,scale:.95},
-  {name:'Finance',lane:.14,home:[-2.35,2.60],seatY:-.36,mid:[.10,3.40],target:[2.55,2.25],shirt:[.63,.48,.14],pants:[.11,.09,.07],skin:[.72,.44,.31],hair:[.07,.045,.032],eye:[.05,.06,.07],lip:[.30,.075,.07],accent:[.96,.78,.36],hairStyle:2,accessory:'glasses',offset:10.2,scale:.95}
+  {name:'Kris',role:'PIMPINAN',executive:'kris',lane:-.08,home:[-5.20,-2.45],seatY:-.34,mid:[-4.70,-1.55],target:[-4.15,-1.55],shirt:[.07,.11,.17],pants:[.05,.07,.10],skin:[.72,.44,.31],hair:[.055,.035,.025],eye:[.05,.06,.07],lip:[.24,.07,.065],accent:[.92,.70,.26],hairStyle:2,accessory:'none',offset:0,scale:1.04},
+  {name:'Maya',role:'AI EXECUTIVE',executive:'maya',lane:.08,home:[-3.30,-2.45],seatY:-.34,mid:[-2.80,-1.55],target:[-2.25,-1.55],shirt:[.48,.20,.38],pants:[.10,.08,.14],skin:[.76,.48,.34],hair:[.10,.055,.035],eye:[.08,.06,.055],lip:[.45,.09,.16],accent:[.94,.73,.32],hairStyle:1,accessory:'none',offset:3.1,scale:1.00},
+  {name:'Team 1',role:'OPERASIONAL',lane:-.12,home:[-4.75,.65],seatY:-.36,mid:[-3.20,1.25],target:[-1.95,.65],shirt:[.10,.30,.58],pants:[.06,.10,.16],skin:[.72,.43,.30],hair:[.08,.05,.035],eye:[.05,.06,.07],lip:[.28,.08,.07],accent:[.91,.69,.25],hairStyle:2,accessory:'headset',offset:1.3,scale:.96},
+  {name:'Team 2',role:'OPERASIONAL',lane:.12,home:[-3.05,.65],seatY:-.36,mid:[.35,1.25],target:[3.55,-2.15],shirt:[.32,.22,.50],pants:[.08,.08,.13],skin:[.67,.39,.28],hair:[.055,.035,.028],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.76,.60,.22],hairStyle:0,accessory:'glasses',offset:5.7,scale:.96},
+  {name:'Team 3',role:'OPERASIONAL',lane:-.10,home:[-.55,.65],seatY:-.36,mid:[-.20,1.35],target:[.45,2.05],shirt:[.10,.39,.30],pants:[.055,.11,.10],skin:[.76,.48,.34],hair:[.12,.075,.045],eye:[.045,.06,.06],lip:[.34,.08,.08],accent:[.90,.68,.24],hairStyle:1,accessory:'none',offset:8.4,scale:.96},
+  {name:'VPS Operator',role:'VPS / TECH',lane:.10,home:[3.15,.65],seatY:-.36,mid:[4.00,1.15],target:[4.90,.80],shirt:[.28,.20,.48],pants:[.07,.07,.12],skin:[.67,.40,.30],hair:[.06,.04,.032],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.93,.70,.26],hairStyle:0,accessory:'headset',offset:2.4,scale:.96},
+  {name:'Maya Support',role:'SUPPORT',lane:-.14,home:[-4.80,2.60],seatY:-.36,mid:[-2.25,3.45],target:[0,3.25],shirt:[.52,.20,.38],pants:[.10,.08,.13],skin:[.76,.48,.34],hair:[.12,.06,.04],eye:[.07,.06,.06],lip:[.46,.09,.16],accent:[.95,.73,.30],hairStyle:1,accessory:'headset',offset:6.3,scale:.95},
+  {name:'Finance',role:'FINANCE',lane:.14,home:[-2.35,2.60],seatY:-.36,mid:[.10,3.40],target:[2.55,2.25],shirt:[.63,.48,.14],pants:[.11,.09,.07],skin:[.72,.44,.31],hair:[.07,.045,.032],eye:[.05,.06,.07],lip:[.30,.075,.07],accent:[.96,.78,.36],hairStyle:2,accessory:'glasses',offset:10.2,scale:.95}
  ]
 
  const rooms=[
@@ -537,8 +550,8 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
         const transitioning=Math.abs(yOffset-seatTarget)>.025
         const status=walking?'MOVING':(activity==='review'?'REVIEWING':transitioning?(seated?'SITTING':'STANDING'):(seated?'TYPING':'WORKING'))
         el.style.opacity='1';el.style.left=pt[0]+'px';el.style.top=pt[1]+'px'
-        el.style.borderColor=status==='MOVING'?'rgba(88,166,255,.55)':status==='REVIEWING'?'rgba(184,146,255,.58)':status==='TYPING'?'rgba(241,204,108,.62)':status==='SITTING'||status==='STANDING'?'rgba(255,191,82,.58)':'rgba(84,201,135,.55)'
-        el.querySelector('small').textContent=status
+        el.style.borderColor=p.executive?'rgba(241,204,108,.75)':status==='MOVING'?'rgba(88,166,255,.55)':status==='REVIEWING'?'rgba(184,146,255,.58)':status==='TYPING'?'rgba(241,204,108,.62)':status==='SITTING'||status==='STANDING'?'rgba(255,191,82,.58)':'rgba(84,201,135,.55)'
+        el.querySelector('small').textContent=(p.role?p.role+' • ':'')+status
       }else el.style.opacity='0'
     }
   }
@@ -550,7 +563,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • NATURAL TRANSITIONS LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • EXECUTIVE IDENTITY LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -568,14 +581,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V2.9 RC • NATURAL TRANSITIONS'})
+   jsx('div',{className:'h3chip',children:'V3.0 RC • EXECUTIVE IDENTITY'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'CHARACTER MAKEOVER'}),
-     jsx('small',{children:'Natural transitions: smooth sit/stand settling, lane spacing on shared routes, smoother facing memory, desk interaction, optimized HUD, and full 3D office presentation.'})
+     jsx('small',{children:'V3 release-candidate identity pass: Kris and Maya receive distinct executive silhouettes/details while the living office keeps routed motion, sit/stand settling, desk interaction, and HUD.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag = orbit camera'}),jsx('div',{className:'h3pill',children:'Wheel = zoom'}),
@@ -583,7 +596,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V2.9 RC adds eased sit/stand transitions and per-character lane offsets to reduce route overlap. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.0 RC adds distinct Kris/Maya executive visual identity and role-aware HUD while keeping natural transitions and lane spacing. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
