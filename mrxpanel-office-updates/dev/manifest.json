@@ -1,0 +1,9 @@
+{
+  "channel": "dev",
+  "version": "3.0.0-rc",
+  "plugin_path": "mrxpanel-office-updates/dev/plugin.js",
+  "sha256": "49c389ac40d5187ca150b18686e073c083af8a92dc236902e110979810f2e13e",
+  "released_at": "2026-10-06T11:58:00+07:00",
+  "notes": "Executive Identity RC: 8 rigged characters, full 3D office, role-aware HUD, routed motion, lane spacing, smooth sit/stand, typing/review micro-animation, environment and performance polish.",
+  "stable_unchanged": true
+}
