@@ -395,32 +395,44 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   const mode=modeRef.current
 
   const cast=[
-   {name:'Kris',home:[-5.20,-2.45],target:[-4.15,-1.55],shirt:[.07,.11,.17],pants:[.05,.07,.10],skin:[.72,.44,.31],hair:[.055,.035,.025],eye:[.05,.06,.07],lip:[.24,.07,.065],accent:[.92,.70,.26],hairStyle:2,accessory:'none',offset:0,scale:1.04},
-   {name:'Maya',home:[-3.30,-2.45],target:[-2.25,-1.55],shirt:[.48,.20,.38],pants:[.10,.08,.14],skin:[.76,.48,.34],hair:[.10,.055,.035],eye:[.08,.06,.055],lip:[.45,.09,.16],accent:[.94,.73,.32],hairStyle:1,accessory:'none',offset:3.1,scale:1.00},
-   {name:'Team 1',home:[-4.75,.65],target:[-1.95,.65],shirt:[.10,.30,.58],pants:[.06,.10,.16],skin:[.72,.43,.30],hair:[.08,.05,.035],eye:[.05,.06,.07],lip:[.28,.08,.07],accent:[.91,.69,.25],hairStyle:2,accessory:'headset',offset:1.3,scale:.96},
-   {name:'Team 2',home:[-3.05,.65],target:[3.55,-2.15],shirt:[.32,.22,.50],pants:[.08,.08,.13],skin:[.67,.39,.28],hair:[.055,.035,.028],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.76,.60,.22],hairStyle:0,accessory:'glasses',offset:5.7,scale:.96},
-   {name:'Team 3',home:[-.55,.65],target:[.45,2.05],shirt:[.10,.39,.30],pants:[.055,.11,.10],skin:[.76,.48,.34],hair:[.12,.075,.045],eye:[.045,.06,.06],lip:[.34,.08,.08],accent:[.90,.68,.24],hairStyle:1,accessory:'none',offset:8.4,scale:.96},
-   {name:'VPS Operator',home:[3.15,.65],target:[4.90,.80],shirt:[.28,.20,.48],pants:[.07,.07,.12],skin:[.67,.40,.30],hair:[.06,.04,.032],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.93,.70,.26],hairStyle:0,accessory:'headset',offset:2.4,scale:.96},
-   {name:'Maya Support',home:[-4.80,2.60],target:[0,3.25],shirt:[.52,.20,.38],pants:[.10,.08,.13],skin:[.76,.48,.34],hair:[.12,.06,.04],eye:[.07,.06,.06],lip:[.46,.09,.16],accent:[.95,.73,.30],hairStyle:1,accessory:'headset',offset:6.3,scale:.95},
-   {name:'Finance',home:[-2.35,2.60],target:[2.55,2.25],shirt:[.63,.48,.14],pants:[.11,.09,.07],skin:[.72,.44,.31],hair:[.07,.045,.032],eye:[.05,.06,.07],lip:[.30,.075,.07],accent:[.96,.78,.36],hairStyle:2,accessory:'glasses',offset:10.2,scale:.95}
+   {name:'Kris',home:[-5.20,-2.45],mid:[-4.70,-1.55],target:[-4.15,-1.55],shirt:[.07,.11,.17],pants:[.05,.07,.10],skin:[.72,.44,.31],hair:[.055,.035,.025],eye:[.05,.06,.07],lip:[.24,.07,.065],accent:[.92,.70,.26],hairStyle:2,accessory:'none',offset:0,scale:1.04},
+   {name:'Maya',home:[-3.30,-2.45],mid:[-2.80,-1.55],target:[-2.25,-1.55],shirt:[.48,.20,.38],pants:[.10,.08,.14],skin:[.76,.48,.34],hair:[.10,.055,.035],eye:[.08,.06,.055],lip:[.45,.09,.16],accent:[.94,.73,.32],hairStyle:1,accessory:'none',offset:3.1,scale:1.00},
+   {name:'Team 1',home:[-4.75,.65],mid:[-3.20,1.25],target:[-1.95,.65],shirt:[.10,.30,.58],pants:[.06,.10,.16],skin:[.72,.43,.30],hair:[.08,.05,.035],eye:[.05,.06,.07],lip:[.28,.08,.07],accent:[.91,.69,.25],hairStyle:2,accessory:'headset',offset:1.3,scale:.96},
+   {name:'Team 2',home:[-3.05,.65],mid:[.35,1.25],target:[3.55,-2.15],shirt:[.32,.22,.50],pants:[.08,.08,.13],skin:[.67,.39,.28],hair:[.055,.035,.028],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.76,.60,.22],hairStyle:0,accessory:'glasses',offset:5.7,scale:.96},
+   {name:'Team 3',home:[-.55,.65],mid:[-.20,1.35],target:[.45,2.05],shirt:[.10,.39,.30],pants:[.055,.11,.10],skin:[.76,.48,.34],hair:[.12,.075,.045],eye:[.045,.06,.06],lip:[.34,.08,.08],accent:[.90,.68,.24],hairStyle:1,accessory:'none',offset:8.4,scale:.96},
+   {name:'VPS Operator',home:[3.15,.65],mid:[4.00,1.15],target:[4.90,.80],shirt:[.28,.20,.48],pants:[.07,.07,.12],skin:[.67,.40,.30],hair:[.06,.04,.032],eye:[.05,.06,.07],lip:[.28,.07,.08],accent:[.93,.70,.26],hairStyle:0,accessory:'headset',offset:2.4,scale:.96},
+   {name:'Maya Support',home:[-4.80,2.60],mid:[-2.25,3.45],target:[0,3.25],shirt:[.52,.20,.38],pants:[.10,.08,.13],skin:[.76,.48,.34],hair:[.12,.06,.04],eye:[.07,.06,.06],lip:[.46,.09,.16],accent:[.95,.73,.30],hairStyle:1,accessory:'headset',offset:6.3,scale:.95},
+   {name:'Finance',home:[-2.35,2.60],mid:[.10,3.40],target:[2.55,2.25],shirt:[.63,.48,.14],pants:[.11,.09,.07],skin:[.72,.44,.31],hair:[.07,.045,.032],eye:[.05,.06,.07],lip:[.30,.075,.07],accent:[.96,.78,.36],hairStyle:2,accessory:'glasses',offset:10.2,scale:.95}
   ]
+
+  const pathAt=(p,f)=>{
+    const a=p.home,m=p.mid||[(a[0]+p.target[0])/2,(a[1]+p.target[1])/2],b=p.target
+    if(f<=.5){const q=f*2;return[a[0]+(m[0]-a[0])*q,a[1]+(m[1]-a[1])*q]}
+    const q=(f-.5)*2;return[m[0]+(b[0]-m[0])*q,m[1]+(b[1]-m[1])*q]
+  }
+  const dirAt=(p,f,reverse=false)=>{
+    const a=p.home,m=p.mid||[(a[0]+p.target[0])/2,(a[1]+p.target[1])/2],b=p.target
+    let dx,dz
+    if(f<=.5){dx=m[0]-a[0];dz=m[1]-a[1]}else{dx=b[0]-m[0];dz=b[1]-m[1]}
+    if(reverse){dx=-dx;dz=-dz}
+    return Math.atan2(-dz,dx)
+  }
 
   let phaseSummary='OFFICE ACTIVE'
   for(const p of cast){
     const cycle=(sec+p.offset)%18
     let walking=false,px=p.home[0],pz=p.home[1],yaw=0
     if(mode==='walk'){
-      const q=(sec+p.offset)*.34,f=(Math.sin(q)+1)/2
-      px=p.home[0]+(p.target[0]-p.home[0])*f;pz=p.home[1]+(p.target[1]-p.home[1])*f;walking=true
-      const sign=Math.cos(q)>=0?1:-1,dx=(p.target[0]-p.home[0])*sign,dz=(p.target[1]-p.home[1])*sign;yaw=Math.atan2(-dz,dx)
+      const q=(sec+p.offset)*.34,forward=Math.cos(q)>=0,f=(Math.sin(q)+1)/2,pt=pathAt(p,f)
+      px=pt[0];pz=pt[1];walking=true;yaw=dirAt(p,f,!forward)
     }else if(mode==='idle'){
-      px=p.home[0];pz=p.home[1];walking=false;yaw=0
+      px=p.home[0];pz=p.home[1];walking=false;yaw=dirAt(p,0,false)
     }else{
-      if(cycle<5){px=p.home[0];pz=p.home[1];walking=false}
-      else if(cycle<9){const f=(cycle-5)/4;px=p.home[0]+(p.target[0]-p.home[0])*f;pz=p.home[1]+(p.target[1]-p.home[1])*f;walking=true;const dx=p.target[0]-p.home[0],dz=p.target[1]-p.home[1];yaw=Math.atan2(-dz,dx)}
-      else if(cycle<13){px=p.target[0];pz=p.target[1];walking=false;const dx=p.target[0]-p.home[0],dz=p.target[1]-p.home[1];yaw=Math.atan2(-dz,dx)}
-      else if(cycle<17){const f=(cycle-13)/4;px=p.target[0]+(p.home[0]-p.target[0])*f;pz=p.target[1]+(p.home[1]-p.target[1])*f;walking=true;const dx=p.home[0]-p.target[0],dz=p.home[1]-p.target[1];yaw=Math.atan2(-dz,dx)}
-      else{px=p.home[0];pz=p.home[1];walking=false}
+      if(cycle<5){px=p.home[0];pz=p.home[1];walking=false;yaw=dirAt(p,0,false)}
+      else if(cycle<9){const ff=(cycle-5)/4,pt=pathAt(p,ff);px=pt[0];pz=pt[1];walking=true;yaw=dirAt(p,ff,false)}
+      else if(cycle<13){px=p.target[0];pz=p.target[1];walking=false;yaw=dirAt(p,1,false)}
+      else if(cycle<17){const ff=(cycle-13)/4,rf=1-ff,pt=pathAt(p,rf);px=pt[0];pz=pt[1];walking=true;yaw=dirAt(p,rf,true)}
+      else{px=p.home[0];pz=p.home[1];walking=false;yaw=dirAt(p,0,false)}
     }
 
     const st=localState(sec+p.offset,walking?1:0),world=worlds(st),mw=world[meshNode],invMw=invert4(mw),jm=new Float32Array(skin.joints.length*16)
@@ -456,7 +468,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(5.8,Math.min(14,cam.dist+Math.sign(e.deltaY)*.55))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • OFFICE HUD LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • ROUTED OFFICE LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -474,14 +486,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V2.2 DEV • OFFICE HUD'})
+   jsx('div',{className:'h3chip',children:'V2.3 DEV • ROUTED OFFICE'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'CHARACTER MAKEOVER'}),
-     jsx('small',{children:'Living 3D office + in-world nameplates/status HUD. Characters now remain identifiable while walking through executive, meeting, operations, VPS, support, finance and lounge zones.'})
+     jsx('small',{children:'Living 3D office + in-world HUD + routed movement. Characters follow office lanes/waypoints instead of sliding directly through every zone.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag = orbit camera'}),jsx('div',{className:'h3pill',children:'Wheel = zoom'}),
