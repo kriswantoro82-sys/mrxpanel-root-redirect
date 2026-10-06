@@ -1,191 +1,226 @@
-import {host,ROUTES_AREA,SIDEBAR_NAV_AREA} from '@hermes/plugin-sdk'
+import {ROUTES_AREA,SIDEBAR_NAV_AREA} from '@hermes/plugin-sdk'
 import {useEffect,useRef,useState} from 'react'
 import {jsx,jsxs} from 'react/jsx-runtime'
 
-const PEOPLE=[
- {id:'MAYA_OPERATOR',name:'Maya Operator',node:'OFFICE',home:[25,56],idle:[63,80]},
- {id:'OFFICE_TEAM_1',name:'Team 1',node:'OFFICE',home:[16,52],idle:[63,80]},
- {id:'OFFICE_TEAM_2',name:'Team 2',node:'OFFICE',home:[34,52],idle:[73,80]},
- {id:'OFFICE_TEAM_3',name:'Team 3',node:'OFFICE',home:[16,61],idle:[63,80]},
- {id:'VPS_OPERATOR',name:'VPS Operator',node:'VPS',home:[76,56],idle:[85,80]},
- {id:'VPS_TEAM_1',name:'VPS Team 1',node:'VPS',home:[66,52],idle:[63,80]},
- {id:'VPS_TEAM_2',name:'VPS Team 2',node:'VPS',home:[84,52],idle:[73,80]},
- {id:'VPS_TEAM_3',name:'VPS Team 3',node:'VPS',home:[66,61],idle:[85,80]},
- {id:'MAYA_SUPPORT',name:'Maya Support',node:'SUPPORT',home:[15,73],idle:[73,80]},
- {id:'FINANCE_ADMIN',name:'Finance/Admin',node:'ADMIN',home:[34,73],idle:[73,80]}
-]
-const INIT=Object.fromEntries(PEOPLE.map((p,i)=>[p.id,{status:i%4===0?'WORKING':i%4===1?'REVIEWING':i%4===2?'IDLE':'PASS',task:'Demo task'}]))
-const CYCLE=['WORKING','REVIEWING','IDLE','PASS','BLOCKED','NEEDS_OWNER']
-
 const CSS=`
-.m8{height:100%;min-height:740px;background:#090d12;color:#fff;display:flex;flex-direction:column;font-family:Inter,system-ui}
-.h{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid #29313c}.corp{font-size:9px;letter-spacing:.18em;color:#9297a0;font-weight:800}.title{font-size:21px;font-weight:950}.title b{color:#f1cc6c}.chip{font-size:8px;border:1px solid #345843;border-radius:999px;padding:6px 8px;color:#8ce3a9}
-.body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(850px,1fr) 330px}.stage{padding:12px;min-height:0}.scene{--rx:0deg;--ry:0deg;height:100%;min-height:650px;position:relative;overflow:hidden;border:1px solid #323b47;border-radius:17px;background:#638b98;perspective:1200px}.world{position:absolute;inset:0;transform:rotateX(var(--rx)) rotateY(var(--ry));transition:transform .18s ease}
-.top{position:absolute;inset:0 0 auto;height:9%;background:linear-gradient(#f2e8d8,#d9cbb5);border-bottom:5px solid #8a633c}.brand{position:absolute;z-index:5;left:50%;top:1%;transform:translateX(-50%);text-align:center;color:#403529;font-size:8px;font-weight:900}.brand strong{display:block;font-size:12px}
-.corr{position:absolute;background:rgba(20,45,53,.24);border:1px solid rgba(255,255,255,.07);z-index:2}.corr.h{left:5%;right:5%;top:40%;height:6%}.corr.v{left:45%;width:10%;top:10%;bottom:5%}.corr.entry{left:44%;width:12%;top:84%;bottom:0;background:rgba(20,45,53,.3)}
-.room{position:absolute;border:2px solid #39454c;border-radius:8px;background:linear-gradient(#e9e1d3 0 18%,#587e8b 18%);box-shadow:0 8px 0 rgba(18,26,31,.38),0 12px 16px rgba(0,0,0,.15)}.room:after{content:"";position:absolute;left:0;right:0;top:18%;height:4px;background:#8a633c}.rl{position:absolute;top:5px;left:8px;font-size:8px;color:#42372d;font-weight:950;letter-spacing:.08em}
-.exec{left:6%;top:12%;width:36%;height:25%;background:linear-gradient(#efe4cf 0 18%,#b99b76 18%)}.meet{left:58%;top:12%;width:36%;height:25%}.ops{left:6%;top:47%;width:37%;height:18%}.vps{left:57%;top:47%;width:37%;height:18%;background:linear-gradient(#dfe3e5 0 18%,#405965 18%)}.support{left:6%;top:68%;width:20%;height:14%}.finance{left:29%;top:68%;width:18%;height:14%;background:linear-gradient(#eee4d3 0 18%,#809686 18%)}.lounge{left:52%;top:68%;width:15%;height:14%;background:linear-gradient(#e6ded1 0 18%,#536a7e 18%)}.pantry{left:69%;top:68%;width:10%;height:14%;background:linear-gradient(#efe8db 0 18%,#c9b79c 18%)}.server{left:81%;top:68%;width:13%;height:19%;background:linear-gradient(#d0d7db 0 18%,#1b2933 18%)}.lobby{left:42%;top:86%;width:16%;height:11%;background:linear-gradient(#eee8dc 0 26%,#8ca0a5 26%)}.lobby:after{top:26%}
-.door{position:absolute;z-index:8;width:26px;height:7px;background:#6a482d;border:1px solid #4f341f;border-radius:1px;box-shadow:0 2px rgba(0,0,0,.25)}.de{left:32%;top:36.7%}.dm{left:65%;top:36.7%}.do{left:33%;top:64.8%}.dv{left:64%;top:64.8%}.dl{left:48.5%;top:85%}
-.desk{position:absolute;width:67px;height:33px;background:linear-gradient(#b8844b,#81562f);border:2px solid #68431f;border-radius:5px;box-shadow:0 6px 0 #51331a}.desk:before{content:"";position:absolute;left:27%;top:-16px;width:46%;height:27px;background:#101923;border:2px solid #34414e;border-radius:3px}.e1{left:11%;top:25%}.e2{left:29%;top:25%;width:58px}.mt{left:68%;top:25%;width:105px;height:42px;border-radius:50%;background:linear-gradient(#a87543,#744a28)}.mt:before{display:none}.o1{left:12%;top:54%}.o2{left:30%;top:54%}.o3{left:12%;top:62%}.o4{left:30%;top:62%}.v1{left:62%;top:54%}.v2{left:80%;top:54%}.v3{left:62%;top:62%}.v4{left:80%;top:62%}.s1{left:12%;top:75%;width:58px}.s2{left:33%;top:75%;width:58px}
-.screen{position:absolute;left:17%;top:15%;width:78px;height:35px;background:#081018;border:3px solid #3b4650;border-radius:4px}.screen:after{content:"MAYA CORE / MASB5";position:absolute;inset:0;display:grid;place-items:center;color:#f1cc6c;font-size:6px;font-weight:900}.sofa{position:absolute;left:54%;top:75%;width:80px;height:35px;border-radius:9px;background:#405363;border:2px solid #27343f;box-shadow:0 6px 0 #22303a}.coffee{position:absolute;left:71%;top:75%;width:52px;height:35px;border-radius:7px;background:#e6ddcf;border:2px solid #887966}.coffee:after{content:"☕";position:absolute;inset:0;display:grid;place-items:center}.reception{position:absolute;left:46.5%;top:90%;width:62px;height:30px;border-radius:5px;background:#9a6c3c;border:2px solid #68431f;box-shadow:0 5px 0 #51331a}.reception:after{content:"RECEPTION";position:absolute;left:50%;top:8px;transform:translateX(-50%);font-size:6px;color:#fff;font-weight:900}
-.rack{position:absolute;top:74%;width:14px;height:56px;background:#091017;border:1px solid #3b4955}.r1{left:82.3%}.r2{left:85%}.r3{left:87.7%}.r4{left:90.4%}.rack:after{content:"";position:absolute;left:20%;right:20%;top:12%;height:3px;background:#58a6ff;box-shadow:0 10px #54c987,0 20px #58a6ff,0 30px #54c987}
-.person{position:absolute;width:62px;height:92px;transform:translate(-50%,-50%);transition:left .22s linear,top .22s linear;filter:drop-shadow(0 7px 5px rgba(0,0,0,.24))}.person.walk .avatar{animation:walk .22s infinite alternate}.person.work .arms{animation:type .2s infinite alternate}@keyframes walk{to{transform:translateY(-4px) rotate(.8deg)}}@keyframes type{to{transform:translateY(2px)}}.shadow{position:absolute;left:10px;top:61px;width:40px;height:12px;border-radius:50%;background:rgba(0,0,0,.28);filter:blur(1px)}.avatar{position:absolute;left:9px;top:8px;width:44px;height:60px}.head{position:absolute;left:10px;top:1px;width:23px;height:23px;border-radius:50%;background:var(--skin);box-shadow:inset -4px -4px rgba(0,0,0,.07)}.hair{position:absolute;z-index:2;left:7px;top:-3px;width:28px;height:12px;border-radius:15px 15px 7px 7px;background:var(--hair)}.bodyp{position:absolute;left:5px;top:22px;width:33px;height:29px;border-radius:10px 10px 6px 6px;background:var(--outfit);box-shadow:inset -4px -4px rgba(0,0,0,.06)}.legs{position:absolute;left:9px;top:49px;width:25px;height:11px;border-left:7px solid #27323d;border-right:7px solid #27323d}.arms:before,.arms:after{content:"";position:absolute;top:30px;width:7px;height:18px;background:var(--skin);border-radius:5px}.arms:before{left:3px}.arms:after{right:2px}.face{position:absolute;z-index:3;left:13px;top:10px;width:3px;height:3px;border-radius:50%;background:#222;box-shadow:8px 0 #222}.badge{position:absolute;left:50%;top:-7px;transform:translateX(-50%);font-size:7px;font-weight:950;border:1px solid currentColor;background:#10161d;border-radius:999px;padding:2px 5px;white-space:nowrap}.WORKING{color:#58a6ff}.REVIEWING{color:#b892ff}.IDLE{color:#b6bec7}.PASS{color:#54c987}.BLOCKED{color:#ffbf52}.NEEDS_OWNER{color:#ff7777}.tag{position:absolute;left:50%;top:68px;transform:translateX(-50%);min-width:82px;max-width:110px;padding:3px 5px;background:#f4ecde;color:#3b3329;border:1px solid #907c5d;border-radius:5px;font-size:8px;font-weight:950;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bubble{position:absolute;left:50%;top:87px;transform:translateX(-50%);font-size:7px;background:#111820;border:1px solid #34404d;border-radius:7px;padding:3px 6px;white-space:nowrap;color:#d9dee4}
-.vip{position:absolute;width:64px;height:94px;transform:translate(-50%,-50%);z-index:150;filter:drop-shadow(0 7px 5px rgba(0,0,0,.24))}.vip .tag{top:69px}.vtitle{position:absolute;left:50%;top:88px;transform:translateX(-50%);font-size:6px;font-weight:900;white-space:nowrap;padding:2px 5px;background:#f3dfc0;color:#4a3c2c;border:1px solid #ac8f63;border-radius:5px}
-.side{background:#10151d;overflow:auto}.sideh{padding:14px;border-bottom:1px solid #2a323c}.sideh strong{font-size:13px}.sideh small{display:block;color:#9297a0;font-size:8px;margin-top:3px}.card{margin:10px;padding:12px;border:1px solid #2a323c;border-radius:10px;background:#171d26}.card h3{margin:0;font-size:11px}.sub{font-size:8px;color:#9297a0;margin-top:3px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}.stat{padding:8px;border:1px solid #2f3945;border-radius:8px;background:#121820}.stat b{display:block;font-size:15px;color:#f0d273}.stat span{font-size:7px;color:#88939f}.log{font:7px ui-monospace,Consolas;line-height:1.55;color:#aab2bc}.btn{width:100%;margin-top:8px;padding:7px;border:1px solid #d6a73a;border-radius:7px;background:#151c24;color:#dce0e5;font-size:8px;font-weight:900}
+.m3d{height:100%;min-height:720px;background:#090d12;color:#fff;display:flex;flex-direction:column;font-family:Inter,system-ui}
+.m3dh{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid #29313c;background:#080c11}
+.m3dcorp{font-size:9px;letter-spacing:.18em;color:#9297a0;font-weight:800}.m3dtitle{font-size:21px;font-weight:950}.m3dtitle b{color:#f1cc6c}
+.m3dchip{font-size:8px;border:1px solid #345843;border-radius:999px;padding:6px 8px;color:#8ce3a9}
+.m3dbody{flex:1;min-height:0;display:grid;grid-template-columns:minmax(760px,1fr) 320px}
+.m3dstage{position:relative;min-height:0;background:#090d12;padding:12px}.m3dwrap{position:relative;width:100%;height:100%;min-height:640px;border-radius:16px;overflow:hidden;border:1px solid #323b47;background:linear-gradient(#1c2d38,#0e171d)}
+.m3dcanvas{display:block;width:100%;height:100%;min-height:640px;touch-action:none;cursor:grab}.m3dcanvas:active{cursor:grabbing}
+.m3dover{pointer-events:none;position:absolute;left:16px;top:16px;padding:10px 12px;border:1px solid rgba(241,204,108,.28);border-radius:10px;background:rgba(10,15,20,.72);backdrop-filter:blur(7px)}
+.m3dover strong{font-size:12px;color:#f1cc6c}.m3dover small{display:block;margin-top:3px;font-size:8px;color:#aab3bd;line-height:1.45}
+.m3dlegend{position:absolute;left:16px;bottom:16px;display:flex;gap:6px}.m3dpill{padding:5px 7px;border-radius:999px;background:rgba(10,15,20,.78);border:1px solid #33404b;font-size:7px;color:#c9d0d7}
+.m3dside{overflow:auto;background:#10151d;border-left:1px solid #29313c}.m3dsideh{padding:14px;border-bottom:1px solid #29313c}.m3dsideh strong{font-size:13px}.m3dsideh small{display:block;color:#9297a0;font-size:8px;margin-top:3px}
+.m3dcard{margin:10px;padding:12px;border:1px solid #2a323c;border-radius:10px;background:#171d26}.m3dcard h3{margin:0;font-size:11px}.m3dsub{font-size:8px;color:#9297a0;line-height:1.5;margin-top:4px}
+.m3dstat{display:grid;grid-template-columns:90px 1fr;gap:6px 8px;margin-top:10px;font-size:8px}.m3dstat span:nth-child(odd){color:#7f8994}.m3dstat span:nth-child(even){color:#e0e4e8}
+.m3dbtn{width:100%;margin-top:8px;padding:8px;border:1px solid #3a4652;border-radius:7px;background:#121920;color:#dce2e7;font-size:8px;font-weight:900;cursor:pointer}.m3dbtn.active{border-color:#d6a73a;background:linear-gradient(#f1cc6c,#d6a73a);color:#19140c}
+.m3dgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.m3dnote{font-size:7px;color:#697581;line-height:1.5}
+@media(max-width:1000px){.m3dbody{grid-template-columns:1fr}.m3dside{display:none}}
 `
 
-function targetFor(p,run,reviewIdx,ownerIdx){
- if(run.status==='WORKING'||run.status==='PASS')return p.home
- if(run.status==='REVIEWING')return reviewIdx%2===0?[50,33]:[60,33]
- if(run.status==='NEEDS_OWNER')return ownerIdx%2===0?[34,31]:[38,31]
- if(run.status==='BLOCKED')return p.node==='VPS'?[58,64]:[43,64]
- return p.idle
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v))
+const lerp=(a,b,t)=>a+(b-a)*t
+const ease=t=>t*t*(3-2*t)
+const V=(x=0,y=0,z=0)=>[x,y,z]
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]]
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2]
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]
+const norm=a=>{const l=Math.hypot(a[0],a[1],a[2])||1;return[a[0]/l,a[1]/l,a[2]/l]}
+
+function Mmul(a,b){
+ const r=new Array(16).fill(0)
+ for(let row=0;row<4;row++)for(let col=0;col<4;col++)for(let k=0;k<4;k++)r[row*4+col]+=a[row*4+k]*b[k*4+col]
+ return r
 }
-function bubble(s){return s==='WORKING'?'working':s==='REVIEWING'?'reviewing':s==='NEEDS_OWNER'?'need Kris':s==='PASS'?'done ✓':s==='BLOCKED'?'waiting':'idle'}
-function smoothStep(cur,target,amount=.16){return [cur[0]+(target[0]-cur[0])*amount,cur[1]+(target[1]-cur[1])*amount]}
-function dist(a,b){const dx=a[0]-b[0],dy=a[1]-b[1];return Math.sqrt(dx*dx+dy*dy)}
-function zoneOf(pos){
- const [x,y]=pos
- if(y<39&&x<44)return 'exec'
- if(y<39&&x>56)return 'meeting'
- if(y>=46&&y<66&&x<45)return 'ops'
- if(y>=46&&y<66&&x>55)return 'vps'
- if(y>=66&&x<27)return 'support'
- if(y>=66&&x<49)return 'finance'
- if(y>=66&&x<68)return 'lounge'
- if(y>=66&&x<80)return 'pantry'
- if(y>=66&&x>=80)return 'server'
- return 'corridor'
+const I=()=>[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]
+const T=(x,y,z)=>[1,0,0,x,0,1,0,y,0,0,1,z,0,0,0,1]
+const S=(x,y,z)=>[x,0,0,0,0,y,0,0,0,0,z,0,0,0,0,1]
+const RX=a=>{const c=Math.cos(a),s=Math.sin(a);return[1,0,0,0,0,c,-s,0,0,s,c,0,0,0,0,1]}
+const RY=a=>{const c=Math.cos(a),s=Math.sin(a);return[c,0,s,0,0,1,0,0,-s,0,c,0,0,0,0,1]}
+function TP(m,p){return[m[0]*p[0]+m[1]*p[1]+m[2]*p[2]+m[3],m[4]*p[0]+m[5]*p[1]+m[6]*p[2]+m[7],m[8]*p[0]+m[9]*p[1]+m[10]*p[2]+m[11]]}
+function lookAt(eye,target){
+ const z=norm(sub(eye,target)),x=norm(cross([0,1,0],z)),y=cross(z,x)
+ return[x[0],x[1],x[2],-dot(x,eye),y[0],y[1],y[2],-dot(y,eye),z[0],z[1],z[2],-dot(z,eye),0,0,0,1]
 }
-function doorForZone(z){return {exec:[32,40],meeting:[65,40],ops:[33,46],vps:[64,46],support:[16,67],finance:[38,67],lounge:[59,67],pantry:[74,67],server:[86,67]}[z]||null}
-function hubForZone(z){return ['support','finance','lounge','pantry','server'].includes(z)?[50,66]:[50,43]}
-function buildRoute(start,target){
- const from=zoneOf(start),to=zoneOf(target)
- if(from===to)return [target]
- const pts=[],exit=doorForZone(from),entry=doorForZone(to),fromHub=hubForZone(from),toHub=hubForZone(to)
- if(exit&&dist(start,exit)>.6)pts.push(exit)
- if(dist(pts.length?pts[pts.length-1]:start,fromHub)>.6)pts.push(fromHub)
- if(dist(fromHub,toHub)>.6)pts.push(toHub)
- if(entry&&dist(toHub,entry)>.6)pts.push(entry)
- pts.push(target)
- return pts
+function hex(c){
+ const n=parseInt(c.replace('#',''),16);return[(n>>16)&255,(n>>8)&255,n&255]
+}
+function shade(c,f){
+ const [r,g,b]=hex(c),k=clamp(f,.25,1.35)
+ return`rgb(${clamp(Math.round(r*k),0,255)},${clamp(Math.round(g*k),0,255)},${clamp(Math.round(b*k),0,255)})`
+}
+function box(w,h,d){
+ const x=w/2,y=h/2,z=d/2
+ return{v:[[-x,-y,-z],[x,-y,-z],[x,y,-z],[-x,y,-z],[-x,-y,z],[x,-y,z],[x,y,z],[-x,y,z]],f:[[0,1,2,3],[5,4,7,6],[4,0,3,7],[1,5,6,2],[3,2,6,7],[4,5,1,0]]}
+}
+function cyl(r,h,n=10){
+ const v=[],f=[]
+ for(let i=0;i<n;i++){const a=i*Math.PI*2/n;v.push([Math.cos(a)*r,-h/2,Math.sin(a)*r],[Math.cos(a)*r,h/2,Math.sin(a)*r])}
+ for(let i=0;i<n;i++){const j=(i+1)%n;f.push([i*2,j*2,j*2+1,i*2+1])}
+ f.push([...Array(n)].map((_,i)=>i*2).reverse(),[...Array(n)].map((_,i)=>i*2+1))
+ return{v,f}
+}
+function sphere(rx,ry,rz,lat=7,lon=12){
+ const v=[],f=[]
+ for(let a=0;a<=lat;a++){const p=a*Math.PI/lat;for(let b=0;b<lon;b++){const t=b*Math.PI*2/lon;v.push([Math.sin(p)*Math.cos(t)*rx,Math.cos(p)*ry,Math.sin(p)*Math.sin(t)*rz])}}
+ for(let a=0;a<lat;a++)for(let b=0;b<lon;b++){const n=(b+1)%lon,i=a*lon+b,j=a*lon+n,k=(a+1)*lon+n,l=(a+1)*lon+b;f.push([i,j,k,l])}
+ return{v,f}
+}
+const MESH={torso:box(.72,.82,.34),pelvis:box(.56,.25,.32),limb:cyl(.105,.56,10),fore:cyl(.09,.50,10),head:sphere(.27,.30,.27),hair:sphere(.285,.16,.285),hand:sphere(.11,.12,.11),shoe:box(.22,.13,.38)}
+
+function addPart(out,mesh,color,m){out.push({mesh,color,m})}
+function human(out,time,pose){
+ const root=T(pose.x,pose.y,pose.z),base=Mmul(root,RY(pose.yaw||0))
+ const walk=pose.kind==='walk',sit=pose.kind==='sit'
+ const ph=Math.sin(time*8.4),bob=walk?Math.abs(Math.sin(time*8.4))*.035:Math.sin(time*2.2)*.012
+ const pelvis=Mmul(base,T(0,.92+bob,0))
+ addPart(out,MESH.pelvis,'#263646',pelvis)
+ const lean=sit?.06:(walk?.035:0)
+ const torso=Mmul(Mmul(pelvis,T(0,.48,0)),RX(lean))
+ addPart(out,MESH.torso,'#365f91',torso)
+ const neck=Mmul(torso,T(0,.55,0));addPart(out,cyl(.10,.14,10),'#c98a67',neck)
+ const head=Mmul(torso,T(0,.83,0));addPart(out,MESH.head,'#c98a67',head)
+ const hair=Mmul(head,T(0,.19,.01));addPart(out,MESH.hair,'#2f211c',hair)
+ addPart(out,sphere(.035,.035,.018,5,8),'#1c2024',Mmul(head,T(-.085,.035,-.255)))
+ addPart(out,sphere(.035,.035,.018,5,8),'#1c2024',Mmul(head,T(.085,.035,-.255)))
+
+ const armL=walk?-ph*.60:(sit?-.75:-.08),armR=walk?ph*.60:(sit?-.75:.08)
+ for(const side of [-1,1]){
+  const a=side<0?armL:armR
+  const shoulder=Mmul(torso,T(side*.47,.28,0))
+  const up=Mmul(Mmul(shoulder,RX(a)),T(0,-.28,0));addPart(out,MESH.limb,'#365f91',up)
+  const elbow=Mmul(Mmul(shoulder,RX(a)),T(0,-.56,0))
+  const bend=sit?-.82:(walk?.12:0)
+  const fore=Mmul(Mmul(elbow,RX(bend)),T(0,-.25,0));addPart(out,MESH.fore,'#c98a67',fore)
+  const hand=Mmul(Mmul(elbow,RX(bend)),T(0,-.51,0));addPart(out,MESH.hand,'#c98a67',hand)
+ }
+
+ const thighL=sit?1.30:ph*.72,thighR=sit?1.30:-ph*.72
+ for(const side of [-1,1]){
+  const a=side<0?thighL:thighR
+  const hip=Mmul(pelvis,T(side*.18,-.12,0))
+  const upper=Mmul(Mmul(hip,RX(a)),T(0,-.28,0));addPart(out,MESH.limb,'#27323d',upper)
+  const knee=Mmul(Mmul(hip,RX(a)),T(0,-.56,0))
+  const kb=sit?-1.30:(walk?Math.max(0,-(side<0?ph:-ph))*.72:0)
+  const lower=Mmul(Mmul(knee,RX(kb)),T(0,-.25,0));addPart(out,MESH.fore,'#27323d',lower)
+  const foot=Mmul(Mmul(knee,RX(kb)),T(0,-.53,-.08));addPart(out,MESH.shoe,'#171d23',foot)
+ }
 }
 
-function Person({p,run,pos,onClick}){
- const moving=Math.abs(pos[0]-(p.home?.[0]||pos[0]))>.5||['REVIEWING','NEEDS_OWNER','BLOCKED','IDLE'].includes(run.status)
- return jsxs('div',{className:`person ${moving?'walk':''} ${run.status==='WORKING'?'work':''}`,style:{left:`${pos[0]}%`,top:`${pos[1]}%`,'--skin':'#c98a67','--hair':'#2f231f','--outfit':p.node==='VPS'?'#397866':p.node==='SUPPORT'?'#9d5073':p.node==='ADMIN'?'#c59b3e':'#456fae',zIndex:String(100+Math.round(pos[1]))},onClick,children:[
-  jsx('div',{className:'shadow'}),jsx('div',{className:`badge ${run.status}`,children:run.status.replace('_',' ')}),
-  jsxs('div',{className:'avatar',children:[jsx('div',{className:'hair'}),jsx('div',{className:'head'}),jsx('div',{className:'face'}),jsx('div',{className:'bodyp'}),jsx('div',{className:'arms'}),jsx('div',{className:'legs'})]}),
-  jsx('div',{className:'tag',children:p.name}),jsx('div',{className:'bubble',children:bubble(run.status)})
- ]})
-}
-function VIP({name,title,x,y,outfit}){
- return jsxs('div',{className:'vip',style:{left:`${x}%`,top:`${y}%`,'--skin':'#c98a67','--hair':'#2f231f','--outfit':outfit},children:[
-  jsx('div',{className:'shadow'}),jsxs('div',{className:'avatar',children:[jsx('div',{className:'hair'}),jsx('div',{className:'head'}),jsx('div',{className:'face'}),jsx('div',{className:'bodyp'}),jsx('div',{className:'arms'}),jsx('div',{className:'legs'})]}),
-  jsx('div',{className:'tag',children:name}),jsx('div',{className:'vtitle',children:title})
- ]})
+function furniture(out){
+ const add=(mesh,color,m)=>addPart(out,mesh,color,m)
+ add(box(8,.12,6),'#718f86',T(0,-.08,0))
+ add(box(8,3.2,.12),'#d8ccb8',T(0,1.55,-3))
+ add(box(.12,3.2,6),'#aeb8b1',T(-4,1.55,0))
+ add(box(2.35,.14,.86),'#9b6939',T(1.45,.92,-1.25))
+ add(box(.15,.86,.15),'#6f4728',T(.48,.44,-1.55));add(box(.15,.86,.15),'#6f4728',T(2.42,.44,-1.55))
+ add(box(.15,.86,.15),'#6f4728',T(.48,.44,-.95));add(box(.15,.86,.15),'#6f4728',T(2.42,.44,-.95))
+ add(box(.9,.55,.08),'#131b22',T(1.45,1.35,-1.50));add(box(.12,.28,.12),'#232e37',T(1.45,1.03,-1.47))
+ add(box(.62,.10,.58),'#33424e',T(1.45,.54,.05));add(box(.62,.78,.10),'#33424e',T(1.45,.94,.30))
+ add(box(1.2,.07,.18),'#efe5d7',T(1.45,.99,-.88))
+ add(box(1.55,.88,.10),'#253745',T(-1.65,1.60,-2.91))
+ add(box(1.38,.70,.04),'#0b1219',T(-1.65,1.60,-2.84))
 }
 
-function Office(){
- const ref=useRef(null)
- const [runtime,setRuntime]=useState(INIT)
- const [positions,setPositions]=useState(Object.fromEntries(PEOPLE.map(p=>[p.id,p.home])))
- const routesRef=useRef({})
- const [demo,setDemo]=useState(true)
- const [selected,setSelected]=useState('MAYA_OPERATOR')
- const [events,setEvents]=useState([{at:Date.now(),text:'V0.9 navigation engine started'}])
+function renderScene(canvas,cam,time,modeRef,phaseCb){
+ const dpr=Math.min(2,window.devicePixelRatio||1),w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight)
+ if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr)}
+ const c=canvas.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,w,h)
+ const grad=c.createLinearGradient(0,0,0,h);grad.addColorStop(0,'#223844');grad.addColorStop(1,'#0d171d');c.fillStyle=grad;c.fillRect(0,0,w,h)
 
- useEffect(()=>{
-  const reviews=PEOPLE.filter(p=>runtime[p.id]?.status==='REVIEWING')
-  const owners=PEOPLE.filter(p=>runtime[p.id]?.status==='NEEDS_OWNER')
-  const routes={...routesRef.current}
-  for(const p of PEOPLE){
-    const run=runtime[p.id]||{status:'IDLE'}
-    const target=targetFor(p,run,Math.max(0,reviews.findIndex(x=>x.id===p.id)),Math.max(0,owners.findIndex(x=>x.id===p.id)))
-    const start=positions[p.id]||p.home
-    routes[p.id]={points:buildRoute(start,target),index:0,target,status:run.status}
+ let mode=modeRef.current,t=time%18,kind='idle',z=2.25,y=0,yaw=0
+ if(mode==='sit'){kind='sit';z=.35}
+ else if(mode==='walk'){kind='walk';z=1.3+Math.sin(time*.55)*1.55;yaw=Math.cos(time*.55)>0?Math.PI:0}
+ else{
+   if(t<2){kind='idle';z=2.3}
+   else if(t<7){kind='walk';z=lerp(2.3,.35,ease((t-2)/5))}
+   else if(t<11){kind='sit';z=.35}
+   else if(t<12.5){kind='idle';z=.35}
+   else if(t<17.5){kind='walk';z=lerp(.35,2.3,ease((t-12.5)/5));yaw=Math.PI}
+   else{kind='idle';z=2.3;yaw=Math.PI}
+ }
+ phaseCb(kind)
+
+ const objects=[];furniture(objects);human(objects,time,{x:0,y:0,z,yaw,kind})
+ const cy=Math.cos(cam.yaw),sy=Math.sin(cam.yaw),cp=Math.cos(cam.pitch),sp=Math.sin(cam.pitch)
+ const eye=[cam.dist*sy*cp,2.0+cam.dist*sp,cam.dist*cy*cp],view=lookAt(eye,[0,1.15,-.25])
+ const light=norm([-1,1.8,1.2]),faces=[]
+ for(const o of objects){
+  const world=o.mesh.v.map(p=>TP(o.m,p)),vv=world.map(p=>TP(view,p))
+  for(const fi of o.mesh.f){
+    const wp=fi.map(i=>world[i]),vp=fi.map(i=>vv[i])
+    const dep=vp.map(p=>-p[2]);if(dep.some(d=>d<=.15))continue
+    const n=norm(cross(sub(wp[1],wp[0]),sub(wp[2],wp[0]))),illum=.48+.58*Math.max(0,dot(n,light))
+    const pts=vp.map(p=>{const d=-p[2],f=Math.min(w,h)*1.05;return[w/2+p[0]*f/d,h*.53-p[1]*f/d]})
+    faces.push({pts,depth:dep.reduce((a,b)=>a+b,0)/dep.length,color:shade(o.color,illum)})
   }
-  routesRef.current=routes
- },[runtime])
+ }
+ faces.sort((a,b)=>b.depth-a.depth)
+ c.lineJoin='round'
+ for(const f of faces){c.beginPath();c.moveTo(f.pts[0][0],f.pts[0][1]);for(let i=1;i<f.pts.length;i++)c.lineTo(f.pts[i][0],f.pts[i][1]);c.closePath();c.fillStyle=f.color;c.fill();c.strokeStyle='rgba(0,0,0,.10)';c.lineWidth=.65;c.stroke()}
+}
+
+function True3D(){
+ const canvasRef=useRef(null),modeRef=useRef('auto'),camRef=useRef({yaw:.62,pitch:.34,dist:9.5}),dragRef=useRef(null)
+ const [mode,setMode]=useState('auto'),[phase,setPhase]=useState('idle')
+ function choose(m){modeRef.current=m;setMode(m)}
 
  useEffect(()=>{
-  const id=setInterval(()=>{
-   setPositions(prev=>{
-    const next={...prev}
-    for(const p of PEOPLE){
-      const route=routesRef.current[p.id]
-      if(!route||route.index>=route.points.length)continue
-      const cur=prev[p.id]||p.home
-      const waypoint=route.points[route.index]
-      let n=smoothStep(cur,waypoint,.24)
-      if(dist(n,waypoint)<.38){n=waypoint;route.index+=1}
-      next[p.id]=n
-    }
-    return next
-   })
-  },90)
-  return()=>clearInterval(id)
+  const canvas=canvasRef.current;if(!canvas)return
+  let raf=0,start=performance.now(),lastPhase=''
+  const phaseCb=p=>{if(p!==lastPhase){lastPhase=p;setPhase(p)}}
+  const loop=now=>{renderScene(canvas,camRef.current,(now-start)/1000,modeRef,phaseCb);raf=requestAnimationFrame(loop)}
+  raf=requestAnimationFrame(loop)
+  const down=e=>{dragRef.current={x:e.clientX,y:e.clientY,yaw:camRef.current.yaw,pitch:camRef.current.pitch};canvas.setPointerCapture?.(e.pointerId)}
+  const move=e=>{const d=dragRef.current;if(!d)return;camRef.current.yaw=d.yaw-(e.clientX-d.x)*.008;camRef.current.pitch=clamp(d.pitch+(e.clientY-d.y)*.006,.10,.78)}
+  const up=()=>{dragRef.current=null}
+  const wheel=e=>{e.preventDefault();camRef.current.dist=clamp(camRef.current.dist+Math.sign(e.deltaY)*.55,6.5,14)}
+  canvas.addEventListener('pointerdown',down);canvas.addEventListener('pointermove',move);canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);canvas.addEventListener('wheel',wheel,{passive:false})
+  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',down);canvas.removeEventListener('pointermove',move);canvas.removeEventListener('pointerup',up);canvas.removeEventListener('pointercancel',up);canvas.removeEventListener('wheel',wheel)}
  },[])
 
- useEffect(()=>{
-  if(!demo)return
-  let t=0
-  const id=setInterval(()=>{
-   t++;const p=PEOPLE[(t*3+1)%PEOPLE.length],s=CYCLE[t%CYCLE.length]
-   setRuntime(r=>({...r,[p.id]:{...(r[p.id]||{}),status:s}}))
-   setEvents(e=>[{at:Date.now(),text:`${p.id} → ${s}`},...e].slice(0,14))
-  },5000)
-  return()=>clearInterval(id)
- },[demo])
-
- function move(e){const el=ref.current;if(!el)return;const r=el.getBoundingClientRect(),nx=(e.clientX-r.left)/r.width-.5,ny=(e.clientY-r.top)/r.height-.5;el.style.setProperty('--ry',`${nx*2.2}deg`);el.style.setProperty('--rx',`${-ny*1.5}deg`)}
- function leave(){const el=ref.current;if(el){el.style.setProperty('--ry','0deg');el.style.setProperty('--rx','0deg')}}
-
- const reviews=PEOPLE.filter(p=>runtime[p.id]?.status==='REVIEWING')
- const owners=PEOPLE.filter(p=>runtime[p.id]?.status==='NEEDS_OWNER')
- const working=Object.values(runtime).filter(x=>x.status==='WORKING').length
- const attention=Object.values(runtime).filter(x=>['BLOCKED','NEEDS_OWNER'].includes(x.status)).length
- const selectedRun=runtime[selected]||{}
-
- return jsxs('div',{className:'m8',children:[
+ return jsxs('div',{className:'m3d',children:[
   jsx('style',{children:CSS}),
-  jsxs('div',{className:'h',children:[jsxs('div',{children:[jsx('div',{className:'corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),jsx('div',{className:'chip',children:'V0.9 • NAVIGATION ENGINE'})]}),
-  jsxs('div',{className:'body',children:[
-   jsx('main',{className:'stage',children:jsxs('div',{ref,className:'scene',onMouseMove:move,onMouseLeave:leave,children:[
-    jsxs('div',{className:'world',children:[
-     jsx('div',{className:'top'}),jsxs('div',{className:'brand',children:[jsx('strong',{children:'PT MRXPANEL MEDIA GROUP'}),'MRXPANEL OFFICE']}),
-     jsx('div',{className:'corr h'}),jsx('div',{className:'corr v'}),jsx('div',{className:'corr entry'}),
-     jsxs('div',{className:'room exec',children:[jsx('div',{className:'rl',children:'RUANG PIMPINAN • KRIS + MAYA'})]}),
-     jsxs('div',{className:'room meet',children:[jsx('div',{className:'rl',children:'RUANG MEETING / REVIEW'})]}),
-     jsxs('div',{className:'room ops',children:[jsx('div',{className:'rl',children:'RUANG OPERASIONAL'})]}),
-     jsxs('div',{className:'room vps',children:[jsx('div',{className:'rl',children:'VPS / TECH OPS'})]}),
-     jsxs('div',{className:'room support',children:[jsx('div',{className:'rl',children:'SUPPORT'})]}),
-     jsxs('div',{className:'room finance',children:[jsx('div',{className:'rl',children:'FINANCE / ADMIN'})]}),
-     jsxs('div',{className:'room lounge',children:[jsx('div',{className:'rl',children:'LOUNGE'})]}),
-     jsxs('div',{className:'room pantry',children:[jsx('div',{className:'rl',children:'PANTRY'})]}),
-     jsxs('div',{className:'room server',children:[jsx('div',{className:'rl',children:'SERVER'})]}),
-     jsxs('div',{className:'room lobby',children:[jsx('div',{className:'rl',children:'LOBBY / RECEPTION'})]}),
-     jsx('div',{className:'door de'}),jsx('div',{className:'door dm'}),jsx('div',{className:'door do'}),jsx('div',{className:'door dv'}),jsx('div',{className:'door dl'}),
-     jsx('div',{className:'screen'}),jsx('div',{className:'desk e1'}),jsx('div',{className:'desk e2'}),jsx('div',{className:'desk mt'}),
-     jsx('div',{className:'desk o1'}),jsx('div',{className:'desk o2'}),jsx('div',{className:'desk o3'}),jsx('div',{className:'desk o4'}),
-     jsx('div',{className:'desk v1'}),jsx('div',{className:'desk v2'}),jsx('div',{className:'desk v3'}),jsx('div',{className:'desk v4'}),
-     jsx('div',{className:'desk s1'}),jsx('div',{className:'desk s2'}),jsx('div',{className:'sofa'}),jsx('div',{className:'coffee'}),jsx('div',{className:'reception'}),
-     jsx('div',{className:'rack r1'}),jsx('div',{className:'rack r2'}),jsx('div',{className:'rack r3'}),jsx('div',{className:'rack r4'}),
-     jsx(VIP,{name:'Kris',title:'Pimpinan',x:17,y:27,outfit:'#202b3a'}),jsx(VIP,{name:'Maya',title:'AI Executive Partner',x:34,y:27,outfit:'#c59b3e'}),
-     ...PEOPLE.map(p=>jsx(Person,{p,run:runtime[p.id]||{status:'IDLE'},pos:positions[p.id]||p.home,onClick:()=>setSelected(p.id),key:p.id}))
-    ]})
+  jsxs('header',{className:'m3dh',children:[
+   jsxs('div',{children:[jsx('div',{className:'m3dcorp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'m3dtitle',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
+   jsx('div',{className:'m3dchip',children:'V1.0 • TRUE 3D FOUNDATION'})
+  ]}),
+  jsxs('div',{className:'m3dbody',children:[
+   jsx('main',{className:'m3dstage',children:jsxs('div',{className:'m3dwrap',children:[
+    jsx('canvas',{ref:canvasRef,className:'m3dcanvas'}),
+    jsxs('div',{className:'m3dover',children:[jsx('strong',{children:'TRUE 3D CHARACTER LAB'}),jsx('small',{children:'Procedural humanoid • articulated skeleton • 3D furniture • perspective camera'})]}),
+    jsxs('div',{className:'m3dlegend',children:[jsx('div',{className:'m3dpill',children:'Drag = orbit camera'}),jsx('div',{className:'m3dpill',children:'Wheel = zoom'}),jsx('div',{className:'m3dpill',children:`Animation: ${phase.toUpperCase()}`})]})
    ]})}),
-   jsxs('aside',{className:'side',children:[
-    jsxs('div',{className:'sideh',children:[jsx('strong',{children:'Office Control'}),jsx('small',{children:'Door routing + corridor navigation + anti-overlap slots'})]}),
-    jsxs('section',{className:'card',children:[jsx('h3',{children:'Office Overview'}),jsxs('div',{className:'stats',children:[
-     jsxs('div',{className:'stat',children:[jsx('b',{children:String(working)}),jsx('span',{children:'Working'})]}),
-     jsxs('div',{className:'stat',children:[jsx('b',{children:String(reviews.length)}),jsx('span',{children:'Meeting'})]}),
-     jsxs('div',{className:'stat',children:[jsx('b',{children:String(attention)}),jsx('span',{children:'Need attention'})]}),
-     jsxs('div',{className:'stat',children:[jsx('b',{children:String(owners.length)}),jsx('span',{children:'Executive queue'})]})
-    ]})]}),
-    jsxs('section',{className:'card',children:[jsx('h3',{children:selected}),jsx('div',{className:'sub',children:`Status: ${selectedRun.status||'-'}`}),jsx('div',{className:'log',children:`Task: ${selectedRun.task||'Demo task'}`})]}),
-    jsxs('section',{className:'card',children:[jsx('h3',{children:'Executive Room'}),jsx('div',{className:'sub',children:'Kris + Maya tetap di ruang pimpinan. NEEDS_OWNER bergerak ke executive queue.'}),jsx('button',{className:'btn',onClick:()=>setDemo(v=>!v),children:demo?'PAUSE SIMULATION':'RESUME SIMULATION'})]}),
-    jsxs('section',{className:'card',children:[jsx('h3',{children:'Live Events'}),...events.map((e,i)=>jsx('div',{className:'log',children:`${new Date(e.at).toLocaleTimeString()} ${e.text}`,key:i}))]})
+   jsxs('aside',{className:'m3dside',children:[
+    jsxs('div',{className:'m3dsideh',children:[jsx('strong',{children:'3D Foundation Control'}),jsx('small',{children:'Bukan sprite / gambar bergerak — karakter dibentuk dari geometri 3D dan joint animation.'})]}),
+    jsxs('section',{className:'m3dcard',children:[
+      jsx('h3',{children:'Proof Character'}),
+      jsxs('div',{className:'m3dstat',children:[
+       jsx('span',{children:'Model'}),jsx('span',{children:'Procedural humanoid 3D'}),
+       jsx('span',{children:'Skeleton'}),jsx('span',{children:'Head / torso / arms / legs'}),
+       jsx('span',{children:'Current pose'}),jsx('span',{children:phase}),
+       jsx('span',{children:'Renderer'}),jsx('span',{children:'MRXPANEL lightweight 3D'}),
+       jsx('span',{children:'MASB bridge'}),jsx('span',{children:'OFF — visual proof first'})
+      ]})
+    ]}),
+    jsxs('section',{className:'m3dcard',children:[
+      jsx('h3',{children:'Animation Test'}),
+      jsx('div',{className:'m3dsub',children:'AUTO: jalan ke meja → duduk → berdiri → berjalan kembali. Tombol lain mengunci pose untuk diperiksa.'}),
+      jsxs('div',{className:'m3dgrid',children:[
+       jsx('button',{className:`m3dbtn ${mode==='auto'?'active':''}`,onClick:()=>choose('auto'),children:'AUTO'}),
+       jsx('button',{className:`m3dbtn ${mode==='walk'?'active':''}`,onClick:()=>choose('walk'),children:'WALK'}),
+       jsx('button',{className:`m3dbtn ${mode==='sit'?'active':''}`,onClick:()=>choose('sit'),children:'SIT'}),
+       jsx('button',{className:`m3dbtn ${mode==='idle'?'active':''}`,onClick:()=>choose('idle'),children:'IDLE'})
+      ]})
+    ]}),
+    jsxs('section',{className:'m3dcard',children:[
+      jsx('h3',{children:'V1.0 Scope'}),
+      jsx('div',{className:'m3dsub',children:'Ini sengaja satu ruang + satu manusia 3D dahulu. Kalau gerak dan rasa karakternya sudah tepat, engine yang sama dipakai untuk Kris, Maya, semua Team, pintu, seluruh kantor, dan akhirnya state MASB nyata.'})
+    ]}),
+    jsx('div',{className:'m3dnote',style:{padding:'0 12px 14px'},children:'Karakter ini model generik MRXPANEL Staff. Belum merupakan wajah/fisik Kris atau karakter final Maya.'})
    ]})
   ]})
  ]})
@@ -193,5 +228,8 @@ function Office(){
 
 export default{
  id:'mrxpanel-office',name:'MRXPANEL OFFICE',defaultEnabled:true,
- register(ctx){ctx.register({id:'route',area:ROUTES_AREA,title:'MRXPANEL OFFICE',data:{path:'/mrxpanel-office'},render:()=>jsx(Office,{})});ctx.register({id:'sidebar',area:SIDEBAR_NAV_AREA,title:'MRXPANEL OFFICE',data:{path:'/mrxpanel-office',label:'MRXPANEL OFFICE',codicon:'organization'}})}
+ register(ctx){
+  ctx.register({id:'route',area:ROUTES_AREA,title:'MRXPANEL OFFICE',data:{path:'/mrxpanel-office'},render:()=>jsx(True3D,{})})
+  ctx.register({id:'sidebar',area:SIDEBAR_NAV_AREA,title:'MRXPANEL OFFICE',data:{path:'/mrxpanel-office',label:'MRXPANEL OFFICE',codicon:'organization'}})
+ }
 }
