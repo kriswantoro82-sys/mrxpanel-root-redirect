@@ -13,6 +13,7 @@ const CSS=`
 .h3body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(760px,1fr) 330px}
 .h3stage{padding:12px;min-height:0;background:#090d12}.h3wrap{position:relative;width:100%;height:100%;min-height:650px;border:1px solid #323b47;border-radius:16px;overflow:hidden;background:#15252f}
 .h3canvas{display:block;width:100%;height:100%;min-height:650px;touch-action:none;cursor:grab}.h3canvas:active{cursor:grabbing}
+.h3labels{pointer-events:none;position:absolute;inset:0;overflow:hidden}.h3name{position:absolute;left:0;top:0;transform:translate(-50%,-100%);padding:4px 7px;border-radius:7px;background:rgba(9,13,18,.86);border:1px solid rgba(241,204,108,.38);box-shadow:0 4px 12px rgba(0,0,0,.28);font-size:7px;font-weight:900;color:#fff;white-space:nowrap;transition:opacity .15s ease}.h3name small{display:block;margin-top:1px;font-size:6px;font-weight:800;color:#9aa6b2;letter-spacing:.04em}
 .h3over{pointer-events:none;position:absolute;left:16px;top:16px;max-width:360px;padding:10px 12px;border:1px solid rgba(241,204,108,.3);border-radius:10px;background:rgba(10,15,20,.75);backdrop-filter:blur(8px)}
 .h3over strong{font-size:12px;color:#f1cc6c}.h3over small{display:block;margin-top:4px;font-size:8px;line-height:1.5;color:#b3bcc5}
 .h3legend{position:absolute;left:16px;bottom:16px;display:flex;gap:6px;flex-wrap:wrap}.h3pill{padding:5px 7px;border:1px solid #33404b;border-radius:999px;background:rgba(10,15,20,.82);font-size:7px;color:#d2d8de}
@@ -110,6 +111,15 @@ function lookAt(e,t){
  o[12]=-(x[0]*e[0]+x[1]*e[1]+x[2]*e[2]);o[13]=-(y[0]*e[0]+y[1]*e[1]+y[2]*e[2]);o[14]=-(z[0]*e[0]+z[1]*e[1]+z[2]*e[2])
  return o
 }
+function project3(vp,p,w,h){
+ const x=vp[0]*p[0]+vp[4]*p[1]+vp[8]*p[2]+vp[12]
+ const y=vp[1]*p[0]+vp[5]*p[1]+vp[9]*p[2]+vp[13]
+ const q=vp[3]*p[0]+vp[7]*p[1]+vp[11]*p[2]+vp[15]
+ if(q<=.05)return null
+ const nx=x/q,ny=y/q
+ if(nx<-1.25||nx>1.25||ny<-1.25||ny>1.25)return null
+ return[(nx*.5+.5)*w,(1-(ny*.5+.5))*h]
+}
 function mix3(a,b,t){return[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t]}
 function slerp(a,b,t){
  let ax=a[0],ay=a[1],az=a[2],aw=a[3],bx=b[0],by=b[1],bz=b[2],bw=b[3]
@@ -156,7 +166,7 @@ function sphereGeometry(lat=12,lon=16){
  }
  return{p:new Float32Array(p),n:new Float32Array(n),i:new Uint16Array(idx)}
 }
-function init(canvas,setStatus,setPhase,modeRef){
+function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  const gl=canvas.getContext('webgl2',{antialias:true,alpha:false})
  if(!gl)throw new Error('WebGL2 tidak tersedia')
  const model=parseGLB(decode64(MODEL_B64)),j=model.json,prim=j.meshes[0].primitives[0],skin=j.skins[0],anim=j.animations[0]
@@ -221,6 +231,7 @@ function init(canvas,setStatus,setPhase,modeRef){
  const u={svp:gl.getUniformLocation(sp,'uVP'),sm:gl.getUniformLocation(sp,'uModel'),sj:gl.getUniformLocation(sp,'uJ[0]'),shirt:gl.getUniformLocation(sp,'uShirt'),skinTone:gl.getUniformLocation(sp,'uSkinTone'),pants:gl.getUniformLocation(sp,'uPants'),bvp:gl.getUniformLocation(bp,'uVP'),bm:gl.getUniformLocation(bp,'uModel'),bc:gl.getUniformLocation(bp,'uColor')}
  const invBind=[];for(let i=0;i<skin.joints.length;i++)invBind.push(new Float32Array(ibmAcc.array.slice(i*16,i*16+16)))
  const cam={yaw:.76,pitch:.54,dist:17.6},drag={active:false,x:0,y:0,yaw:0,pitch:0}
+ const labelMap=new Map()
  let lastPhase='',start=performance.now(),raf=0
  function localState(t,w){
   const st=base.map(x=>({t:x.t.slice(),r:x.r.slice(),s:x.s.slice(),m:x.m}))
@@ -421,6 +432,21 @@ function init(canvas,setStatus,setPhase,modeRef){
     gl.uniform3fv(u.shirt,p.shirt);gl.uniform3fv(u.skinTone,p.skin);gl.uniform3fv(u.pants,p.pants)
     gl.bindVertexArray(vao);gl.drawElements(gl.TRIANGLES,indices.count,indices.componentType===5123?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,0)
     characterMakeover(vp,modelM,jm,sec+p.offset,walking,p)
+    if(labelLayer){
+      let el=labelMap.get(p.name)
+      if(!el){
+        el=document.createElement('div');el.className='h3name'
+        el.innerHTML='<b>'+p.name+'</b><small></small>'
+        labelLayer.appendChild(el);labelMap.set(p.name,el)
+      }
+      const pt=project3(vp,[px,1.78,pz],cssW,cssH)
+      if(pt){
+        const status=walking?'MOVING':(cycle>=9&&cycle<13?'REVIEWING':'WORKING')
+        el.style.opacity='1';el.style.left=pt[0]+'px';el.style.top=pt[1]+'px'
+        el.style.borderColor=status==='MOVING'?'rgba(88,166,255,.55)':status==='REVIEWING'?'rgba(184,146,255,.58)':'rgba(84,201,135,.55)'
+        el.querySelector('small').textContent=status
+      }else el.style.opacity='0'
+    }
   }
   if(phaseSummary!==lastPhase){lastPhase=phaseSummary;setPhase(phaseSummary)}
   raf=requestAnimationFrame(render)
@@ -430,17 +456,17 @@ function init(canvas,setStatus,setPhase,modeRef){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(5.8,Math.min(14,cam.dist+Math.sign(e.deltaY)*.55))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • ENVIRONMENT POLISH LOADED');raf=requestAnimationFrame(render)
- return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh)}
+ setStatus('READY • OFFICE HUD LOADED');raf=requestAnimationFrame(render)
+ return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
 function HumanLab(){
- const canvasRef=useRef(null),modeRef=useRef('auto')
+ const canvasRef=useRef(null),labelsRef=useRef(null),modeRef=useRef('auto')
  const [mode,setMode]=useState('auto'),[phase,setPhase]=useState('LOADING'),[status,setStatus]=useState('LOADING MODEL')
  function choose(m){modeRef.current=m;setMode(m)}
  useEffect(()=>{
   let cleanup=()=>{}
-  try{cleanup=init(canvasRef.current,setStatus,setPhase,modeRef)}
+  try{cleanup=init(canvasRef.current,setStatus,setPhase,modeRef,labelsRef.current)}
   catch(e){setStatus('ERROR • '+(e?.message||String(e)));setPhase('ERROR')}
   return()=>cleanup()
  },[])
@@ -448,14 +474,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V2.1 DEV • ENVIRONMENT POLISH'})
+   jsx('div',{className:'h3chip',children:'V2.2 DEV • OFFICE HUD'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
-    jsx('canvas',{ref:canvasRef,className:'h3canvas'}),
+    jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'CHARACTER MAKEOVER'}),
-     jsx('small',{children:'Living 3D office + environment polish: zoned floors, windows, warm ceiling lights, plants, richer executive/meeting/tech areas, and autonomous multi-character cast.'})
+     jsx('small',{children:'Living 3D office + in-world nameplates/status HUD. Characters now remain identifiable while walking through executive, meeting, operations, VPS, support, finance and lounge zones.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag = orbit camera'}),jsx('div',{className:'h3pill',children:'Wheel = zoom'}),
