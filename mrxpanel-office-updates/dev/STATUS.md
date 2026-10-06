@@ -1,38 +1,39 @@
 # MRXPANEL OFFICE — DEV STATUS
 
-Current dev build: **V3.13 DEV — CLEARANCE ROUTING**
+Current dev build: **V3.15 DEV — GROUNDING & LIGHTING**
 
 Stable channel: **V1.3.0** (unchanged)
 
 ## Realism baseline now implemented
 - 8 rigged 3D characters with distinct roles/outfits.
+- Character stature normalized against 0.70m desks; current character scales are closer to plausible adult proportions.
+- Standing workstation arm pose is calibrated from the Cesium Man skeleton geometry so terminal hand joints sit near desk/keyboard height.
+- Fake seated body-sinking remains disabled; chairs remain withheld until a true sit rig exists.
 - Character face/hair/accessory proportions tightened.
 - Softer key/fill lighting and restrained material palette.
-- Neutral carpet, warmer walls, darker architectural partitions.
-- Interior walls are full office height with human-scale door openings.
-- Framed windows, upper glass bands and baseboards.
-- Workstations now have grounded legs, monitor face, stand/base, keyboard and mouse.
-- Meeting table has grounded pedestal/feet.
-- Reception and pantry are structurally grounded instead of floating slabs.
-- Fake seated body-sinking remains disabled; chairs are withheld until a true sit rig exists.
+- Warm wall-mounted practical fixtures replace floating ceiling panels.
+- Contact grounding added under major workstations, meeting table, server racks, lounge, pantry and reception.
+- Character blob shadows are smaller/lighter.
+- Neutral carpet, warmer perimeter walls, darker full-height architectural partitions.
+- Human-scale door openings, framed windows, upper glass bands and baseboards.
+- Workstations have grounded legs, monitor screen/stand/base, keyboard and mouse.
+- Meeting, reception and pantry furniture are structurally grounded.
 - All 8 characters use explicit architecture-aware multi-waypoint routes.
-- Route traversal is distance-weighted and travel duration is based on route length.
-- Skeletal gait phase follows world distance.
-- Walk blend eases in/out and turns are frame-rate independent.
+- Risky paths were reworked after a conservative body-clearance audit.
+- Route traversal is distance weighted; world travel duration is based on route length.
+- Skeletal gait phase follows world distance with eased start/stop and frame-rate-independent turns.
 - Route geometry and HUD nodes are cached; rendering uses a pixel budget.
 - Stationary non-executive HUD is hidden.
 - Full-width office presentation with compact controls.
-- Risky routes were reworked after a conservative clearance audit against walls and major furniture using ~0.18 world-unit body radius.
-- Current route audit: no detected intersections with audited walls, door frames, desks, lounge, plants, reception, pantry or server racks.
 - JavaScript structural smoke/syntax check: PASS.
 
 ## Still blocked before stable promotion
 1. New Hermes visual review is required.
-2. Verify full-height walls and door frames visually from several camera angles.
-3. Verify gait cadence against world speed.
-4. Verify hand/arm posture against keyboard positions.
-5. Verify character/furniture scale after furniture rebuild.
-6. Verify no visual clipping missed by the geometric audit.
-7. Verify 8-character performance and final lighting balance.
+2. Verify arm/hand position actually reads as natural from the live camera.
+3. Verify contact shadows do not read as dark mats.
+4. Verify full-height walls and door frames from multiple camera angles.
+5. Verify no route clipping missed by the geometric audit.
+6. Verify gait cadence/world speed and 8-character performance.
+7. Final lighting/material tuning after live visual feedback.
 
-Stable V1.3.0 remains untouched. Real MASB state integration remains OFF until the visual shell passes the next realism review.
+Stable V1.3.0 remains untouched. Real MASB state integration remains OFF until the 3D shell passes the next realism review.
