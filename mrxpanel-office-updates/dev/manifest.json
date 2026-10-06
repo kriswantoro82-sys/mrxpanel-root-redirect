@@ -1,9 +1,9 @@
 {
   "channel": "dev",
-  "version": "3.11.0-dev",
+  "version": "3.13.0-dev",
   "plugin_path": "mrxpanel-office-updates/dev/plugin.js",
-  "sha256": "eceb0ab7e2eda003a3669178080c990d9f4b0aa9a02bdb357415c576cd2a30e8",
-  "released_at": "2026-10-06T13:24:00+07:00",
-  "notes": "Architectural/gait/frame realism: full-height interior walls with door openings and upper glass bands, distance-synced gait, frame-rate-independent turning, cached route metrics/HUD nodes, pixel-budgeted DPR, full-width office presentation, neutral materials and collision-aware explicit routes.",
+  "sha256": "a20157406de0898e4ff086034f340a415b91c1cc2e7ca85c1f7e9f630c504968",
+  "released_at": "2026-10-06T13:36:00+07:00",
+  "notes": "Furniture and clearance realism: grounded desks/meeting/reception/pantry, physical support geometry, monitor faces, full-height walls, human-scale doors, distance-synced gait, frame-stable routing, and clearance-audited routes around walls, desks, lounge, plants and server racks.",
   "stable_unchanged": true
 }
