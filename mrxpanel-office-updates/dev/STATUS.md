@@ -1,41 +1,37 @@
 # MRXPANEL OFFICE — DEV STATUS
 
-Current dev build: **V3.1 DEV — REALISM RESET**
+Current dev build: **V3.4 DEV — WORKSTATION REALISM**
 
 Stable channel: **V1.3.0** (unchanged)
 
-## Why V3.1 is a reset
-The first V3 preview proved the system can run a full office, but the visual review exposed a more important issue: too many features were added before the scene looked believable.
+## Visual direction
+The project remains in realism-first mode. The earlier V3 preview proved the full-office engine works, but looked too much like a debug/prototype scene. The current dev line is reducing impossible interactions before adding any more spectacle.
 
-## Visual issues confirmed from the preview
-- floating room/status labels made the scene look like debug mode,
-- fake seated pose sank standing characters into chairs/desks,
-- detached ceiling-light panels looked physically impossible in an open dollhouse scene,
-- character heads/faces were still too caricatured,
-- too many people moved at once,
-- room partitions/material colors looked game-prototype rather than finished office,
-- visual clutter hid the office layout.
-
-## V3.1 changes
-- floating room labels removed from live render,
-- character HUD reduced,
-- fake sitting disabled until a real leg/chair pose exists,
+## Improvements since the V3 preview
+- floating room labels removed,
 - detached ceiling panels removed,
+- fake body-sinking seated pose removed,
 - character head/face proportions reduced,
-- traffic cycle slowed from 18s to 32s,
-- long work periods / fewer simultaneous walkers,
-- floor palette muted,
-- partitions made taller/more architectural,
-- camera lowered for a less top-down prototype look,
-- structural JavaScript smoke/syntax check: PASS.
+- hair, glasses, headset and facial details tightened,
+- two-direction key/fill lighting replaces harsher single-light shading,
+- smaller ground shadows,
+- office traffic slowed,
+- partitions rebuilt with actual doorway gaps,
+- all 8 characters now use explicit multi-waypoint routes,
+- lane offset fades at route endpoints to avoid start/stop jumps,
+- workstation chairs withheld until a true sit rig exists,
+- stationary staff face their actual desks,
+- workstations now include monitor body, stand/base, keyboard and mouse,
+- executive desk received proper monitor stand/base and input devices,
+- JavaScript smoke/syntax check: PASS.
 
-## Next targets
-1. Replace the current fake work pose with a real chair pose or keep characters standing cleanly.
-2. Rebuild furniture scale and aisle clearance.
-3. Introduce collision-safe corridor nodes, not decorative waypoints.
-4. Improve character silhouette/face before adding more accessories.
-5. Improve lighting/material response instead of adding more objects.
-6. Only then restore restrained labels/status information.
-7. MASB live data remains OFF until the visual shell is credible.
+## Still blocked before stable promotion
+1. work-arm pose must look natural near keyboards,
+2. walking animation must be reviewed against the new routes,
+3. furniture and character scale need another visual pass,
+4. destination spacing needs visual confirmation,
+5. lighting/material balance needs a real Hermes visual review,
+6. no severe clipping through desks/walls,
+7. performance with all 8 characters must remain acceptable.
 
-Promotion to stable remains blocked until a new visual review passes.
+Real MASB data integration remains OFF until the visual shell passes a new realism review.
