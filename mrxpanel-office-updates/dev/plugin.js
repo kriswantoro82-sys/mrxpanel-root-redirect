@@ -128,6 +128,16 @@ function slerp(a,b,t){
  const th=Math.acos(Math.min(1,cos)),s=Math.sin(th),a1=Math.sin((1-t)*th)/s,b1=Math.sin(t*th)/s
  return[ax*a1+bx*b1,ay*a1+by*b1,az*a1+bz*b1,aw*a1+bw*b1]
 }
+function qmul(a,b){
+ return[
+  a[3]*b[0]+a[0]*b[3]+a[1]*b[2]-a[2]*b[1],
+  a[3]*b[1]-a[0]*b[2]+a[1]*b[3]+a[2]*b[0],
+  a[3]*b[2]+a[0]*b[1]-a[1]*b[0]+a[2]*b[3],
+  a[3]*b[3]-a[0]*b[0]-a[1]*b[1]-a[2]*b[2]
+ ]
+}
+function qy(a){return[0,Math.sin(a/2),0,Math.cos(a/2)]}
+
 function sample(times,vals,comps,t,isQuat){
  let hi=1;while(hi<times.length&&times[hi]<t)hi++
  if(hi>=times.length)hi=times.length-1
@@ -233,7 +243,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  const cam={yaw:.76,pitch:.54,dist:17.6},drag={active:false,x:0,y:0,yaw:0,pitch:0}
  const labelMap=new Map()
  let lastPhase='',start=performance.now(),raf=0
- function localState(t,w){
+ function localState(t,w,activity='idle'){
   const st=base.map(x=>({t:x.t.slice(),r:x.r.slice(),s:x.s.slice(),m:x.m}))
   const at=((t-.0416666)%1.9583334+1.9583334)%1.9583334+.0416666
   for(const ch of anim.channels){
@@ -241,6 +251,17 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
    if(path==='translation')st[n].t=mix3(base[n].t,samp,w)
    else if(path==='scale')st[n].s=mix3(base[n].s,samp,w)
    else if(path==='rotation')st[n].r=slerp(base[n].r,samp,w)
+  }
+  if(w<.05&&activity==='work'){
+   const tap=Math.sin(t*7.5)*.035
+   st[17].r=qmul(st[17].r,qy(-.10-tap));st[14].r=qmul(st[14].r,qy(.10+tap))
+   st[18].r=qmul(st[18].r,qy(-.16-tap));st[15].r=qmul(st[15].r,qy(.16+tap))
+   st[12].r=qmul(st[12].r,qy(Math.sin(t*1.8)*.018))
+  }else if(w<.05&&activity==='review'){
+   st[20].r=qmul(st[20].r,qy(Math.sin(t*1.25)*.030))
+   st[21].r=qmul(st[21].r,qy(Math.sin(t*.85)*.045))
+  }else if(w<.05){
+   st[12].r=qmul(st[12].r,qy(Math.sin(t*.72)*.014))
   }
   return st
  }
@@ -435,7 +456,8 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
       else{px=p.home[0];pz=p.home[1];walking=false;yaw=dirAt(p,0,false)}
     }
 
-    const st=localState(sec+p.offset,walking?1:0),world=worlds(st),mw=world[meshNode],invMw=invert4(mw),jm=new Float32Array(skin.joints.length*16)
+    const activity=walking?'walk':(cycle>=9&&cycle<13?'review':'work')
+    const st=localState(sec+p.offset,walking?1:0,activity),world=worlds(st),mw=world[meshNode],invMw=invert4(mw),jm=new Float32Array(skin.joints.length*16)
     for(let i=0;i<skin.joints.length;i++)jm.set(mul4(mul4(invMw,world[skin.joints[i]]),invBind[i]),i*16)
     const placement=mul4(mul4(trans(px,0,pz),rotY(yaw)),scale(p.scale,p.scale,p.scale)),modelM=mul4(placement,mw)
 
@@ -453,7 +475,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
       }
       const pt=project3(vp,[px,1.78,pz],cssW,cssH)
       if(pt){
-        const status=walking?'MOVING':(cycle>=9&&cycle<13?'REVIEWING':'WORKING')
+        const status=walking?'MOVING':(activity==='review'?'REVIEWING':'WORKING')
         el.style.opacity='1';el.style.left=pt[0]+'px';el.style.top=pt[1]+'px'
         el.style.borderColor=status==='MOVING'?'rgba(88,166,255,.55)':status==='REVIEWING'?'rgba(184,146,255,.58)':'rgba(84,201,135,.55)'
         el.querySelector('small').textContent=status
@@ -468,7 +490,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(5.8,Math.min(14,cam.dist+Math.sign(e.deltaY)*.55))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • ROUTED OFFICE LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • LIFE ANIMATIONS LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -486,14 +508,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V2.3 DEV • ROUTED OFFICE'})
+   jsx('div',{className:'h3chip',children:'V2.4 DEV • LIFE ANIMATIONS'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'CHARACTER MAKEOVER'}),
-     jsx('small',{children:'Living 3D office + in-world HUD + routed movement. Characters follow office lanes/waypoints instead of sliding directly through every zone.'})
+     jsx('small',{children:'Living 3D office + routed movement + subtle work/review animation layers. Staff no longer freeze completely when they reach desks or meeting points.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag = orbit camera'}),jsx('div',{className:'h3pill',children:'Wheel = zoom'}),
