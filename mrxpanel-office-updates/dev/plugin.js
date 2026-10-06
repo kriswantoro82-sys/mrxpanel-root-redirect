@@ -137,6 +137,11 @@ function qmul(a,b){
  ]
 }
 function qy(a){return[0,Math.sin(a/2),0,Math.cos(a/2)]}
+function qx(a){return[Math.sin(a/2),0,0,Math.cos(a/2)]}
+function qz(a){return[0,0,Math.sin(a/2),Math.cos(a/2)]}
+function smooth01(t){t=Math.max(0,Math.min(1,t));return t*t*(3-2*t)}
+function angleDelta(a,b){let d=(b-a+Math.PI)%(Math.PI*2)-Math.PI;if(d<-Math.PI)d+=Math.PI*2;return d}
+
 
 function sample(times,vals,comps,t,isQuat){
  let hi=1;while(hi<times.length&&times[hi]<t)hi++
@@ -242,6 +247,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  const invBind=[];for(let i=0;i<skin.joints.length;i++)invBind.push(new Float32Array(ibmAcc.array.slice(i*16,i*16+16)))
  const cam={yaw:.76,pitch:.54,dist:17.6},drag={active:false,x:0,y:0,yaw:0,pitch:0}
  const labelMap=new Map()
+ const facingMap=new Map()
  let lastPhase='',start=performance.now(),raf=0
  function localState(t,w,activity='idle'){
   const st=base.map(x=>({t:x.t.slice(),r:x.r.slice(),s:x.s.slice(),m:x.m}))
@@ -253,15 +259,20 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
    else if(path==='rotation')st[n].r=slerp(base[n].r,samp,w)
   }
   if(w<.05&&activity==='work'){
-   const tap=Math.sin(t*7.5)*.035
-   st[17].r=qmul(st[17].r,qy(-.10-tap));st[14].r=qmul(st[14].r,qy(.10+tap))
-   st[18].r=qmul(st[18].r,qy(-.16-tap));st[15].r=qmul(st[15].r,qy(.16+tap))
-   st[12].r=qmul(st[12].r,qy(Math.sin(t*1.8)*.018))
+   const tap=Math.sin(t*7.5)*.050,alt=Math.sin(t*7.5+Math.PI)*.050
+   st[17].r=qmul(st[17].r,qy(-.13-tap));st[14].r=qmul(st[14].r,qy(.13+alt))
+   st[18].r=qmul(st[18].r,qy(-.20-tap));st[15].r=qmul(st[15].r,qy(.20+alt))
+   st[12].r=qmul(st[12].r,qy(Math.sin(t*1.8)*.020))
+   st[13].r=qmul(st[13].r,qx(.025+Math.sin(t*1.1)*.010))
+   st[3].t[2]+=Math.sin(t*1.55)*.004
   }else if(w<.05&&activity==='review'){
-   st[20].r=qmul(st[20].r,qy(Math.sin(t*1.25)*.030))
-   st[21].r=qmul(st[21].r,qy(Math.sin(t*.85)*.045))
+   st[20].r=qmul(st[20].r,qy(Math.sin(t*1.25)*.040))
+   st[21].r=qmul(st[21].r,qy(Math.sin(t*.85)*.055))
+   st[13].r=qmul(st[13].r,qx(Math.sin(t*.95)*.016))
+   st[3].t[2]+=Math.sin(t*1.35)*.003
   }else if(w<.05){
-   st[12].r=qmul(st[12].r,qy(Math.sin(t*.72)*.014))
+   st[12].r=qmul(st[12].r,qy(Math.sin(t*.72)*.016))
+   st[3].t[2]+=Math.sin(t*1.25)*.004
   }
   return st
  }
@@ -428,8 +439,8 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
 
   const pathAt=(p,f)=>{
     const a=p.home,m=p.mid||[(a[0]+p.target[0])/2,(a[1]+p.target[1])/2],b=p.target
-    if(f<=.5){const q=f*2;return[a[0]+(m[0]-a[0])*q,a[1]+(m[1]-a[1])*q]}
-    const q=(f-.5)*2;return[m[0]+(b[0]-m[0])*q,m[1]+(b[1]-m[1])*q]
+    if(f<=.5){const q=smooth01(f*2);return[a[0]+(m[0]-a[0])*q,a[1]+(m[1]-a[1])*q]}
+    const q=smooth01((f-.5)*2);return[m[0]+(b[0]-m[0])*q,m[1]+(b[1]-m[1])*q]
   }
   const dirAt=(p,f,reverse=false)=>{
     const a=p.home,m=p.mid||[(a[0]+p.target[0])/2,(a[1]+p.target[1])/2],b=p.target
@@ -442,20 +453,23 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   let phaseSummary='OFFICE ACTIVE'
   for(const p of cast){
     const cycle=(sec+p.offset)%18
-    let walking=false,px=p.home[0],pz=p.home[1],yaw=0
+    let walking=false,px=p.home[0],pz=p.home[1],desiredYaw=0
     if(mode==='walk'){
       const q=(sec+p.offset)*.34,forward=Math.cos(q)>=0,f=(Math.sin(q)+1)/2,pt=pathAt(p,f)
-      px=pt[0];pz=pt[1];walking=true;yaw=dirAt(p,f,!forward)
+      px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,f,!forward)
     }else if(mode==='idle'){
-      px=p.home[0];pz=p.home[1];walking=false;yaw=dirAt(p,0,false)
+      px=p.home[0];pz=p.home[1];walking=false;desiredYaw=dirAt(p,0,false)
     }else{
-      if(cycle<5){px=p.home[0];pz=p.home[1];walking=false;yaw=dirAt(p,0,false)}
-      else if(cycle<9){const ff=(cycle-5)/4,pt=pathAt(p,ff);px=pt[0];pz=pt[1];walking=true;yaw=dirAt(p,ff,false)}
-      else if(cycle<13){px=p.target[0];pz=p.target[1];walking=false;yaw=dirAt(p,1,false)}
-      else if(cycle<17){const ff=(cycle-13)/4,rf=1-ff,pt=pathAt(p,rf);px=pt[0];pz=pt[1];walking=true;yaw=dirAt(p,rf,true)}
-      else{px=p.home[0];pz=p.home[1];walking=false;yaw=dirAt(p,0,false)}
+      if(cycle<5){px=p.home[0];pz=p.home[1];walking=false;desiredYaw=dirAt(p,0,false)}
+      else if(cycle<9){const ff=(cycle-5)/4,pt=pathAt(p,ff);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,ff,false)}
+      else if(cycle<13){px=p.target[0];pz=p.target[1];walking=false;desiredYaw=dirAt(p,1,false)}
+      else if(cycle<17){const ff=(cycle-13)/4,rf=1-ff,pt=pathAt(p,rf);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,rf,true)}
+      else{px=p.home[0];pz=p.home[1];walking=false;desiredYaw=dirAt(p,0,false)}
     }
 
+    const prevYaw=facingMap.has(p.name)?facingMap.get(p.name):desiredYaw
+    const yaw=prevYaw+angleDelta(prevYaw,desiredYaw)*(walking?.16:.09)
+    facingMap.set(p.name,yaw)
     const activity=walking?'walk':(cycle>=9&&cycle<13?'review':'work')
     const st=localState(sec+p.offset,walking?1:0,activity),world=worlds(st),mw=world[meshNode],invMw=invert4(mw),jm=new Float32Array(skin.joints.length*16)
     for(let i=0;i<skin.joints.length;i++)jm.set(mul4(mul4(invMw,world[skin.joints[i]]),invBind[i]),i*16)
@@ -488,9 +502,9 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pd(e){drag.active=true;drag.x=e.clientX;drag.y=e.clientY;drag.yaw=cam.yaw;drag.pitch=cam.pitch;canvas.setPointerCapture?.(e.pointerId)}
  function pm(e){if(!drag.active)return;cam.yaw=drag.yaw-(e.clientX-drag.x)*.008;cam.pitch=Math.max(.08,Math.min(.78,drag.pitch+(e.clientY-drag.y)*.006))}
  function pu(){drag.active=false}
- function wh(e){e.preventDefault();cam.dist=Math.max(5.8,Math.min(14,cam.dist+Math.sign(e.deltaY)*.55))}
+ function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • LIFE ANIMATIONS LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • SMOOTH MOTION LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -508,14 +522,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V2.4 DEV • LIFE ANIMATIONS'})
+   jsx('div',{className:'h3chip',children:'V2.5 DEV • SMOOTH MOTION'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'CHARACTER MAKEOVER'}),
-     jsx('small',{children:'Living 3D office + routed movement + subtle work/review animation layers. Staff no longer freeze completely when they reach desks or meeting points.'})
+     jsx('small',{children:'Living 3D office + smoother cornering, eased route motion, per-character facing memory, work/review micro-animation, and readable in-world status.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag = orbit camera'}),jsx('div',{className:'h3pill',children:'Wheel = zoom'}),
@@ -523,7 +537,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'DEV V2.0 menggabungkan karakter rigged ke kantor 3D hidup. Stable V1.3 tetap aman sampai build ini matang.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'DEV V2.5: 8 rigged characters, full 3D office, routed paths, smooth turns, status HUD, and work/review micro-animation. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
