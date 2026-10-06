@@ -1,9 +1,9 @@
 {
   "channel": "stable",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "plugin_url": "https://raw.githubusercontent.com/kriswantoro82-sys/mrxpanel-root-redirect/main/mrxpanel-office-updates/plugin.js",
-  "sha256": "23fa9b2c2b4e3d279c5fa82715440a0a8d8dc6642d3bc47f4af4f4048480f495",
-  "released_at": "2026-10-06T08:55:00+07:00",
+  "sha256": "08e1a7f004c450126ae22fd07d0679b2fb044bef052b51bf2c03718c5db263e0",
+  "released_at": "2026-10-06T09:12:00+07:00",
   "bootstrap_min": "1.0.0",
-  "notes": "Character Makeover: stylized 3D head overlay attached to animated head joint, hair, ears, eyes, pupils, eyebrows, nose and mouth; facing aligned with travel direction."
+  "notes": "Game Character Polish: full stylized head replacement, clearer 3/4 face, layered hair, ears, eyes/pupils/catchlights, brows, nose, mouth, neck, gold chest detail, foot shadow, improved camera and lighting."
 }
