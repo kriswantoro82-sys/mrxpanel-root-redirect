@@ -216,16 +216,25 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  uniform vec3 uShirt;uniform vec3 uSkinTone;uniform vec3 uPants;
  void main(){
   if(vHead>.28)discard;
-  vec3 L=normalize(vec3(-.45,.85,.55));float d=.44+.56*max(dot(normalize(vN),L),0.0);
+  vec3 N=normalize(vN);
+  vec3 L1=normalize(vec3(-.42,.86,.50)),L2=normalize(vec3(.62,.34,-.48));
+  float key=max(dot(N,L1),0.0),fill=max(dot(N,L2),0.0),hemi=.5+.5*clamp(N.y,-1.0,1.0);
+  float light=.46+.40*key+.09*fill+.05*hemi;
   vec3 base=mix(uShirt,uPants,smoothstep(.42,.72,vLeg));base=mix(base,uSkinTone,smoothstep(.35,.68,vSkin));
-  outColor=vec4(base*d,1.0);
+  outColor=vec4(base*light,1.0);
  }`
  const boxVS=`#version 300 es
  precision highp float;layout(location=0) in vec3 aPos;layout(location=1) in vec3 aNor;uniform mat4 uVP;uniform mat4 uModel;out vec3 vN;
  void main(){vN=normalize(mat3(uModel)*aNor);gl_Position=uVP*uModel*vec4(aPos,1.0);}`
  const boxFS=`#version 300 es
  precision highp float;in vec3 vN;uniform vec3 uColor;out vec4 outColor;
- void main(){vec3 L=normalize(vec3(-.45,.85,.55));float d=.48+.52*max(dot(normalize(vN),L),0.0);outColor=vec4(uColor*d,1.0);}`
+ void main(){
+  vec3 N=normalize(vN);
+  vec3 L1=normalize(vec3(-.42,.86,.50)),L2=normalize(vec3(.60,.30,-.42));
+  float key=max(dot(N,L1),0.0),fill=max(dot(N,L2),0.0),hemi=.5+.5*clamp(N.y,-1.0,1.0);
+  float light=.50+.36*key+.09*fill+.05*hemi;
+  outColor=vec4(uColor*light,1.0);
+ }`
  const sp=program(gl,skinVS,skinFS),bp=program(gl,boxVS,boxFS)
  const vao=gl.createVertexArray();gl.bindVertexArray(vao)
  function attr(loc,a,integer=false){
@@ -307,41 +316,41 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   // Individual hair silhouettes.
   if(p.hairStyle===1){
     part(0,-.050,.132,.164,.126,.097,hair)
-    part(-.120,-.028,.074,.070,.100,.120,hair);part(.120,-.028,.074,.070,.100,.120,hair)
-    part(.135,-.020,-.015,.048,.075,.120,hair)
+    part(-.106,-.026,.068,.058,.086,.102,hair);part(.106,-.026,.068,.058,.086,.102,hair)
+    part(.116,-.018,-.010,.040,.064,.098,hair)
   }else if(p.hairStyle===2){
     part(0,-.052,.130,.166,.124,.096,hair)
-    part(-.074,-.050,.200,.120,.102,.050,hair);part(.082,-.045,.195,.105,.105,.052,hair)
+    part(-.062,-.045,.184,.098,.086,.044,hair);part(.068,-.040,.180,.090,.088,.046,hair)
   }else{
     part(0,-.052,.127,.162,.120,.091,hair)
-    part(-.105,-.035,.072,.060,.090,.095,hair);part(.105,-.035,.072,.060,.090,.095,hair)
+    part(-.096,-.030,.067,.050,.076,.082,hair);part(.096,-.030,.067,.050,.076,.082,hair)
   }
 
-  part(-.162,.000,-.006,.032,.023,.052,[skin[0]*.92,skin[1]*.92,skin[2]*.92])
-  part(.162,.000,-.006,.032,.023,.052,[skin[0]*.92,skin[1]*.92,skin[2]*.92])
+  part(-.148,.000,-.006,.027,.020,.045,[skin[0]*.92,skin[1]*.92,skin[2]*.92])
+  part(.148,.000,-.006,.027,.020,.045,[skin[0]*.92,skin[1]*.92,skin[2]*.92])
   part(-.054,.153,.040,.023,.011,.019,[.965,.965,.945]);part(.054,.153,.040,.023,.011,.019,[.965,.965,.945])
   part(-.054,.163,.040,.009,.008,.010,p.eye);part(.054,.163,.040,.009,.008,.010,p.eye)
-  part(-.056,.191,.049,.004,.004,.005,[1,1,1]);part(.064,.191,.049,.004,.004,.005,[1,1,1])
-  block(-.060,.174,.087,.043,.007,.010,hair,-.08);block(.060,.174,.087,.043,.007,.010,hair,.08)
+  part(-.052,.171,.044,.003,.003,.004,[1,1,1]);part(.056,.171,.044,.003,.003,.004,[1,1,1])
+  block(-.054,.157,.078,.034,.005,.008,hair,-.07);block(.054,.157,.078,.034,.005,.008,hair,.07)
   part(0,.162,-.004,.020,.025,.032,[skin[0]*.90,skin[1]*.86,skin[2]*.84])
   block(0,.158,-.058,.040,.006,.008,p.lip)
-  part(-.032,.174,-.036,.030,.010,.022,[Math.min(1,skin[0]*1.08),Math.min(1,skin[1]*1.02),Math.min(1,skin[2]*1.02)])
-  part(.032,.174,-.036,.030,.010,.022,[Math.min(1,skin[0]*1.08),Math.min(1,skin[1]*1.02),Math.min(1,skin[2]*1.02)])
+  part(-.028,.158,-.034,.024,.008,.018,[Math.min(1,skin[0]*1.08),Math.min(1,skin[1]*1.02),Math.min(1,skin[2]*1.02)])
+  part(.028,.158,-.034,.024,.008,.018,[Math.min(1,skin[0]*1.08),Math.min(1,skin[1]*1.02),Math.min(1,skin[2]*1.02)])
 
   // Headset / glasses by role.
   if(p.accessory==='headset'){
-    block(-.185,-.002,.030,.018,.020,.105,[.05,.07,.09])
-    block(.185,-.002,.030,.018,.020,.105,[.05,.07,.09])
-    block(.150,.035,.128,.045,.012,.012,[.05,.07,.09],-.22)
+    block(-.164,-.002,.028,.014,.016,.090,[.05,.07,.09])
+    block(.164,-.002,.028,.014,.016,.090,[.05,.07,.09])
+    block(.136,.030,.112,.036,.009,.010,[.05,.07,.09],-.20)
   }
   if(p.accessory==='glasses'){
-    block(-.060,.188,.044,.042,.006,.032,[.06,.07,.08])
-    block(.060,.188,.044,.042,.006,.032,[.06,.07,.08])
-    block(0,.190,.044,.020,.005,.005,[.06,.07,.08])
+    block(-.054,.166,.040,.034,.005,.025,[.06,.07,.08])
+    block(.054,.166,.040,.034,.005,.025,[.06,.07,.08])
+    block(0,.168,.040,.016,.004,.004,[.06,.07,.08])
   }
   if(p.executive==='maya'){
-    part(-.166,.012,-.032,.014,.012,.022,[.94,.73,.32])
-    part(.166,.012,-.032,.014,.012,.022,[.94,.73,.32])
+    part(-.148,.010,-.030,.011,.010,.018,[.94,.73,.32])
+    part(.148,.010,-.030,.011,.010,.018,[.94,.73,.32])
   }
 
   const torso=mul4(mul4(modelM,torsoJ),trans(0,.130,.995))
@@ -515,7 +524,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     for(let i=0;i<skin.joints.length;i++)jm.set(mul4(mul4(invMw,world[skin.joints[i]]),invBind[i]),i*16)
     const placement=mul4(mul4(trans(px,yOffset,pz),rotY(yaw)),scale(p.scale,p.scale,p.scale)),modelM=mul4(placement,mw)
 
-    sphereDraw(vp,mul4(trans(px,.012,pz),scale(.30*p.scale,.016,.16*p.scale)),[.04,.05,.06])
+    sphereDraw(vp,mul4(trans(px,.010,pz),scale(.24*p.scale,.012,.13*p.scale)),[.055,.060,.062])
     gl.useProgram(sp);gl.uniformMatrix4fv(u.svp,false,vp);gl.uniformMatrix4fv(u.sm,false,modelM);gl.uniformMatrix4fv(u.sj,false,jm)
     gl.uniform3fv(u.shirt,p.shirt);gl.uniform3fv(u.skinTone,p.skin);gl.uniform3fv(u.pants,p.pants)
     gl.bindVertexArray(vao);gl.drawElements(gl.TRIANGLES,indices.count,indices.componentType===5123?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,0)
@@ -544,7 +553,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • SPACE & ROUTING REALISM LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • CHARACTER & LIGHTING REALISM LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -562,14 +571,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.2 DEV • SPACE & ROUTING REALISM'})
+   jsx('div',{className:'h3chip',children:'V3.3 DEV • CHARACTER & LIGHTING REALISM'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'CHARACTER MAKEOVER'}),
-     jsx('small',{children:'Space/routing realism: open door gaps, collision-safe corridor routes, no workstation chair clipping, calmer materials, and waypoint paths that respect the office architecture.'})
+     jsx('small',{children:'Character/lighting realism: tighter facial proportions, smaller accessories, cleaner hair silhouettes, softer two-direction lighting, muted materials, and architecture-aware routing.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag = orbit camera'}),jsx('div',{className:'h3pill',children:'Wheel = zoom'}),
@@ -577,7 +586,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.2 DEV rebuilds room openings and character routes so people stop crossing walls/furniture. Workstation chairs remain withheld until a real sit rig exists. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.3 DEV tightens facial/accessory proportions and replaces harsh one-direction shading with softer key/fill lighting. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
