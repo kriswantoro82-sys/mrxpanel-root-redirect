@@ -1,40 +1,41 @@
 # MRXPANEL OFFICE — DEV STATUS
 
-Current dev candidate: **V3.0 RC — EXECUTIVE IDENTITY**
+Current dev build: **V3.1 DEV — REALISM RESET**
 
-Stable channel: **V1.3.0** (intentionally unchanged)
+Stable channel: **V1.3.0** (unchanged)
 
-## Current build
-- 8 simultaneous rigged 3D characters.
-- Distinct roles/outfits/accessories and role-aware in-world HUD.
-- Kris and Maya have separate executive visual treatments.
-- Full 3D office zoning and furniture.
-- Windows, warm light fixtures, plants, server racks, reception, lounge and pantry.
-- Routed movement with per-character waypoints.
-- Lane offsets to reduce characters overlapping on shared routes.
-- Smooth facing interpolation and eased pacing.
-- Smooth sit/stand settling at workstations.
-- Typing/work/review/idle micro-animation.
-- Room signage + character name/status HUD.
-- Adaptive DPR + throttled HUD DOM updates.
-- Static cast/room data moved outside the frame loop.
-- Structural JavaScript smoke/syntax check: PASS.
+## Why V3.1 is a reset
+The first V3 preview proved the system can run a full office, but the visual review exposed a more important issue: too many features were added before the scene looked believable.
 
-## Stable promotion gate
-Stable must NOT be replaced until a visual run confirms:
-1. no broken face/head orientation,
-2. no severe clipping into desks/chairs/walls,
-3. sit/stand looks acceptable,
-4. routes do not visibly cross walls,
-5. 8-character performance is acceptable,
-6. camera framing and room labels remain readable.
+## Visual issues confirmed from the preview
+- floating room/status labels made the scene look like debug mode,
+- fake seated pose sank standing characters into chairs/desks,
+- detached ceiling-light panels looked physically impossible in an open dollhouse scene,
+- character heads/faces were still too caricatured,
+- too many people moved at once,
+- room partitions/material colors looked game-prototype rather than finished office,
+- visual clutter hid the office layout.
 
-## Next polish
-- collision spacing at shared destinations,
-- hand/keyboard alignment,
-- chair pose silhouette,
-- final lighting/material balance,
-- executive Kris/Maya character refinement,
-- then one controlled visual review before stable promotion.
+## V3.1 changes
+- floating room labels removed from live render,
+- character HUD reduced,
+- fake sitting disabled until a real leg/chair pose exists,
+- detached ceiling panels removed,
+- character head/face proportions reduced,
+- traffic cycle slowed from 18s to 32s,
+- long work periods / fewer simultaneous walkers,
+- floor palette muted,
+- partitions made taller/more architectural,
+- camera lowered for a less top-down prototype look,
+- structural JavaScript smoke/syntax check: PASS.
 
-Real MASB runtime data remains OFF until the 3D shell passes visual review.
+## Next targets
+1. Replace the current fake work pose with a real chair pose or keep characters standing cleanly.
+2. Rebuild furniture scale and aisle clearance.
+3. Introduce collision-safe corridor nodes, not decorative waypoints.
+4. Improve character silhouette/face before adding more accessories.
+5. Improve lighting/material response instead of adding more objects.
+6. Only then restore restrained labels/status information.
+7. MASB live data remains OFF until the visual shell is credible.
+
+Promotion to stable remains blocked until a new visual review passes.
