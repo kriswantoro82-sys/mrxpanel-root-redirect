@@ -1,0 +1,8 @@
+{
+  "channel": "stable",
+  "version": "0.8.1",
+  "plugin_url": "https://raw.githubusercontent.com/kriswantoro82-sys/mrxpanel-root-redirect/main/mrxpanel-office-updates/plugin.js",
+  "sha256": "be64d9281dd291744053a44cf88397fb349b4e22162eaa388ac1333a893676ce",
+  "released_at": "2026-10-06T06:55:00+07:00",
+  "bootstrap_min": "1.0.0"
+}
