@@ -43,6 +43,33 @@ function targetFor(p,run,reviewIdx,ownerIdx){
 }
 function bubble(s){return s==='WORKING'?'working':s==='REVIEWING'?'reviewing':s==='NEEDS_OWNER'?'need Kris':s==='PASS'?'done ✓':s==='BLOCKED'?'waiting':'idle'}
 function smoothStep(cur,target,amount=.16){return [cur[0]+(target[0]-cur[0])*amount,cur[1]+(target[1]-cur[1])*amount]}
+function dist(a,b){const dx=a[0]-b[0],dy=a[1]-b[1];return Math.sqrt(dx*dx+dy*dy)}
+function zoneOf(pos){
+ const [x,y]=pos
+ if(y<39&&x<44)return 'exec'
+ if(y<39&&x>56)return 'meeting'
+ if(y>=46&&y<66&&x<45)return 'ops'
+ if(y>=46&&y<66&&x>55)return 'vps'
+ if(y>=66&&x<27)return 'support'
+ if(y>=66&&x<49)return 'finance'
+ if(y>=66&&x<68)return 'lounge'
+ if(y>=66&&x<80)return 'pantry'
+ if(y>=66&&x>=80)return 'server'
+ return 'corridor'
+}
+function doorForZone(z){return {exec:[32,40],meeting:[65,40],ops:[33,46],vps:[64,46],support:[16,67],finance:[38,67],lounge:[59,67],pantry:[74,67],server:[86,67]}[z]||null}
+function hubForZone(z){return ['support','finance','lounge','pantry','server'].includes(z)?[50,66]:[50,43]}
+function buildRoute(start,target){
+ const from=zoneOf(start),to=zoneOf(target)
+ if(from===to)return [target]
+ const pts=[],exit=doorForZone(from),entry=doorForZone(to),fromHub=hubForZone(from),toHub=hubForZone(to)
+ if(exit&&dist(start,exit)>.6)pts.push(exit)
+ if(dist(pts.length?pts[pts.length-1]:start,fromHub)>.6)pts.push(fromHub)
+ if(dist(fromHub,toHub)>.6)pts.push(toHub)
+ if(entry&&dist(toHub,entry)>.6)pts.push(entry)
+ pts.push(target)
+ return pts
+}
 
 function Person({p,run,pos,onClick}){
  const moving=Math.abs(pos[0]-(p.home?.[0]||pos[0]))>.5||['REVIEWING','NEEDS_OWNER','BLOCKED','IDLE'].includes(run.status)
@@ -63,26 +90,42 @@ function Office(){
  const ref=useRef(null)
  const [runtime,setRuntime]=useState(INIT)
  const [positions,setPositions]=useState(Object.fromEntries(PEOPLE.map(p=>[p.id,p.home])))
+ const routesRef=useRef({})
  const [demo,setDemo]=useState(true)
  const [selected,setSelected]=useState('MAYA_OPERATOR')
- const [events,setEvents]=useState([{at:Date.now(),text:'V0.8 started'}])
+ const [events,setEvents]=useState([{at:Date.now(),text:'V0.9 navigation engine started'}])
+
+ useEffect(()=>{
+  const reviews=PEOPLE.filter(p=>runtime[p.id]?.status==='REVIEWING')
+  const owners=PEOPLE.filter(p=>runtime[p.id]?.status==='NEEDS_OWNER')
+  const routes={...routesRef.current}
+  for(const p of PEOPLE){
+    const run=runtime[p.id]||{status:'IDLE'}
+    const target=targetFor(p,run,Math.max(0,reviews.findIndex(x=>x.id===p.id)),Math.max(0,owners.findIndex(x=>x.id===p.id)))
+    const start=positions[p.id]||p.home
+    routes[p.id]={points:buildRoute(start,target),index:0,target,status:run.status}
+  }
+  routesRef.current=routes
+ },[runtime])
 
  useEffect(()=>{
   const id=setInterval(()=>{
    setPositions(prev=>{
-    const reviews=PEOPLE.filter(p=>runtime[p.id]?.status==='REVIEWING')
-    const owners=PEOPLE.filter(p=>runtime[p.id]?.status==='NEEDS_OWNER')
     const next={...prev}
     for(const p of PEOPLE){
-      const run=runtime[p.id]||{status:'IDLE'}
-      const t=targetFor(p,run,Math.max(0,reviews.findIndex(x=>x.id===p.id)),Math.max(0,owners.findIndex(x=>x.id===p.id)))
-      next[p.id]=smoothStep(prev[p.id]||p.home,t,.18)
+      const route=routesRef.current[p.id]
+      if(!route||route.index>=route.points.length)continue
+      const cur=prev[p.id]||p.home
+      const waypoint=route.points[route.index]
+      let n=smoothStep(cur,waypoint,.24)
+      if(dist(n,waypoint)<.38){n=waypoint;route.index+=1}
+      next[p.id]=n
     }
     return next
    })
-  },120)
+  },90)
   return()=>clearInterval(id)
- },[runtime])
+ },[])
 
  useEffect(()=>{
   if(!demo)return
@@ -106,7 +149,7 @@ function Office(){
 
  return jsxs('div',{className:'m8',children:[
   jsx('style',{children:CSS}),
-  jsxs('div',{className:'h',children:[jsxs('div',{children:[jsx('div',{className:'corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),jsx('div',{className:'chip',children:'V0.8 • OFFICE MOTION'})]}),
+  jsxs('div',{className:'h',children:[jsxs('div',{children:[jsx('div',{className:'corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),jsx('div',{className:'chip',children:'V0.9 • NAVIGATION ENGINE'})]}),
   jsxs('div',{className:'body',children:[
    jsx('main',{className:'stage',children:jsxs('div',{ref,className:'scene',onMouseMove:move,onMouseLeave:leave,children:[
     jsxs('div',{className:'world',children:[
@@ -133,7 +176,7 @@ function Office(){
     ]})
    ]})}),
    jsxs('aside',{className:'side',children:[
-    jsxs('div',{className:'sideh',children:[jsx('strong',{children:'Office Control'}),jsx('small',{children:'Smooth motion + lobby + real-room flow'})]}),
+    jsxs('div',{className:'sideh',children:[jsx('strong',{children:'Office Control'}),jsx('small',{children:'Door routing + corridor navigation + anti-overlap slots'})]}),
     jsxs('section',{className:'card',children:[jsx('h3',{children:'Office Overview'}),jsxs('div',{className:'stats',children:[
      jsxs('div',{className:'stat',children:[jsx('b',{children:String(working)}),jsx('span',{children:'Working'})]}),
      jsxs('div',{className:'stat',children:[jsx('b',{children:String(reviews.length)}),jsx('span',{children:'Meeting'})]}),
