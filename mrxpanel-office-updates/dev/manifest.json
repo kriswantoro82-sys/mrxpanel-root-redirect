@@ -1,9 +1,9 @@
 {
   "channel": "dev",
-  "version": "3.23.0-dev",
+  "version": "3.24.0-dev",
   "plugin_path": "mrxpanel-office-updates/dev/plugin.js",
-  "sha256": "eb42c2b0ccefe60edbf89845a8ee34b2733df020074b91543ec4292aaca8957c",
-  "released_at": "2026-10-06T17:59:00+07:00",
-  "notes": "Hair Fit Polish: preserve the 180-degree hair orientation, shift the full hair silhouette back and slightly down onto the crown, and reduce hair volume slightly. V3.22 head/neck seating and V3.20 body/head orientation remain unchanged.",
+  "sha256": "ff93e3a6e9811de33d9cf12fc9409e5190e608804d39a6cd3ffaabd5d6dbc18b",
+  "released_at": "2026-10-07T00:46:00+07:00",
+  "notes": "Head proportion polish: shrink the visible head assembly by 5.5% while keeping the neck bridge, V3.22 head seating, V3.23 hair fit, and accepted V3.20 body/head orientation unchanged. Stable V1.3.0 remains untouched.",
   "stable_unchanged": true
 }
