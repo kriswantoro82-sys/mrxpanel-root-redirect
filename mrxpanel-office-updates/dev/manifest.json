@@ -1,9 +1,9 @@
 {
   "channel": "dev",
-  "version": "3.21.0-dev",
+  "version": "3.22.0-dev",
   "plugin_path": "mrxpanel-office-updates/dev/plugin.js",
-  "sha256": "392703dcdc9f21140693d922bcbe87425fdd17e527f09e2bee202da45eb87e5c",
-  "released_at": "2026-10-06T16:08:00+07:00",
-  "notes": "Hair orientation pass: only the hair silhouette geometry is rotated 180 degrees around the head-local vertical axis. V3.20 body, neck, head anchoring, route motion, lighting, grounding and performance work are preserved.",
+  "sha256": "519db9c029659c286baadb56af1ab978077feafb1027a18b05c4db04d09581be",
+  "released_at": "2026-10-06T16:50:00+07:00",
+  "notes": "Head/neck seating pass: lower the complete head assembly toward the neck anchor while preserving the accepted V3.20 body/head orientation and V3.21 180-degree hair rotation. Stable V1.3.0 remains untouched.",
   "stable_unchanged": true
 }
