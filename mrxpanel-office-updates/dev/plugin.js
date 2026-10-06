@@ -323,8 +323,9 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   const headJ=jm.subarray(4*16,5*16)
   const torsoJ=jm.subarray(2*16,3*16)
   const turn=walking?Math.sin(time*1.35+p.offset)*.006:Math.sin(time*1.25+p.offset)*.032
-  const bodyHeadAnchor=mul4(mul4(modelM,headJ),trans(0,0,1.338))
-  const neutralHeadAnchor=mul4(mul4(headModelM,headJ),trans(0,0,1.338))
+  const headSeatZ=1.248
+  const bodyHeadAnchor=mul4(mul4(modelM,headJ),trans(0,0,headSeatZ))
+  const neutralHeadAnchor=mul4(mul4(headModelM,headJ),trans(0,0,headSeatZ))
   const headAnchor=new Float32Array(neutralHeadAnchor)
   headAnchor[12]=bodyHeadAnchor[12];headAnchor[13]=bodyHeadAnchor[13];headAnchor[14]=bodyHeadAnchor[14]
   const head=mul4(headAnchor,rotZ(turn))
@@ -653,7 +654,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • HAIR 180° LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • HEAD / NECK SEATING LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -671,14 +672,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.21 DEV • HAIR 180°'})
+   jsx('div',{className:'h3chip',children:'V3.22 DEV • HEAD / NECK SEATING'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
-     jsx('small',{children:'Hair orientation pass: only the hair silhouette is rotated 180° in head-local space; head, neck, body orientation and the V3.20 anchored-head correction remain unchanged.'})
+     jsx('small',{children:'Head/neck seating pass: the complete head assembly is lowered toward the neck anchor while preserving the accepted body orientation, head facing and 180° hair rotation.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
@@ -689,7 +690,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.21 DEV preserves the accepted V3.20 body/head alignment and rotates only the hair geometry 180° around the head vertical axis. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.22 DEV lowers the full head assembly toward the neck so the head sits naturally on the shoulders; V3.20 body orientation and V3.21 hair rotation remain preserved. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
