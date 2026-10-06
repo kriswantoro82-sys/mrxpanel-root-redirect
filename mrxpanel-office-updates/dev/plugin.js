@@ -255,7 +255,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  const sib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,sib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,sph.i,gl.STATIC_DRAW);gl.bindVertexArray(null)
  const u={svp:gl.getUniformLocation(sp,'uVP'),sm:gl.getUniformLocation(sp,'uModel'),sj:gl.getUniformLocation(sp,'uJ[0]'),shirt:gl.getUniformLocation(sp,'uShirt'),skinTone:gl.getUniformLocation(sp,'uSkinTone'),pants:gl.getUniformLocation(sp,'uPants'),bvp:gl.getUniformLocation(bp,'uVP'),bm:gl.getUniformLocation(bp,'uModel'),bc:gl.getUniformLocation(bp,'uColor')}
  const invBind=[];for(let i=0;i<skin.joints.length;i++)invBind.push(new Float32Array(ibmAcc.array.slice(i*16,i*16+16)))
- const cam={yaw:.78,pitch:.40,dist:17.2},drag={active:false,x:0,y:0,yaw:0,pitch:0}
+ const cam={yaw:.78,pitch:.46,dist:17.8},drag={active:false,x:0,y:0,yaw:0,pitch:0}
  const labelMap=new Map(),roomLabelMap=new Map(),gaitMap=new Map()
  const facingMap=new Map()
  let lastPhase='',start=performance.now(),raf=0,labelFrame=0,lastNow=start
@@ -398,20 +398,25 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
 
   // Segmented partitions: visible rooms with actual walk-through gaps.
   // Left divider: rear wall, door gap around z=-1.55, short front return.
-  B(-1.5,.72,-3.30,.055,.72,1.20,[.30,.32,.33])
-  B(-1.5,.72,-.20,.055,.72,.85,[.30,.32,.33])
+  B(-1.5,1.08,-3.30,.055,1.08,1.20,[.35,.36,.36])
+  B(-1.5,1.08,-.20,.055,1.08,.85,[.35,.36,.36])
   // Right divider: same doorway alignment for the main corridor.
-  B(2.15,.72,-3.30,.055,.72,1.20,[.30,.32,.33])
-  B(2.15,.72,-.20,.055,.72,.85,[.30,.32,.33])
+  B(2.15,1.08,-3.30,.055,1.08,1.20,[.35,.36,.36])
+  B(2.15,1.08,-.20,.055,1.08,.85,[.35,.36,.36])
   // Front divider is broken into side wings, leaving a generous central aisle.
-  B(-4.55,.72,.95,1.55,.72,.055,[.30,.32,.33])
-  B(4.45,.72,.95,1.65,.72,.055,[.30,.32,.33])
+  B(-4.55,1.08,.95,1.55,1.08,.055,[.35,.36,.36])
+  B(4.45,1.08,.95,1.65,1.08,.055,[.35,.36,.36])
   // Door frames mark the two main cross-corridor openings.
   for(const xx of [-1.5,2.15]){
-    B(xx,1.02,-2.07,.075,1.02,.075,[.18,.19,.20])
-    B(xx,1.02,-1.08,.075,1.02,.075,[.18,.19,.20])
-    B(xx,1.98,-1.575,.075,.075,.50,[.18,.19,.20])
+    B(xx,1.04,-2.07,.060,1.04,.060,[.16,.17,.18])
+    B(xx,1.04,-1.08,.060,1.04,.060,[.16,.17,.18])
+    B(xx,2.08,-1.575,.060,.060,.50,[.16,.17,.18])
   }
+  // Upper glass bands keep the office open visually without fake half-height walls.
+  B(-1.46,1.72,-3.30,.018,.28,1.12,[.14,.24,.28])
+  B(2.11,1.72,-3.30,.018,.28,1.12,[.14,.24,.28])
+  B(-4.55,1.72,.91,1.48,.28,.018,[.14,.24,.28])
+  B(4.45,1.72,.91,1.58,.28,.018,[.14,.24,.28])
 
   // Executive room: Kris + Maya.
   B(-4.25,.78,-3.20,1.38,.08,.55,[.31,.20,.12])
@@ -597,7 +602,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • FRAME STABILITY LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • ARCHITECTURAL SCALE LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -615,14 +620,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.10 DEV • FRAME STABILITY'})
+   jsx('div',{className:'h3chip',children:'V3.11 DEV • ARCHITECTURAL SCALE'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
-     jsx('small',{children:'Frame stability: route geometry is precomputed, HUD nodes are cached, render density is pixel-budgeted, and gait/turn realism remains distance-aware and frame-rate independent.'})
+     jsx('small',{children:'Architectural scale: interior partitions are now full office height, door openings match human scale, and the elevated dollhouse camera can read rooms without waist-high prototype walls.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
@@ -633,7 +638,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.10 DEV precomputes route metrics, caches HUD status nodes, and caps render pixels for steadier 8-character performance. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.11 DEV replaces waist-high prototype partitions with full-height office walls, human-scale door frames and restrained upper glass bands. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
