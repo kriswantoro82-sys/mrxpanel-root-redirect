@@ -1,9 +1,9 @@
 {
   "channel": "dev",
-  "version": "3.1.0-dev",
+  "version": "3.4.0-dev",
   "plugin_path": "mrxpanel-office-updates/dev/plugin.js",
-  "sha256": "cd851a4c0fe88142c4983e9eb0c8c9a6ab029a5e9cb068a67b92640e88b28e46",
-  "released_at": "2026-10-06T12:10:00+07:00",
-  "notes": "Realism Reset after visual review: floating room labels removed, fake seated body-sinking disabled, detached ceiling panels removed, character head/face proportions reduced, office traffic slowed, materials muted, partitions made more architectural, camera lowered.",
+  "sha256": "c893005e7a9ffba95330a9473f3a25b8e08b27e8011a77af28259e62adb19c8a",
+  "released_at": "2026-10-06T12:28:00+07:00",
+  "notes": "Realism continuation: segmented room walls with door gaps, explicit collision-safe multi-waypoint routes, workstation chair clipping removed, tighter character/accessory proportions, softer key/fill lighting, smaller ground shadows, desk-facing work orientation, realistic monitor stands, keyboards and mice.",
   "stable_unchanged": true
 }
