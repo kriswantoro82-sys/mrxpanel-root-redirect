@@ -339,19 +339,23 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   part(0,0,.000,.148,.164,.171,skin)
   part(0,.018,.042,.141,.158,.145,[Math.min(1,skin[0]*1.05),Math.min(1,skin[1]*1.05),Math.min(1,skin[2]*1.05)])
 
-  // Hair fit polish: keep the 180° orientation, but seat the silhouette back/down on the crown.
-  const hairHead=mul4(mul4(headVisual,trans(0,-.095,-.018)),rotZ(Math.PI))
-  const hairPart=(x,y,z,sx,sy,sz,color)=>sphereDraw(vp,mul4(mul4(hairHead,trans(x,y,z)),scale(sx*.95,sy*.95,sz*.96)),color)
+  // Hair shape rebuild: follow the skull directly; no rotated cap transform.
+  // A compact crown plus tapered side/back masses avoids the band/helmet silhouette seen in V3.24.
+  const hairPart=(x,y,z,sx,sy,sz,color)=>sphereDraw(vp,mul4(mul4(headVisual,trans(x,y,z)),scale(sx,sy,sz)),color)
   if(p.hairStyle===1){
-    hairPart(0,-.050,.132,.164,.126,.097,hair)
-    hairPart(-.106,-.026,.068,.058,.086,.102,hair);hairPart(.106,-.026,.068,.058,.086,.102,hair)
-    hairPart(.116,-.018,-.010,.040,.064,.098,hair)
+    hairPart(0,-.034,.130,.150,.124,.090,hair)
+    hairPart(-.104,-.020,.064,.048,.073,.091,hair);hairPart(.104,-.020,.064,.048,.073,.091,hair)
+    hairPart(0,-.103,.060,.122,.046,.095,hair)
+    hairPart(.105,-.074,.012,.033,.042,.070,hair)
   }else if(p.hairStyle===2){
-    hairPart(0,-.052,.130,.166,.124,.096,hair)
-    hairPart(-.062,-.045,.184,.098,.086,.044,hair);hairPart(.068,-.040,.180,.090,.088,.046,hair)
+    hairPart(0,-.035,.129,.151,.123,.089,hair)
+    hairPart(-.055,.005,.174,.078,.071,.038,hair);hairPart(.060,.008,.170,.074,.069,.039,hair)
+    hairPart(-.105,-.020,.060,.047,.070,.087,hair);hairPart(.105,-.020,.060,.047,.070,.087,hair)
+    hairPart(0,-.105,.060,.120,.045,.091,hair)
   }else{
-    hairPart(0,-.052,.127,.162,.120,.091,hair)
-    hairPart(-.096,-.030,.067,.050,.076,.082,hair);hairPart(.096,-.030,.067,.050,.076,.082,hair)
+    hairPart(0,-.034,.127,.148,.120,.086,hair)
+    hairPart(-.101,-.020,.062,.044,.068,.082,hair);hairPart(.101,-.020,.062,.044,.068,.082,hair)
+    hairPart(0,-.101,.061,.116,.043,.086,hair)
   }
 
   part(-.148,.000,-.006,.027,.020,.045,[skin[0]*.92,skin[1]*.92,skin[2]*.92])
@@ -656,7 +660,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • HEAD PROPORTION POLISH LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • HAIR SHAPE REBUILD LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -674,14 +678,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.24 DEV • HEAD PROPORTION POLISH'})
+   jsx('div',{className:'h3chip',children:'V3.25 DEV • HAIR SHAPE REBUILD'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
-     jsx('small',{children:'Head proportion pass: shrink the visible head assembly by 5.5% while keeping the neck bridge, head seating, body orientation and V3.23 hair fit intact.'})
+     jsx('small',{children:'Hair shape rebuild: replace the rotated cap/band silhouette with a skull-following crown, tapered side masses and a compact back mass while preserving V3.24 head proportion and accepted orientation.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
