@@ -329,18 +329,23 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   const headAnchor=new Float32Array(neutralHeadAnchor)
   headAnchor[12]=bodyHeadAnchor[12];headAnchor[13]=bodyHeadAnchor[13];headAnchor[14]=bodyHeadAnchor[14]
   const head=mul4(headAnchor,rotZ(turn))
-  const headVisual=mul4(head,scale(.945,.945,.945))
+  // V3.25 anatomical rebuild: narrower cranium, tapered jaw and a separate facial volume.
+  // The neck remains on the accepted V3.22 anchor while the visible head is rebuilt around it.
+  const headVisual=mul4(head,scale(.925,.925,.925))
   const skin=p.skin,hair=p.hair,accent=p.accent
   const part=(x,y,z,sx,sy,sz,color)=>sphereDraw(vp,mul4(mul4(headVisual,trans(x,y,z)),scale(sx,sy,sz)),color)
   const block=(x,y,z,sx,sy,sz,color,rz=0)=>boxDraw(vp,mul4(mul4(mul4(headVisual,trans(x,y,z)),rotZ(rz)),scale(sx,sy,sz)),color)
   const neckPart=(x,y,z,sx,sy,sz,color)=>sphereDraw(vp,mul4(mul4(head,trans(x,y,z)),scale(sx,sy,sz)),color)
 
-  neckPart(0,0,-.205,.074,.074,.102,[skin[0]*.93,skin[1]*.93,skin[2]*.93])
-  part(0,0,.000,.148,.164,.171,skin)
-  part(0,.018,.042,.141,.158,.145,[Math.min(1,skin[0]*1.05),Math.min(1,skin[1]*1.05),Math.min(1,skin[2]*1.05)])
+  neckPart(0,0,-.205,.071,.071,.104,[skin[0]*.93,skin[1]*.93,skin[2]*.93])
+  // Back cranium + mid-face + jaw are intentionally separate to avoid the old double-ball head.
+  part(0,-.020,.038,.143,.139,.157,skin)
+  part(0,.060,.020,.132,.116,.128,[Math.min(1,skin[0]*1.035),Math.min(1,skin[1]*1.035),Math.min(1,skin[2]*1.035)])
+  part(0,.046,-.082,.108,.096,.083,[skin[0]*.975,skin[1]*.975,skin[2]*.975])
+  part(-.092,.035,-.020,.050,.076,.090,[skin[0]*.99,skin[1]*.99,skin[2]*.99])
+  part(.092,.035,-.020,.050,.076,.090,[skin[0]*.99,skin[1]*.99,skin[2]*.99])
 
-  // Hair shape rebuild: follow the skull directly; no rotated cap transform.
-  // A compact crown plus tapered side/back masses avoids the band/helmet silhouette seen in V3.24.
+  // Hair is rebuilt as part of the skull silhouette, not a rotated cap.
   const hairPart=(x,y,z,sx,sy,sz,color)=>sphereDraw(vp,mul4(mul4(headVisual,trans(x,y,z)),scale(sx,sy,sz)),color)
   if(p.hairStyle===1){
     hairPart(0,-.034,.130,.150,.124,.090,hair)
@@ -660,7 +665,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • HAIR SHAPE REBUILD LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • HEAD + HAIR REBUILD LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -678,14 +683,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.25 DEV • HAIR SHAPE REBUILD'})
+   jsx('div',{className:'h3chip',children:'V3.25 DEV • HEAD + HAIR REBUILD'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
-     jsx('small',{children:'Hair shape rebuild: replace the rotated cap/band silhouette with a skull-following crown, tapered side masses and a compact back mass while preserving V3.24 head proportion and accepted orientation.'})
+     jsx('small',{children:'Head/hair rebuild: narrower cranium, tapered jaw and integrated hair silhouette replace the old cap-like head treatment while preserving the accepted neck seat and body orientation.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
@@ -696,7 +701,7 @@ function HumanLab(){
     ]})
    ]})}),
    jsxs('aside',{className:'h3side',children:[
-    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.22 DEV lowers the full head assembly toward the neck so the head sits naturally on the shoulders; V3.20 body orientation and V3.21 hair rotation remain preserved. Stable V1.3 remains untouched.'})]}),
+    jsxs('div',{className:'h3sideh',children:[jsx('strong',{children:'MRXPANEL Living Office'}),jsx('small',{children:'V3.25 DEV rebuilds the visible head and hair around the accepted V3.22 neck anchor while preserving the accepted V3.20 body orientation. Stable V1.3 remains untouched.'})]}),
     jsxs('section',{className:'h3card',children:[
      jsx('h3',{children:'Character Engine'}),
      jsxs('div',{className:'h3stats',children:[
