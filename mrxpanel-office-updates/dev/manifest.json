@@ -1,9 +1,10 @@
 {
   "channel": "dev",
-  "version": "3.24.0-dev",
+  "version": "3.25.0-dev",
   "plugin_path": "mrxpanel-office-updates/dev/plugin.js",
-  "sha256": "ff93e3a6e9811de33d9cf12fc9409e5190e608804d39a6cd3ffaabd5d6dbc18b",
-  "released_at": "2026-10-07T00:46:00+07:00",
-  "notes": "Head proportion polish: shrink the visible head assembly by 5.5% while keeping the neck bridge, V3.22 head seating, V3.23 hair fit, and accepted V3.20 body/head orientation unchanged. Stable V1.3.0 remains untouched.",
-  "stable_unchanged": true
+  "sha256": "3bb97bbb0408df472aa1e95bf9a02ab1800f628caa22c65ebbd214562737086c",
+  "released_at": "2026-10-08T14:10:00+07:00",
+  "notes": "Head + Hair Rebuild: replaces the previous cap-like head treatment with a narrower cranium, separate mid-face and tapered jaw volumes, and hair integrated into the skull silhouette. Preserves V3.22 neck seating and accepted V3.20 body orientation. Stable V1.3.0 remains untouched.",
+  "stable_unchanged": true,
+  "source_commit": "6b4ea1fa5cac41e99af0cc0f472054e2f7512513"
 }
