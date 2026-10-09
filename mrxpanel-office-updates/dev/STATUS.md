@@ -1,24 +1,24 @@
 # MRXPANEL OFFICE — DEV STATUS
 
-Current dev build: **V3.26 DEV — WORKSTATION + GROUNDING**
+Current dev build: **V3.27 DEV — MOTION + ARRIVAL POLISH**
 
 Stable channel: **V1.3.0** (unchanged)
 
-## V3.26 coherent batch polish
-- Preserves the V3.25 head + hair rebuild.
-- Standing work pose now converges forearms more naturally toward the keyboard.
-- Independent wrist micro-motion adds restrained typing behavior.
-- Desk mats and raised keyboard/mouse surfaces remove the old desktop clipping look.
-- Executive desk inputs were also lifted and visually grounded.
-- Workstations now have brighter monitor faces, compact task lights, wrist rests and restrained gold edge detail.
-- Character contact shadows are slightly wider, softer and closer to the floor.
-- Body orientation, route motion and accepted neck seating remain unchanged.
+## V3.27 coherent batch polish
+- Preserves V3.26 workstation + grounding changes.
+- Preserves V3.25 head + hair rebuild and accepted body/head orientation.
+- Route heading now samples a short tangent around each waypoint, reducing abrupt direction snaps.
+- Travel easing upgraded from cubic smoothstep to quintic smootherstep for gentler starts/stops.
+- Office walking speed reduced from 1.10 to 0.96 world units/sec.
+- Turn smoothing reduced to avoid sharp body rotation during route changes.
+- Gait blend now fades with movement phase so footsteps soften near departure and arrival.
+- World-space stride mapping increased from 1.42 to 1.55 units per gait cycle to reduce fast-foot/treadmill impression.
 - Commit-pinned syntax/source preflight: PASS.
-- Target SHA256: `de9096cff1d2d603f0b0b0e9e1c1b0751916fff6dd7e7fd7eb758bfdd94bcbde`.
+- Target SHA256: `444969809f60061fe0979a857be5fe9dff4d80fb933f474ce32005b23f4bd633`.
 
 ## Visual review gate
-- Load only from commit `bbd56116521ae6a610f577238b9bfeddf388bf37`.
+- Load only from commit `a8f60661cbd2d1c8ff016095618f4539782d29fe`.
 - Stable V1.3.0 and updater must remain untouched.
-- Final visual acceptance still required before any stable promotion.
+- Visual acceptance still required before stable promotion.
 
 Stable V1.3.0 remains untouched.
