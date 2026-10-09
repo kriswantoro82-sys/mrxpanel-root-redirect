@@ -1,10 +1,10 @@
 {
   "channel": "dev",
-  "version": "3.25.0-dev",
+  "version": "3.26.0-dev",
   "plugin_path": "mrxpanel-office-updates/dev/plugin.js",
-  "sha256": "3bb97bbb0408df472aa1e95bf9a02ab1800f628caa22c65ebbd214562737086c",
-  "released_at": "2026-10-08T14:10:00+07:00",
-  "notes": "Head + Hair Rebuild: replaces the previous cap-like head treatment with a narrower cranium, separate mid-face and tapered jaw volumes, and hair integrated into the skull silhouette. Preserves V3.22 neck seating and accepted V3.20 body orientation. Stable V1.3.0 remains untouched.",
+  "sha256": "de9096cff1d2d603f0b0b0e9e1c1b0751916fff6dd7e7fd7eb758bfdd94bcbde",
+  "released_at": "2026-10-09T12:20:00+07:00",
+  "notes": "Batch polish: preserves the V3.25 head/hair rebuild while refining standing workstation pose, independent typing wrist motion, desk mats and input-device grounding, brighter monitor faces, compact task-light detail, executive desk ergonomics, and character contact shadows. Stable V1.3.0 remains untouched.",
   "stable_unchanged": true,
-  "source_commit": "6b4ea1fa5cac41e99af0cc0f472054e2f7512513"
+  "source_commit": "bbd56116521ae6a610f577238b9bfeddf388bf37"
 }
