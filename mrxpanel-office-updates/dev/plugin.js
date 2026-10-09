@@ -298,11 +298,19 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
    st[13].r=qmul(st[13].r,qx(.028+breathe*.004))
    st[3].t[2]+=breathe*.002
   }else if(w<.05&&activity==='review'){
+   // Relaxed review stance: arms stay near the torso instead of reverting to the source clip's wide pose.
+   st[14].r=qmul(st[14].r,qx(-.16));st[14].r=qmul(st[14].r,qz(-.22))
+   st[17].r=qmul(st[17].r,qx(.16)); st[17].r=qmul(st[17].r,qz(.22))
+   st[15].r=qmul(st[15].r,qy(.060));st[18].r=qmul(st[18].r,qy(-.060))
    st[20].r=qmul(st[20].r,qy(Math.sin(t*1.10)*.018))
    st[21].r=qmul(st[21].r,qy(Math.sin(t*.80)*.022))
    st[13].r=qmul(st[13].r,qx(Math.sin(t*.90)*.008))
    st[3].t[2]+=Math.sin(t*1.25)*.002
   }else if(w<.05){
+   // Neutral idle stance also keeps shoulders out of the T-pose silhouette.
+   st[14].r=qmul(st[14].r,qx(-.10));st[14].r=qmul(st[14].r,qz(-.16))
+   st[17].r=qmul(st[17].r,qx(.10)); st[17].r=qmul(st[17].r,qz(.16))
+   st[15].r=qmul(st[15].r,qy(.035));st[18].r=qmul(st[18].r,qy(-.035))
    st[12].r=qmul(st[12].r,qy(Math.sin(t*.72)*.016))
    st[3].t[2]+=Math.sin(t*1.25)*.004
   }
@@ -333,40 +341,39 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   const head=mul4(headAnchor,rotZ(turn))
   // V3.25 anatomical rebuild: narrower cranium, tapered jaw and a separate facial volume.
   // The neck remains on the accepted V3.22 anchor while the visible head is rebuilt around it.
-  const headVisual=mul4(head,scale(.925,.925,.925))
+  // V3.28 silhouette rebuild: smaller skull, cleaner jaw and hair that stays above/back from the forehead.
+  const headVisual=mul4(head,scale(.895,.895,.895))
   const skin=p.skin,hair=p.hair,accent=p.accent
   const part=(x,y,z,sx,sy,sz,color)=>sphereDraw(vp,mul4(mul4(headVisual,trans(x,y,z)),scale(sx,sy,sz)),color)
   const block=(x,y,z,sx,sy,sz,color,rz=0)=>boxDraw(vp,mul4(mul4(mul4(headVisual,trans(x,y,z)),rotZ(rz)),scale(sx,sy,sz)),color)
   const neckPart=(x,y,z,sx,sy,sz,color)=>sphereDraw(vp,mul4(mul4(head,trans(x,y,z)),scale(sx,sy,sz)),color)
 
-  neckPart(0,0,-.205,.071,.071,.104,[skin[0]*.93,skin[1]*.93,skin[2]*.93])
-  // Back cranium + mid-face + jaw are intentionally separate to avoid the old double-ball head.
-  part(0,-.020,.038,.143,.139,.157,skin)
-  part(0,.060,.020,.132,.116,.128,[Math.min(1,skin[0]*1.035),Math.min(1,skin[1]*1.035),Math.min(1,skin[2]*1.035)])
-  part(0,.046,-.082,.108,.096,.083,[skin[0]*.975,skin[1]*.975,skin[2]*.975])
-  part(-.092,.035,-.020,.050,.076,.090,[skin[0]*.99,skin[1]*.99,skin[2]*.99])
-  part(.092,.035,-.020,.050,.076,.090,[skin[0]*.99,skin[1]*.99,skin[2]*.99])
+  neckPart(0,0,-.205,.069,.069,.104,[skin[0]*.93,skin[1]*.93,skin[2]*.93])
+  // One compact cranium, a smaller facial volume and a tapered lower jaw.
+  part(0,-.018,.042,.136,.129,.150,skin)
+  part(0,.052,.018,.118,.103,.116,[Math.min(1,skin[0]*1.03),Math.min(1,skin[1]*1.03),Math.min(1,skin[2]*1.03)])
+  part(0,.048,-.078,.092,.080,.074,[skin[0]*.975,skin[1]*.975,skin[2]*.975])
+  // Small ears replace the old side-face bulges.
+  part(-.132,.004,-.012,.019,.015,.034,[skin[0]*.94,skin[1]*.94,skin[2]*.94])
+  part(.132,.004,-.012,.019,.015,.034,[skin[0]*.94,skin[1]*.94,skin[2]*.94])
 
-  // Hair is rebuilt as part of the skull silhouette, not a rotated cap.
+  // Hair sits on the crown/back only; no low side-band crossing the forehead.
   const hairPart=(x,y,z,sx,sy,sz,color)=>sphereDraw(vp,mul4(mul4(headVisual,trans(x,y,z)),scale(sx,sy,sz)),color)
   if(p.hairStyle===1){
-    hairPart(0,-.034,.130,.150,.124,.090,hair)
-    hairPart(-.104,-.020,.064,.048,.073,.091,hair);hairPart(.104,-.020,.064,.048,.073,.091,hair)
-    hairPart(0,-.103,.060,.122,.046,.095,hair)
-    hairPart(.105,-.074,.012,.033,.042,.070,hair)
+    hairPart(0,-.045,.136,.134,.103,.070,hair)
+    hairPart(-.098,-.045,.068,.034,.053,.069,hair);hairPart(.098,-.045,.068,.034,.053,.069,hair)
+    hairPart(0,-.112,.064,.101,.032,.082,hair)
+    hairPart(.083,-.092,.020,.025,.031,.052,hair)
   }else if(p.hairStyle===2){
-    hairPart(0,-.035,.129,.151,.123,.089,hair)
-    hairPart(-.055,.005,.174,.078,.071,.038,hair);hairPart(.060,.008,.170,.074,.069,.039,hair)
-    hairPart(-.105,-.020,.060,.047,.070,.087,hair);hairPart(.105,-.020,.060,.047,.070,.087,hair)
-    hairPart(0,-.105,.060,.120,.045,.091,hair)
+    hairPart(0,-.045,.135,.135,.102,.069,hair)
+    hairPart(-.048,-.010,.172,.056,.052,.027,hair);hairPart(.052,-.008,.169,.054,.050,.028,hair)
+    hairPart(-.098,-.045,.066,.033,.052,.067,hair);hairPart(.098,-.045,.066,.033,.052,.067,hair)
+    hairPart(0,-.113,.063,.100,.032,.080,hair)
   }else{
-    hairPart(0,-.034,.127,.148,.120,.086,hair)
-    hairPart(-.101,-.020,.062,.044,.068,.082,hair);hairPart(.101,-.020,.062,.044,.068,.082,hair)
-    hairPart(0,-.101,.061,.116,.043,.086,hair)
+    hairPart(0,-.045,.132,.132,.100,.066,hair)
+    hairPart(-.095,-.045,.064,.031,.050,.064,hair);hairPart(.095,-.045,.064,.031,.050,.064,hair)
+    hairPart(0,-.110,.062,.097,.031,.076,hair)
   }
-
-  part(-.148,.000,-.006,.027,.020,.045,[skin[0]*.92,skin[1]*.92,skin[2]*.92])
-  part(.148,.000,-.006,.027,.020,.045,[skin[0]*.92,skin[1]*.92,skin[2]*.92])
   part(-.054,.153,.040,.023,.011,.019,[.965,.965,.945]);part(.054,.153,.040,.023,.011,.019,[.965,.965,.945])
   part(-.054,.163,.040,.009,.008,.010,p.eye);part(.054,.163,.040,.009,.008,.010,p.eye)
   part(-.052,.171,.044,.003,.003,.004,[1,1,1]);part(.056,.171,.044,.003,.003,.004,[1,1,1])
@@ -681,7 +688,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • MOTION + ARRIVAL POLISH LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • CHARACTER SILHOUETTE + REVIEW POSE LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -699,14 +706,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.27 DEV • MOTION + ARRIVAL POLISH'})
+   jsx('div',{className:'h3chip',children:'V3.28 DEV • CHARACTER SILHOUETTE'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
-     jsx('small',{children:'Motion polish: V3.26 workstation/grounding stays intact while route turns, acceleration/braking, stride cadence and gait fade at arrival/departure are smoothed for more natural office movement.'})
+     jsx('small',{children:'Visual review pass: head/hair silhouette is rebuilt again to remove the forehead-band look, while REVIEWING/IDLE arm poses are relaxed to eliminate the wide T-pose seen in V3.27 screenshots.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
