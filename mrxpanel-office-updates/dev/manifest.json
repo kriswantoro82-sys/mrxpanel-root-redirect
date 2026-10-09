@@ -1,10 +1,10 @@
 {
   "channel": "dev",
-  "version": "3.26.0-dev",
+  "version": "3.27.0-dev",
   "plugin_path": "mrxpanel-office-updates/dev/plugin.js",
-  "sha256": "de9096cff1d2d603f0b0b0e9e1c1b0751916fff6dd7e7fd7eb758bfdd94bcbde",
-  "released_at": "2026-10-09T12:20:00+07:00",
-  "notes": "Batch polish: preserves the V3.25 head/hair rebuild while refining standing workstation pose, independent typing wrist motion, desk mats and input-device grounding, brighter monitor faces, compact task-light detail, executive desk ergonomics, and character contact shadows. Stable V1.3.0 remains untouched.",
+  "sha256": "444969809f60061fe0979a857be5fe9dff4d80fb933f474ce32005b23f4bd633",
+  "released_at": "2026-10-09T14:18:00+07:00",
+  "notes": "Motion + Arrival Polish: preserves V3.26 workstation/grounding and V3.25 head/hair, while adding smoother waypoint heading, quintic acceleration/braking, slower office walk speed, longer stride cadence, and gait fade near departure/arrival to reduce snapping and treadmill-like foot motion. Stable V1.3.0 remains untouched.",
   "stable_unchanged": true,
-  "source_commit": "bbd56116521ae6a610f577238b9bfeddf388bf37"
+  "source_commit": "a8f60661cbd2d1c8ff016095618f4539782d29fe"
 }
