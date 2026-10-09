@@ -285,15 +285,17 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
    st[3].t[2]=base[3].t[2]+(st[3].t[2]-base[3].t[2])*.30
   }else if(w<.05&&activity==='work'){
    const breathe=Math.sin(t*1.20),micro=Math.sin(t*2.10)
-   // Geometry-calibrated standing desk pose:
-   // shoulder X/Z rotations bring terminal hand joints near ~0.72-0.77m local height,
-   // matching the 0.70m desk + keyboard surface without sinking the body.
+   const keyL=Math.sin(t*7.2+.35),keyR=Math.sin(t*7.2+2.65)
+   // Standing workstation pose: shoulders stay relaxed while forearms converge on the keyboard.
    st[14].r=qmul(st[14].r,qx(-.43));st[14].r=qmul(st[14].r,qz(-.40))
    st[17].r=qmul(st[17].r,qx(.43)); st[17].r=qmul(st[17].r,qz(.40))
-   st[15].r=qmul(st[15].r,qy(.035+micro*.006))
-   st[18].r=qmul(st[18].r,qy(-.035-micro*.006))
+   st[15].r=qmul(st[15].r,qy(.050+micro*.008))
+   st[18].r=qmul(st[18].r,qy(-.050-micro*.008))
+   // Small independent wrist motion reads as typing without turning the arms into a looped gesture.
+   st[16].r=qmul(st[16].r,qx(.030+keyR*.012));st[16].r=qmul(st[16].r,qz(-.025))
+   st[19].r=qmul(st[19].r,qx(-.030-keyL*.012));st[19].r=qmul(st[19].r,qz(.025))
    st[12].r=qmul(st[12].r,qy(breathe*.008))
-   st[13].r=qmul(st[13].r,qx(.022+breathe*.004))
+   st[13].r=qmul(st[13].r,qx(.028+breathe*.004))
    st[3].t[2]+=breathe*.002
   }else if(w<.05&&activity==='review'){
    st[20].r=qmul(st[20].r,qy(Math.sin(t*1.10)*.018))
@@ -468,9 +470,12 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   B(-4.25,1.15,-3.68,.62,.38,.05,[.035,.06,.08])
   B(-4.25,.91,-3.68,.035,.16,.035,[.09,.10,.11])
   B(-4.25,.795,-3.68,.20,.020,.09,[.10,.11,.12])
-  B(-4.72,.865,-2.82,.29,.018,.075,[.10,.11,.12])
-  B(-3.78,.865,-2.82,.29,.018,.075,[.10,.11,.12])
-  B(-4.38,.865,-2.82,.045,.018,.060,[.11,.12,.13])
+  // Separate desk mats keep the executive keyboards visually grounded instead of clipping into the desktop.
+  B(-4.72,.866,-2.82,.36,.006,.16,[.065,.075,.085]);B(-3.78,.866,-2.82,.36,.006,.16,[.065,.075,.085])
+  B(-4.72,.882,-2.82,.29,.012,.075,[.10,.11,.12])
+  B(-3.78,.882,-2.82,.29,.012,.075,[.10,.11,.12])
+  B(-4.38,.882,-2.82,.045,.012,.060,[.11,.12,.13])
+  B(-4.25,.861,-2.655,1.16,.009,.009,[.58,.42,.18])
   B(-4.25,2.15,-4.52,1.15,.025,.03,[.86,.65,.22])
   B(-4.25,2.05,-4.49,.72,.20,.02,[.12,.16,.18])
 
@@ -485,19 +490,25 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
   // Workstation chairs intentionally withheld in realism mode.
   // They return only after a true hip/knee sit pose is implemented; no clipping placeholders.
 
-  // Operations workstations: desk, monitor body + stand/base, keyboard and mouse.
+  // Operations workstations: desk, monitor, ergonomic input zone and task-light detail.
   const workstation=(x,z,wood=[.31,.20,.12])=>{
     // 0.70m desk with four grounded legs.
     B(x,.70,z,.60,.055,.34,wood)
     for(const dx of [-.52,.52])for(const dz of [-.26,.26])B(x+dx,.34,z+dz,.035,.34,.035,[.12,.13,.14])
-    // Monitor body, subtle screen face, stand and base.
+    // Monitor body, brighter screen face, stand and base.
     B(x,.98,z-.35,.31,.23,.035,[.040,.055,.065])
-    B(x,.98,z-.388,.275,.195,.010,[.10,.20,.24])
+    B(x,.98,z-.388,.275,.195,.010,[.12,.25,.30])
     B(x,.80,z-.35,.030,.10,.030,[.09,.10,.11])
     B(x,.715,z-.35,.15,.018,.075,[.10,.11,.12])
-    // Keyboard + mouse.
-    B(x,.765,z+.15,.23,.016,.060,[.10,.11,.12])
-    B(x+.31,.765,z+.15,.040,.016,.050,[.11,.12,.13])
+    // Desk mat lifts the keyboard/mouse clear of the desktop and gives the hands a believable landing zone.
+    B(x,.762,z+.145,.34,.006,.14,[.065,.075,.085])
+    B(x,.777,z+.145,.22,.012,.055,[.10,.11,.12])
+    B(x+.31,.777,z+.145,.038,.012,.045,[.11,.12,.13])
+    B(x,.775,z+.255,.18,.010,.024,[.075,.080,.085])
+    // Compact task light + restrained gold front-edge detail.
+    B(x-.43,.885,z-.04,.018,.12,.018,[.17,.17,.16])
+    B(x-.43,1.025,z-.055,.085,.035,.065,[.72,.55,.25])
+    B(x,.759,z+.329,.48,.008,.008,[.58,.42,.18])
     contact(x,z,.70,.42)
   }
   for(const xx of [-4.75,-3.05,-.55,1.15])workstation(xx,.05,[.32,.21,.12])
@@ -635,7 +646,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     const placement=mul4(mul4(trans(px,yOffset,pz),rotY(bodyYaw)),scale(p.scale,p.scale,p.scale)),modelM=mul4(placement,mw)
     const headPlacement=mul4(mul4(trans(px,yOffset,pz),rotY(yaw)),scale(p.scale,p.scale,p.scale)),headModelM=mul4(headPlacement,mw)
 
-    sphereDraw(vp,mul4(trans(px,.010,pz),scale(.18*p.scale,.006,.095*p.scale)),[.135,.140,.143])
+    sphereDraw(vp,mul4(trans(px,.009,pz),scale(.20*p.scale,.005,.105*p.scale)),[.125,.130,.134])
     gl.useProgram(sp);gl.uniformMatrix4fv(u.svp,false,vp);gl.uniformMatrix4fv(u.sm,false,modelM);gl.uniformMatrix4fv(u.sj,false,jm)
     gl.uniform3fv(u.shirt,p.shirt);gl.uniform3fv(u.skinTone,p.skin);gl.uniform3fv(u.pants,p.pants)
     gl.bindVertexArray(vao);gl.drawElements(gl.TRIANGLES,indices.count,indices.componentType===5123?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,0)
@@ -665,7 +676,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • HEAD + HAIR REBUILD LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • WORKSTATION + GROUNDING POLISH LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -683,14 +694,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.25 DEV • HEAD + HAIR REBUILD'})
+   jsx('div',{className:'h3chip',children:'V3.26 DEV • WORKSTATION + GROUNDING'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
-     jsx('small',{children:'Head/hair rebuild: narrower cranium, tapered jaw and integrated hair silhouette replace the old cap-like head treatment while preserving the accepted neck seat and body orientation.'})
+     jsx('small',{children:'Batch polish: V3.25 head/hair rebuild is preserved while workstation ergonomics, typing wrists, keyboard grounding, monitor/task-light detail and character contact shadows are refined together.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
