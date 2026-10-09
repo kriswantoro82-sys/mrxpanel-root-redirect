@@ -1,10 +1,10 @@
 {
   "channel": "dev",
-  "version": "3.27.0-dev",
+  "version": "3.28.0-dev",
   "plugin_path": "mrxpanel-office-updates/dev/plugin.js",
-  "sha256": "444969809f60061fe0979a857be5fe9dff4d80fb933f474ce32005b23f4bd633",
-  "released_at": "2026-10-09T14:18:00+07:00",
-  "notes": "Motion + Arrival Polish: preserves V3.26 workstation/grounding and V3.25 head/hair, while adding smoother waypoint heading, quintic acceleration/braking, slower office walk speed, longer stride cadence, and gait fade near departure/arrival to reduce snapping and treadmill-like foot motion. Stable V1.3.0 remains untouched.",
+  "sha256": "1dec70eb35db2acb7cb47916ccd792d8cd492275f2772b54fbc6759ee7938467",
+  "released_at": "2026-10-09T14:28:00+07:00",
+  "notes": "Character Silhouette + Review Pose: visually driven correction from V3.27 screenshots. Rebuilds the head/hair silhouette again with a smaller skull, cleaner jaw, smaller ears, crown/back-only hair to eliminate the forehead-band look, and relaxed REVIEWING/IDLE arm poses to remove wide T-pose silhouettes. Preserves V3.27 motion and V3.26 workstation/grounding. Stable V1.3.0 remains untouched.",
   "stable_unchanged": true,
-  "source_commit": "a8f60661cbd2d1c8ff016095618f4539782d29fe"
+  "source_commit": "92ca8721a1ffaf4f6ef4e8ceffc540845eca4936"
 }
