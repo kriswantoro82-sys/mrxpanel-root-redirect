@@ -595,50 +595,55 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
     return[a[0]+dx*q-dz/len*lane,a[1]+dz*q+dx/len*lane]
   }
   const dirAt=(p,f,reverse=false)=>{
-    const {a,b}=routeSeg(p,f);let dx=b[0]-a[0],dz=b[1]-a[1]
+    // Sample a short tangent around the current route position so waypoint turns blend instead of snapping.
+    const eps=.018,a=pathAt(p,Math.max(0,f-eps)),b=pathAt(p,Math.min(1,f+eps))
+    let dx=b[0]-a[0],dz=b[1]-a[1]
     if(reverse){dx=-dx;dz=-dz}
     return Math.atan2(-dz,dx)
   }
-  const travelEase=(q)=>{q=Math.max(0,Math.min(1,q));return q*q*(3-2*q)}
+  // Quintic smootherstep gives gentler acceleration/braking at both ends of a walk.
+  const travelEase=(q)=>{q=Math.max(0,Math.min(1,q));return q*q*q*(q*(q*6-15)+10)}
 
   // Room labels intentionally hidden in realism mode; architecture should explain the space.
 
 
   let phaseSummary='OFFICE ACTIVE'
   for(const p of cast){
-    const routeLen=routeMetrics(p).total,walkSpeed=1.10
-    const moveDur=Math.max(2.7,Math.min(8.5,routeLen/walkSpeed))
+    const routeLen=routeMetrics(p).total,walkSpeed=.96
+    const moveDur=Math.max(2.9,Math.min(9.2,routeLen/walkSpeed))
     const homeHold=11,targetHold=7,returnHold=5,cycleLen=homeHold+moveDur+targetHold+moveDur+returnHold
     const cycle=((sec+(p.schedule||0))%cycleLen+cycleLen)%cycleLen
     const outStart=homeHold,outEnd=outStart+moveDur,reviewEnd=outEnd+targetHold,backEnd=reviewEnd+moveDur
-    let walking=false,px=p.home[0],pz=p.home[1],desiredYaw=0,gaitDistance=0
+    let walking=false,px=p.home[0],pz=p.home[1],desiredYaw=0,gaitDistance=0,movePhase=0
     if(mode==='walk'){
       const span=Math.max(1,routeLen/walkSpeed),q=((sec+p.offset)/span)%2,forward=q<1,leg=forward?q:2-q,f=travelEase(leg),pt=pathAt(p,f)
-      px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,f,!forward);gaitDistance=routeLen*(forward?f:1-f)
+      px=pt[0];pz=pt[1];walking=true;movePhase=leg;desiredYaw=dirAt(p,f,!forward);gaitDistance=routeLen*(forward?f:1-f)
     }else if(mode==='idle'){
       px=p.home[0];pz=p.home[1];walking=false;desiredYaw=(p.workYaw??dirAt(p,0,false))
     }else{
       if(cycle<outStart){px=p.home[0];pz=p.home[1];walking=false;desiredYaw=(p.workYaw??dirAt(p,0,false))}
-      else if(cycle<outEnd){const raw=(cycle-outStart)/moveDur,ff=travelEase(raw),pt=pathAt(p,ff);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,ff,false);gaitDistance=routeLen*ff}
+      else if(cycle<outEnd){const raw=(cycle-outStart)/moveDur,ff=travelEase(raw),pt=pathAt(p,ff);px=pt[0];pz=pt[1];walking=true;movePhase=raw;desiredYaw=dirAt(p,ff,false);gaitDistance=routeLen*ff}
       else if(cycle<reviewEnd){px=p.target[0];pz=p.target[1];walking=false;desiredYaw=dirAt(p,1,false)}
-      else if(cycle<backEnd){const raw=(cycle-reviewEnd)/moveDur,ff=travelEase(raw),rf=1-ff,pt=pathAt(p,rf);px=pt[0];pz=pt[1];walking=true;desiredYaw=dirAt(p,rf,true);gaitDistance=routeLen*ff}
+      else if(cycle<backEnd){const raw=(cycle-reviewEnd)/moveDur,ff=travelEase(raw),rf=1-ff,pt=pathAt(p,rf);px=pt[0];pz=pt[1];walking=true;movePhase=raw;desiredYaw=dirAt(p,rf,true);gaitDistance=routeLen*ff}
       else{px=p.home[0];pz=p.home[1];walking=false;desiredYaw=(p.workYaw??dirAt(p,0,false))}
     }
 
     const prevYaw=facingMap.has(p.name)?facingMap.get(p.name):desiredYaw
-    const turnRate=walking?9.0:5.0,turnAlpha=1-Math.exp(-turnRate*dt)
+    const turnRate=walking?7.0:4.2,turnAlpha=1-Math.exp(-turnRate*dt)
     const yaw=prevYaw+angleDelta(prevYaw,desiredYaw)*turnAlpha
     facingMap.set(p.name,yaw)
 
     const prevGait=gaitMap.has(p.name)?gaitMap.get(p.name):0
-    const gaitTarget=walking?1:0,gaitRate=walking?8.0:6.0,gaitAlpha=1-Math.exp(-gaitRate*dt)
+    // Fade the gait naturally during acceleration/braking instead of keeping full stride until the final frame.
+    const phase=Math.max(0,Math.min(1,movePhase)),phaseWeight=walking?Math.min(1,Math.sin(Math.PI*phase)*1.18):0
+    const gaitTarget=phaseWeight,gaitRate=walking?7.0:5.2,gaitAlpha=1-Math.exp(-gaitRate*dt)
     const gaitBlend=prevGait+(gaitTarget-prevGait)*gaitAlpha
     gaitMap.set(p.name,Math.abs(gaitBlend-gaitTarget)<.002?gaitTarget:gaitBlend)
 
     const activity=walking?'walk':(cycle>=outEnd&&cycle<reviewEnd?'review':'work')
     const yOffset=0
-    // Native gait cycle ≈1.958s; one full left-right cycle maps to ~1.25 world units.
-    const gaitTime=(gaitDistance/1.42)*1.9583334+p.offset*.11
+    // Slightly longer world-space stride reduces the old fast-foot / treadmill impression.
+    const gaitTime=(gaitDistance/1.55)*1.9583334+p.offset*.11
     const motionTime=walking||gaitBlend>.02?gaitTime:sec+p.offset
     const st=localState(motionTime,gaitBlend,activity),world=worlds(st),mw=world[meshNode],invMw=invert4(mw),jm=p._jm
     for(let i=0;i<skin.joints.length;i++)jm.set(mul4(mul4(invMw,world[skin.joints[i]]),invBind[i]),i*16)
@@ -676,7 +681,7 @@ function init(canvas,setStatus,setPhase,modeRef,labelLayer){
  function pu(){drag.active=false}
  function wh(e){e.preventDefault();cam.dist=Math.max(8.5,Math.min(23,cam.dist+Math.sign(e.deltaY)*.65))}
  canvas.addEventListener('pointerdown',pd);canvas.addEventListener('pointermove',pm);canvas.addEventListener('pointerup',pu);canvas.addEventListener('pointercancel',pu);canvas.addEventListener('wheel',wh,{passive:false})
- setStatus('READY • WORKSTATION + GROUNDING POLISH LOADED');raf=requestAnimationFrame(render)
+ setStatus('READY • MOTION + ARRIVAL POLISH LOADED');raf=requestAnimationFrame(render)
  return()=>{cancelAnimationFrame(raf);canvas.removeEventListener('pointerdown',pd);canvas.removeEventListener('pointermove',pm);canvas.removeEventListener('pointerup',pu);canvas.removeEventListener('pointercancel',pu);canvas.removeEventListener('wheel',wh);if(labelLayer)labelLayer.innerHTML=''}
 }
 
@@ -694,14 +699,14 @@ function HumanLab(){
   jsx('style',{children:CSS}),
   jsxs('header',{className:'h3h',children:[
    jsxs('div',{children:[jsx('div',{className:'h3corp',children:'PT MRXPANEL MEDIA GROUP'}),jsxs('div',{className:'h3title',children:['MRXPANEL ',jsx('b',{children:'OFFICE'})]})]}),
-   jsx('div',{className:'h3chip',children:'V3.26 DEV • WORKSTATION + GROUNDING'})
+   jsx('div',{className:'h3chip',children:'V3.27 DEV • MOTION + ARRIVAL POLISH'})
   ]}),
   jsxs('div',{className:'h3body',children:[
    jsx('main',{className:'h3stage',children:jsxs('div',{className:'h3wrap',children:[
     jsx('canvas',{ref:canvasRef,className:'h3canvas'}),jsx('div',{ref:labelsRef,className:'h3labels'}),
     jsxs('div',{className:'h3over',children:[
      jsx('strong',{children:'MRXPANEL OFFICE • LIVE SIMULATION'}),
-     jsx('small',{children:'Batch polish: V3.25 head/hair rebuild is preserved while workstation ergonomics, typing wrists, keyboard grounding, monitor/task-light detail and character contact shadows are refined together.'})
+     jsx('small',{children:'Motion polish: V3.26 workstation/grounding stays intact while route turns, acceleration/braking, stride cadence and gait fade at arrival/departure are smoothed for more natural office movement.'})
     ]}),
     jsxs('div',{className:'h3legend',children:[
      jsx('div',{className:'h3pill',children:'Drag orbit • Wheel zoom'}),
