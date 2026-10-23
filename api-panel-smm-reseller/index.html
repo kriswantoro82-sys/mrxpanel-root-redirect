@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111318">
+<title>API Panel SMM untuk Reseller: Panduan Integrasi Aman | MRXPANEL</title>
+<meta name="description" content="Panduan API panel SMM untuk reseller: pilih format API, cek layanan dan saldo, amankan API Key, hindari pesanan ganda, dan pantau status di MRXPANEL.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://mrxpanel.com/api-panel-smm-reseller/">
+<link rel="icon" href="/favicon-mrx.svg" type="image/svg+xml">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="MRXPANEL">
+<meta property="og:title" content="API Panel SMM untuk Reseller: Panduan Integrasi Aman | MRXPANEL">
+<meta property="og:description" content="Panduan API panel SMM untuk reseller: pilih format API, cek layanan dan saldo, amankan API Key, hindari pesanan ganda, dan pantau status di MRXPANEL.">
+<meta property="og:url" content="https://mrxpanel.com/api-panel-smm-reseller/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"API Panel SMM untuk Reseller: Cara Integrasi Website dengan Aman","description":"Panduan API panel SMM untuk reseller: pilih format API, cek layanan dan saldo, amankan API Key, hindari pesanan ganda, dan pantau status di MRXPANEL.","inLanguage":"id-ID","datePublished":"2026-10-24","dateModified":"2026-10-24","mainEntityOfPage":"https://mrxpanel.com/api-panel-smm-reseller/","author":{"@type":"Organization","name":"MRXPANEL","url":"https://mrxpanel.com/"},"publisher":{"@type":"Organization","name":"MRXPANEL","url":"https://mrxpanel.com/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"MRXPANEL","item":"https://mrxpanel.com/"},{"@type":"ListItem","position":2,"name":"API Panel SMM untuk Reseller: Cara Integrasi Website dengan Aman","item":"https://mrxpanel.com/api-panel-smm-reseller/"}]}</script>
+<style>:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#111318;color:#f5f5f5;font:16px/1.75 system-ui,-apple-system,Segoe UI,sans-serif}a{color:#f1cc6c}header,main,footer{max-width:850px;margin:auto;padding:24px}header{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #2a2f38}header a{text-decoration:none}.brand{font-weight:850;letter-spacing:.05em;font-size:1.15rem}main{padding-top:40px;padding-bottom:60px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.18}h2{font-size:1.45rem;line-height:1.35;margin-top:42px}p,li{color:#d0d3d9}li{margin:10px 0}.eyebrow{color:#f1cc6c;font-weight:700}.intro{font-size:1.15rem}.panel{border:1px solid #2a2f38;border-radius:18px;padding:22px;background:#171a20;margin:30px 0}.cta{display:inline-block;padding:12px 20px;border-radius:10px;background:#f1cc6c;color:#111318;font-weight:750;text-decoration:none}.muted{font-size:.9rem;color:#9297a0}footer{border-top:1px solid #2a2f38;color:#9297a0}@media(max-width:500px){header{flex-wrap:wrap}header,main,footer{padding-left:20px;padding-right:20px}}</style>
+</head>
+<body>
+
+<header><a href="/" class="brand">MRXPANEL</a><a href="https://member.mrxpanel.com/api/">Pusat API Resmi &rarr;</a></header>
+<main id="main">
+<p class="eyebrow">PANDUAN TEKNIS &middot; RESELLER SMM</p>
+<h1>API Panel SMM untuk Reseller: Cara Integrasi Website dengan Aman</h1>
+<p class="intro">Sudah memiliki website panel SMM dan ingin memakai katalog MRXPANEL sebagai penyedia layanan? Integrasi API dapat membantu membaca layanan, mengecek saldo, membuat pesanan, dan memantau status tanpa berpindah dashboard. Namun, integrasi perlu dirancang agar kunci rahasia terlindungi dan pesanan pelanggan tidak tercatat dua kali.</p>
+<div class="panel"><strong>Mulai dari sini:</strong> gunakan <a href="https://member.mrxpanel.com/api/">Pusat API MRXPANEL</a> sebagai sumber dokumentasi dan pengelolaan kunci resmi. Panduan ini menjelaskan persiapan dan praktik aman; contoh pembacaan data di bawah tidak membuat pesanan atau memotong saldo.</div>
+
+<h2>1. Apakah website reseller Anda perlu API?</h2>
+<p>API berguna jika website reseller sudah memiliki sistem pesanan sendiri dan perlu mengambil informasi dari MRXPANEL. Jika baru mencoba layanan secara manual, dashboard member biasanya lebih sederhana: daftar akun, baca katalog, lalu buat pesanan melalui antarmuka yang tersedia.</p>
+<p>Untuk pemula, pahami dahulu <a href="/panduan-reseller/">dasar usaha reseller panel SMM</a> dan <a href="/cara-menggunakan-panel-smm/">cara menggunakan panel SMM</a>. Integrasi tidak menggantikan kewajiban membaca deskripsi, harga, batas jumlah, dan ketentuan setiap layanan.</p>
+
+<h2>2. Pilih API sesuai sistem website</h2>
+<p>MRXPANEL menyediakan dua bentuk integrasi dengan format yang berbeda. Jangan mencampur parameter dan metode autentikasinya.</p>
+<div class="panel">
+<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;border-bottom:1px solid #2a2f38;padding:10px;color:#f1cc6c">Pilihan</th><th style="text-align:left;border-bottom:1px solid #2a2f38;padding:10px;color:#f1cc6c">Dipakai untuk</th></tr></thead><tbody>
+<tr><td style="padding:10px;border-bottom:1px solid #2a2f38"><strong>API SMM standar V2</strong><br><code>https://api.mrxpanel.com/api/v2</code></td><td style="padding:10px;border-bottom:1px solid #2a2f38">Panel yang memiliki menu <em>Providers / Add Provider</em>. Menggunakan <code>POST</code>, format <code>application/x-www-form-urlencoded</code>, dengan parameter <code>key</code> dan <code>action</code>.</td></tr>
+<tr><td style="padding:10px"><strong>API JSON V1</strong><br><code>https://api.mrxpanel.com/v1/</code></td><td style="padding:10px">Website atau aplikasi kustom. Menggunakan JSON pada operasi yang sesuai dan header <code>Authorization: Bearer API_KEY</code>.</td></tr>
+</tbody></table></div>
+</div>
+<p>Keduanya adalah URL resmi yang tercantum dalam <a href="https://member.mrxpanel.com/api/">dokumentasi Pusat API</a>. Untuk website yang meminta URL provider SMM standar, gunakan URL V2—bukan alamat dashboard atau URL layanan database internal.</p>
+
+<h2>3. Siapkan API Key dengan izin minimum</h2>
+<ol>
+<li>Masuk ke <a href="https://member.mrxpanel.com/">Member MRXPANEL</a>, kemudian buka <a href="https://member.mrxpanel.com/api/">Pusat API</a>.</li>
+<li>Periksa daftar layanan dan kebutuhan website reseller terlebih dahulu.</li>
+<li>Buat API Key yang hanya memiliki izin yang diperlukan. Untuk pengujian baca-saja, cukup gunakan izin <code>services:read</code> dan <code>balance:read</code>.</li>
+<li>Aktifkan izin <code>orders:create</code> hanya jika sistem pesanan benar-benar siap. Izin ini dapat digunakan untuk membuat pesanan yang memakai saldo.</li>
+<li>Simpan kunci di server/backend dan batasi aksesnya. Jangan menaruh API Key dalam HTML publik, JavaScript browser, repository terbuka, atau pesan dukungan.</li>
+</ol>
+<p>API Key baru hanya ditampilkan sekali saat dibuat. Kelola dan simpan kunci sesuai petunjuk pada dashboard resmi; bila ada keraguan setelah permintaan pembuatan kunci, periksa daftar kunci lebih dahulu daripada membuat banyak kunci sekaligus.</p>
+
+<h2>4. Uji koneksi tanpa membuat pesanan</h2>
+<p>Untuk API standar SMM, dua aksi yang sesuai untuk pemeriksaan awal adalah <code>services</code> (daftar layanan) dan <code>balance</code> (saldo). Contoh <code>curl</code> berikut hanya membaca informasi akun bila menggunakan kunci dengan izin yang sesuai:</p>
+<div class="panel"><strong>Cek daftar layanan</strong>
+<pre style="white-space:pre-wrap;overflow-wrap:anywhere;color:#f5f5f5"><code>curl -X POST "https://api.mrxpanel.com/api/v2" \
+  --data-urlencode "key=API_KEY_ANDA" \
+  --data-urlencode "action=services"</code></pre>
+<strong>Cek saldo</strong>
+<pre style="white-space:pre-wrap;overflow-wrap:anywhere;color:#f5f5f5"><code>curl -X POST "https://api.mrxpanel.com/api/v2" \
+  --data-urlencode "key=API_KEY_ANDA" \
+  --data-urlencode "action=balance"</code></pre>
+<p class="muted">Ganti placeholder API Key hanya pada perangkat/server yang Anda kendalikan. Jangan menempelkan kunci asli ke halaman publik. Contoh ini tidak dijalankan oleh website MRXPANEL.</p></div>
+<p>Pusat API juga menyediakan tombol <strong>Uji Koneksi Website Reseller</strong> yang dirancang membaca daftar layanan dan saldo, tanpa membuat pesanan. Gunakan fasilitas itu terlebih dahulu sebelum mengaktifkan sistem transaksi otomatis.</p>
+
+<h2>5. Mencegah pesanan ganda saat jaringan bermasalah</h2>
+<p>Ini bagian yang sering terlewat ketika website reseller disambungkan ke penyedia. Jika permintaan membuat pesanan mengalami <em>timeout</em>, tidak berarti pesanan pasti gagal. Permintaan mungkin sudah diterima tetapi responsnya tidak sampai ke website.</p>
+<ul>
+<li>Catat ID pesanan pelanggan di database reseller sebelum mengirim permintaan ke provider.</li>
+<li>Jika software mendukungnya, berikan satu <code>request_id</code> yang stabil untuk satu pesanan pada API SMM V2.</li>
+<li>Jangan membuat <code>request_id</code> baru hanya karena proses koneksi timeout.</li>
+<li>Jangan menjalankan <em>auto-retry</em> untuk <code>action=add</code> tanpa pemeriksaan riwayat dan status terlebih dahulu.</li>
+<li>Dokumentasi MRXPANEL menyatakan bahwa tanpa <code>request_id</code>, pencegahan permintaan identik hanya berlaku dalam jendela <strong>30 detik</strong>. Pengiriman ulang setelah itu bisa menciptakan pesanan dan pemotongan saldo baru.</li>
+</ul>
+<div class="panel"><strong>Ilustrasi operasional:</strong> pelanggan membuat pesanan #RES-2041, tetapi sistem reseller tidak menerima respons. Tandai pesanan sebagai <em>menunggu verifikasi</em>, cek riwayat serta saldo, dan cari nomor order yang mungkin sudah tercatat. Jangan langsung mengirim permintaan membuat pesanan kedua.</div>
+
+<h2>6. Pantau pesanan, refill, dan pembatalan dengan benar</h2>
+<p>API standar memiliki aksi <code>status</code> untuk memeriksa pesanan melalui parameter <code>order</code>, serta hingga 100 pesanan melalui <code>orders</code>. Simpan hubungan nomor order MRXPANEL dengan nomor pesanan pelanggan di sistem reseller Anda.</p>
+<p>Dokumentasi MRXPANEL juga menjelaskan <code>action_check</code> untuk pemeriksaan kelayakan refill/cancel tanpa menghubungi provider. Ini <strong>berbeda</strong> dari mengajukan tindakan. Permintaan refill atau cancel dapat masuk antrean peninjauan; nomor permintaan bukan bukti bahwa provider sudah melakukan refill, pembatalan, atau refund. Jangan menampilkan status sukses sebelum ada konfirmasi hasil akhir.</p>
+
+<h2>7. Checklist sebelum integrasi dipakai pelanggan</h2>
+<ol>
+<li>API URL dan format request sudah cocok dengan jenis integrasi.</li>
+<li>API Key aman di backend dan izinnya tidak berlebihan.</li>
+<li>Daftar layanan dan saldo dapat dibaca dengan benar; mata uang yang digunakan adalah IDR.</li>
+<li>Website reseller memakai ID layanan dari katalog API aktif, bukan menebak kode.</li>
+<li>Harga jual telah mempertimbangkan biaya layanan serta margin, dan diperiksa lagi jika katalog berubah.</li>
+<li>Sistem menyimpan ID pesanan pelanggan, nomor order provider, dan status terbaru.</li>
+<li>Pengiriman ulang pesanan saat timeout diblokir sampai riwayat diverifikasi.</li>
+<li>Dukungan pelanggan memahami perbedaan status pesanan, refill, cancel, dan refund.</li>
+</ol>
+
+<h2>8. Pertanyaan umum</h2>
+<h3>Apakah harus punya website reseller?</h3>
+<p>Tidak. API relevan bagi sistem yang ingin membuat integrasi otomatis. Pengguna tanpa website dapat mengakses layanan melalui dashboard member resmi.</p>
+<h3>Apakah pengujian API akan memotong saldo?</h3>
+<p>Permintaan baca-saja seperti <code>services</code> dan <code>balance</code> tidak membuat pesanan. Sebaliknya, <code>action=add</code> merupakan tindakan membuat pesanan dan dapat menggunakan saldo.</p>
+<h3>Apakah saldo API memakai rupiah?</h3>
+<p>Dokumentasi standar SMM MRXPANEL mencantumkan mata uang <code>IDR</code>. Website reseller perlu mendukung mata uang dan format harga yang sesuai.</p>
+<h3>Bagaimana jika panel saya tidak mendukung <code>request_id</code>?</h3>
+<p>Jangan mengandalkan retry otomatis. Catat status pengiriman, periksa pesanan dan saldo bila respons tidak pasti, lalu buat pesanan baru hanya setelah jelas pesanan sebelumnya tidak tercatat.</p>
+
+<div class="panel"><h2 style="margin-top:0">Siap menghubungkan website reseller?</h2>
+<p>Periksa URL API terbaru, izin API Key, contoh request, serta aturan transaksi langsung dari dokumentasi yang dipelihara oleh MRXPANEL.</p>
+<a class="cta" href="https://member.mrxpanel.com/api/">Buka Pusat API MRXPANEL</a></div>
+<p>Pelajari juga <a href="/panduan-reseller/">panduan memulai reseller</a>, <a href="/memilih-provider-smm/">cara memilih provider SMM</a>, dan <a href="/apa-itu-panel-smm/">pengertian panel SMM</a> untuk memahami proses bisnisnya.</p>
+<p class="muted">Disusun oleh MRXPANEL · 24 Oktober 2026. Informasi teknis mengikuti Pusat API resmi dan dapat berubah mengikuti versi layanan. Panduan ini tidak menjamin hasil layanan, keuntungan reseller, atau keberhasilan integrasi dengan setiap software.</p>
+</main>
+<footer><a href="/">&larr; Kembali ke beranda MRXPANEL</a> &middot; &copy; MRXPANEL</footer>
+<script src="https://mrxpanel-tracker.mrxpanel01.workers.dev/tracker-v1.js" defer></script>
+</body>
+</html>
