@@ -6,6 +6,8 @@ on:
     paths:
       - 'scripts/mrxpanel_og_generator.py'
       - 'scripts/qa_og_card.py'
+      - 'scripts/prepare_og_meta_review.py'
+      - 'scripts/qa_og_meta_review.py'
       - '.github/workflows/og-card-review.yml'
       - 'review/og-card-20261025/**'
 
@@ -27,6 +29,23 @@ jobs:
         run: python3 scripts/mrxpanel_og_generator.py tmp-review/mrxpanel-og-review-1200x630.png
       - name: Verify image dimensions, format and brand styling
         run: python3 scripts/qa_og_card.py tmp-review/mrxpanel-og-review-1200x630.png
+      - name: Checkout pinned SEO articles from Draft PR 14
+        uses: actions/checkout@v4
+        with:
+          ref: 11ef2f5309019eda0954f550e23521dcd08dc887
+          path: tmp-article-source
+          persist-credentials: false
+      - name: Prepare seven image-tagged HTML copies in isolated review folder
+        run: python3 scripts/prepare_og_meta_review.py --source tmp-article-source --output tmp-review/og-integration --png tmp-review/mrxpanel-og-review-1200x630.png
+      - name: Verify all OG tags and prove no other HTML content changes
+        run: python3 scripts/qa_og_meta_review.py --source tmp-article-source --review tmp-review/og-integration --png tmp-review/mrxpanel-og-review-1200x630.png
+      - name: Attach seven-page integration preview for CTO
+        uses: actions/upload-artifact@v4
+        with:
+          name: mrxpanel-og-seven-page-integration-review
+          path: tmp-review/og-integration/
+          if-no-files-found: error
+          retention-days: 14
       - name: Attach concept image for human approval
         uses: actions/upload-artifact@v4
         with:
