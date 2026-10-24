@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "asset_role": "og_card_review_only",
+  "brand": "MRXPANEL",
+  "approval_status": "pending_owner_review",
+  "approved_for_production": false,
+  "dimensions": {
+    "width": 1200,
+    "height": 630
+  },
+  "format": "PNG",
+  "png_sha256": "ea2c611f2c5302561cd93afe15d0679f66926015d4d31c71bdb1b1b68d7ce929",
+  "ci_run_id": 40124000676,
+  "ci_artifact_id": 12572581245,
+  "ci_commit_sha": "c7020e81c17804053de798da58805002b69b87ff",
+  "source_path": "scripts/mrxpanel_og_generator.py",
+  "future_target_path": "assets/mrxpanel-og-1200x630.png",
+  "future_target_live": false,
+  "notes": "Exact binary hash of manually inspected original GitHub Actions PNG, not local preview. No authorization to publish or deploy."
+}
