@@ -1,0 +1,36 @@
+name: MRXPANEL OG Card Concept Review
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/mrxpanel_og_generator.py'
+      - 'scripts/qa_og_card.py'
+      - '.github/workflows/og-card-review.yml'
+      - 'review/og-card-20261025/**'
+
+permissions:
+  contents: read
+
+jobs:
+  image-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout reviewed source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install offline image generator dependency
+        run: python3 -m pip install --disable-pip-version-check --break-system-packages Pillow==11.3.0
+      - name: Generate review-only PNG
+        run: python3 scripts/mrxpanel_og_generator.py tmp-review/mrxpanel-og-review-1200x630.png
+      - name: Verify image dimensions, format and brand styling
+        run: python3 scripts/qa_og_card.py tmp-review/mrxpanel-og-review-1200x630.png
+      - name: Attach concept image for human approval
+        uses: actions/upload-artifact@v4
+        with:
+          name: mrxpanel-og-card-concept-1200x630
+          path: tmp-review/mrxpanel-og-review-1200x630.png
+          if-no-files-found: error
+          retention-days: 14
