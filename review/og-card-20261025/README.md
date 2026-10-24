@@ -27,3 +27,20 @@ Sebelum rilis harus:
 Masalah [pengalihan HTTPS Issue #10](https://github.com/kriswantoro82-sys/mrxpanel-root-redirect/issues/10) masih terbuka; **HTTP 200 tanpa redirect** telah terverifikasi pada beranda dan artikel. Ketersediaan HTTPS 200 sendiri tidak membuktikan pengalihan HTTP aktif. Jangan menyebut masalah tersebut terselesaikan oleh konsep OG card.
 
 **Tidak ada merge, deployment, penggantian DNS, konfigurasi Pages, login, perubahan database atau akun pengguna.**
+
+
+## 25 Oktober — Simulasi metadata tujuh halaman: PASS
+
+GitHub Actions [run #40124000676](https://github.com/kriswantoro82-sys/mrxpanel-root-redirect/actions/runs/40124000676) **SUCCESS (attempt 1)** di commit `c7020e81c17804053de798da58805002b69b87ff`. Selain membuat PNG, workflow menggunakan **commit tepat `11ef2f5309019eda0954f550e23521dcd08dc887` dari Draft PR #14** sebagai baseline artikel dan menghasilkan paket HTML **hanya dalam folder terpisah** `tmp-review/og-integration/` di runner.
+
+Bukti yang disimpan:
+- Artifact `mrxpanel-og-card-concept-1200x630` (ID `12572581245`): PNG konsep untuk review visual.
+- Artifact `mrxpanel-og-seven-page-integration-review` (ID `12572117775`): **tujuh salinan HTML** yang disisipkan OG image + Twitter image, dan file PNG, **belum menjadi file produksi**.
+
+Script [prepare_og_meta_review.py](../../scripts/prepare_og_meta_review.py) membaca dan menguji ketujuh `og:url` lalu menolak jika ada `og:image` yang sudah eksis, output berada di dalam source, atau output telah ada. Script [qa_og_meta_review.py](../../scripts/qa_og_meta_review.py) memastikan seluruh metadata gambar muncul satu kali, URL absolut HTTPS sesuai, raster **1200×630**, dan **menghapus hanya tag yang baru** akan menghasilkan file sumber yang **identik per karakter**. Juga diuji bahwa penulisan ke sumber dan overwrite output ditolak.
+
+**Semua 7/7 PASS** dan QA sebelumnya atas format/palet PNG PASS. Ini membuktikan integrasi dapat disiapkan tanpa menghapus canonical, metadata sosial terdahulu, atau JSON-LD/tanggal artikel, **tetapi tidak membuktikan kompatibilitas platform share publik setelah deployment**.
+
+**Penting:** konsep visual belum memperoleh persetujuan brand/owner, artifact hanya disimpan terbatas (masa retensi 14 hari sejak 25 Oktober), dan URL `https://mrxpanel.com/assets/mrxpanel-og-1200x630.png` yang muncul dalam **HTML simulasi** belum ada di website produksi. **Jangan menggabungkan atau menyebarkan file HTML simulasi ke publik sebelum persetujuan gambar, penerbitan PNG di static assets, dan verifikasi HTTP 200 `image/png`.**
+
+**Konflik/urutan:** sumber simulasi adalah PR #14 pada SHA tertentu, bukan branch yang kelak otomatis mengikuti semua merge. Setelah PR #9→#14 diterbitkan resmi, ulang pemeriksaan terhadap `main` terkini untuk memastikan tag dan asset benar sebelum PR implementasi diajukan. Masalah HTTPS redirect #10 dan alur signup #12 tetap terpisah dan terbuka.
