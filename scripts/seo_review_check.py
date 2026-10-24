@@ -36,9 +36,15 @@ class AuditHTML(HTMLParser):
         self._capture: str | None = None
         self._buffer: list[str] = []
         self.schemas: list[dict] = []
+        self.hrefs: list[str] = []
+        self.element_ids: set[str] = set()
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         a = dict(attrs)
+        if a.get("id"):
+            self.element_ids.add(a["id"])
+        if tag == "a" and a.get("href"):
+            self.hrefs.append(a["href"])
         if tag == "html":
             self.lang = a.get("lang")
         elif tag == "link" and a.get("rel") == "canonical":
@@ -97,6 +103,21 @@ def audit() -> None:
         parser = AuditHTML()
         html_source = page_path.read_text(encoding="utf-8-sig")
         parser.feed(html_source)
+        # Check every internal destination against a local checked-out file.
+        # /signin/ and /signup/ are navigable bridges, not sitemap entries.
+        for href in parser.hrefs:
+            target = urlsplit(href)
+            if href.startswith("#"):
+                assert target.fragment in parser.element_ids, f"{route}: broken page fragment {href}"
+            elif href.startswith("/") and not href.startswith("//"):
+                dest = target.path or "/"
+                assert dest == "/" or dest.endswith("/"), f"{route}: malformed local href {href}"
+                dest_file = ROOT / dest.lstrip("/") / "index.html"
+                assert dest_file.is_file(), f"{route}: missing internal destination {href}"
+                if target.fragment and dest == route:
+                    assert target.fragment in parser.element_ids, f"{route}: broken internal fragment {href}"
+            elif href.startswith("//"):
+                raise AssertionError(f"{route}: protocol-relative href requires review")
         assert parser.lang == "id", f"{route}: missing Indonesian lang"
         assert parser.titles and all(parser.titles), f"{route}: missing title"
         assert len(parser.h1) == 1 and parser.h1[0], f"{route}: missing/duplicate H1"
