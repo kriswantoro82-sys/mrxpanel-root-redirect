@@ -1,0 +1,21 @@
+name: MRXPANEL Seven-Page OG Metadata Draft QA
+on:
+  pull_request:
+    paths:
+      - '**/index.html'
+      - 'qa/verify_og_release_gate.py'
+      - 'review/og-seven-page-release-20261025/**'
+      - '.github/workflows/og-seven-page-gate.yml'
+permissions:
+  contents: read
+jobs:
+  draft-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out review branch only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify exact seven reviewed HTML files and explicit release HOLD
+        run: python3 qa/verify_og_release_gate.py --mode review
