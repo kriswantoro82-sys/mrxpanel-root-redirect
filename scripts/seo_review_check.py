@@ -95,7 +95,8 @@ def audit() -> None:
         page_path = ROOT / route.lstrip("/") / "index.html"
         assert page_path.is_file(), f"Missing HTML for {route}"
         parser = AuditHTML()
-        parser.feed(page_path.read_text(encoding="utf-8-sig"))
+        html_source = page_path.read_text(encoding="utf-8-sig")
+        parser.feed(html_source)
         assert parser.lang == "id", f"{route}: missing Indonesian lang"
         assert parser.titles and all(parser.titles), f"{route}: missing title"
         assert len(parser.h1) == 1 and parser.h1[0], f"{route}: missing/duplicate H1"
@@ -108,6 +109,8 @@ def audit() -> None:
         if route == "/cara-menggunakan-panel-smm/":
             assert parser.opengraph.get("og:title") == parser.titles[0], "Tutorial Open Graph title drift"
             assert parser.opengraph.get("og:description") == parser.meta["description"], "Tutorial Open Graph description drift"
+            assert html_source.count('href="/kalkulator-harga-jual-reseller-smm/"') == 1, "Tutorial calculator link must be unique"
+            assert "Hasil simulasi bukan pengganti harga aktual di katalog." in html_source, "Missing reseller pricing simulation disclaimer"
         if route in ARTICLE_DATES:
             matching = [x for x in parser.schemas if x.get("@type") == "Article"]
             assert len(matching) == 1, f"{route}: expected one Article JSON-LD"
