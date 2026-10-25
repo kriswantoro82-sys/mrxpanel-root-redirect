@@ -15,7 +15,7 @@ assert.match(calc,/<link rel="canonical" href="https:\/\/mrxpanel\.com\/kalkulat
 assert.match(calc,/<meta name="robots" content="index,follow">/);
 const pages=[
  {route:'apa-itu-panel-smm',caveat:/hanya simulasi[^<]*periksa harga layanan sebenarnya/i},
- {route:'cara-menggunakan-panel-smm',caveat:/hanya simulasi[^<]*harga layanan aktual/i}
+ {route:'cara-menggunakan-panel-smm',caveat:/Hasil simulasi bukan pengganti harga aktual di katalog\./i}
 ];
 for(const p of pages){
  const src=html(p.route);
