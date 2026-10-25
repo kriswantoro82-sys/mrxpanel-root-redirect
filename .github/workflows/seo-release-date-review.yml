@@ -38,3 +38,20 @@ jobs:
             exit 1
           fi
           echo "SEO_PUBLICATION_DATE_GATE_HOLD=PASS|ACTUAL_DATE_REQUIRED|NOT_RELEASE_AUTHORIZATION"
+
+      - name: Reject a stale or unverified supplied date as release evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          for date in 2026-10-24 2026-10-25; do
+            if node qa/seo-release-date-review.cjs --mode=release --date="$date" > /tmp/mrx-date-candidate.log 2>&1; then
+              echo "UNSAFE_RELEASE_GATE_ACCEPTED_UNVERIFIED_DATE=$date" >&2
+              exit 1
+            fi
+            if ! grep -q 'HUMAN_CONTENT_DATE_AND_RELEASE_APPROVAL_REQUIRED' /tmp/mrx-date-candidate.log; then
+              echo "RELEASE_GATE_UNEXPECTED_DATE_RESPONSE=$date" >&2
+              cat /tmp/mrx-date-candidate.log >&2
+              exit 1
+            fi
+          done
+          echo "SEO_RELEASE_DATE_CANDIDATE_REJECTION=PASS|OLD_AND_NEW_DATE_BLOCKED"
