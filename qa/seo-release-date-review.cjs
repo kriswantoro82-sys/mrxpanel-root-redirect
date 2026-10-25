@@ -6,7 +6,8 @@
  * node qa/seo-release-date-review.cjs --mode=review
  * node qa/seo-release-date-review.cjs --mode=release --date=YYYY-MM-DD
  *
- * A PASS here never authorizes a merge or production release.
+ * A PASS in review mode only confirms static consistency. Release mode always
+ * fails closed: release dates and human authorization cannot be inferred here.
  */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -47,7 +48,6 @@ try {
   assert.equal(map.size, routes.length, 'Duplicate sitemap URLs');
   let visibleCount = 0;
   let articles = 0;
-  const needsReleaseDate = [];
   for (const item of routes) {
     const url = 'https://mrxpanel.com' + item.route;
     const lastmod = map.get(url);
@@ -68,12 +68,6 @@ try {
         visibleCount++;
       }
     }
-    if (item.significant && mode === 'release') {
-      const article = item.dated || item.article ? schemaArticle(html) : null;
-      if (lastmod !== releaseDate || (article && article.dateModified !== releaseDate)) {
-        needsReleaseDate.push(item.route);
-      }
-    }
   }
   assert.equal(articles, 4, 'Article schema count mismatch');
   assert.equal(visibleCount, 3, 'Visible Article dates count mismatch');
@@ -82,11 +76,15 @@ try {
     console.log('SEO_RELEASE_DATE_GATE=HOLD|ACTUAL_PUBLICATION_DATE_REQUIRED|DRAFT_ONLY');
     console.log('DATE_REVIEW_ROUTES=' + routes.filter(x => x.significant).map(x => x.route).join(','));
   } else if (!isDate(releaseDate)) {
-    fail('RELEASE_DATE_REQUIRED', 'Pass a real YYYY-MM-DD date only at an authorized release review');
-  } else if (needsReleaseDate.length) {
-    fail('DATE_REFRESH_REQUIRED', needsReleaseDate.join(','));
+    fail('RELEASE_DATE_REQUIRED',
+      'A calendar date is needed for review; it is not evidence of a significant content edit or approval');
   } else {
-    console.log('SEO_RELEASE_DATE_CHECK_PASS|DATE=' + releaseDate + '|AUTHORIZATION_STILL_REQUIRED');
+    // Never certify production readiness from a supplied date alone. Some pages can
+    // legitimately retain older lastmod/dateModified values when content is unchanged.
+    // A separate, externally authorized reviewer must validate content-change dates.
+    console.log('SEO_DATE_CANDIDATE_UNVERIFIED|DATE=' + releaseDate);
+    fail('HUMAN_CONTENT_DATE_AND_RELEASE_APPROVAL_REQUIRED',
+      'Review each meaningful page change against history and obtain an external release decision');
   }
 } catch (e) {
   fail('SEO_DATE_REVIEW_FAIL', e.message);
