@@ -1,0 +1,40 @@
+name: MRXPANEL SEO Publication Date Readiness
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '**/index.html'
+      - 'sitemap.xml'
+      - 'qa/seo-release-date-review.cjs'
+      - '.github/workflows/seo-release-date-review.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  date-review:
+    name: Read-only date integrity and prepublication HOLD
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout reviewed Draft candidate
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify sitemap and Article dates without network
+        run: node qa/seo-release-date-review.cjs --mode=review
+      - name: Prove production date cannot be inferred automatically
+        shell: bash
+        run: |
+          set -euo pipefail
+          if node qa/seo-release-date-review.cjs --mode=release > /tmp/mrx-date-gate.log 2>&1; then
+            echo "UNSAFE_DATE_GATE_ACCEPTED_UNSPECIFIED_PUBLICATION_DATE" >&2
+            exit 1
+          fi
+          if ! grep -q 'RELEASE_DATE_REQUIRED' /tmp/mrx-date-gate.log; then
+            echo "DATE_GATE_UNEXPECTED_FAILURE" >&2
+            cat /tmp/mrx-date-gate.log >&2
+            exit 1
+          fi
+          echo "SEO_PUBLICATION_DATE_GATE_HOLD=PASS|ACTUAL_DATE_REQUIRED|NOT_RELEASE_AUTHORIZATION"
