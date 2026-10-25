@@ -1,5 +1,5 @@
 'use strict';
-/** Review-only: audit internal calculator link in the basic concept article.
+/** Review-only: audit internal calculator links in two educational articles.
  * No network calls, auth, deploys, or filesystem mutation.
  */
 const assert=require('node:assert/strict');
@@ -14,11 +14,12 @@ assert.match(sitemap,/<loc>https:\/\/mrxpanel\.com\/kalkulator-harga-jual-resell
 assert.match(calc,/<link rel="canonical" href="https:\/\/mrxpanel\.com\/kalkulator-harga-jual-reseller-smm\/">/);
 assert.match(calc,/<meta name="robots" content="index,follow">/);
 const pages=[
- {route:'apa-itu-panel-smm',caveat:/hanya simulasi[^<]*periksa harga layanan sebenarnya/i}
+ {route:'apa-itu-panel-smm',caveat:/hanya simulasi[^<]*periksa harga layanan sebenarnya/i},
+ {route:'cara-menggunakan-panel-smm',caveat:/hanya simulasi[^<]*harga layanan aktual/i}
 ];
 for(const p of pages){
  const src=html(p.route);
- const count=(src.match(/href="\/kalkulator-harga-jual-reseller-smm\/"/g)||[]).length;
+ const count=src.split('href="'+target+'"').length-1;
  assert.equal(count,1,p.route+': exactly one contextual calculator link');
  assert.match(src,p.caveat,p.route+': price caveat');
  assert.match(src,/<meta name="robots" content="index,follow">/);
@@ -26,4 +27,4 @@ for(const p of pages){
  assert.match(src,/<h1\b[^>]*>/);
  console.log('PASS '+p.route+' -> calculator; safe price disclaimer');
 }
-console.log('SEO_CALCULATOR_INTERNAL_LINK_QA_PASS=1/1');
+console.log('SEO_CALCULATOR_INTERNAL_LINK_QA_PASS=2/2');
