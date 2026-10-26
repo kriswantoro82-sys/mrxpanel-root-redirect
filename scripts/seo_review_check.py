@@ -83,6 +83,42 @@ class AuditHTML(HTMLParser):
             self._capture = None
 
 
+
+def audit_registration_bridge() -> None:
+    """Keep signup CTAs safe until the Member Web deep link is deployed.
+
+    Production currently ignores ?auth=register and opens the login screen.
+    This is a draft-only guard, not a live auth or registration test.
+    """
+    homepage = (ROOT / "index.html").read_text(encoding="utf-8-sig")
+    signup = (ROOT / "signup" / "index.html").read_text(encoding="utf-8-sig")
+    member_root = "https://member.mrxpanel.com/"
+    unsupported = "https://member.mrxpanel.com/?auth=register"
+
+    assert homepage.count('href="/signup/"') >= 1, (
+        "Homepage: signup CTA missing or bypassing the approved bridge"
+    )
+    assert unsupported not in homepage and unsupported not in signup, (
+        "Unreleased register deep link must not be used by homepage or signup bridge"
+    )
+    assert '<meta name="robots" content="noindex,follow">' in signup, (
+        "Signup: preserve noindex for the bridge"
+    )
+    assert '<meta http-equiv="refresh" content="0; url=' + member_root + '">' in signup, (
+        "Signup: meta refresh must target the currently supported Member Area root"
+    )
+    assert 'window.location.replace("' + member_root + '")' in signup, (
+        "Signup: JS redirect must match the supported Member Area root"
+    )
+    assert '<a href="' + member_root + '">Buka Member Area MRXPANEL</a>' in signup, (
+        "Signup: accessible manual fallback link missing or mismatched"
+    )
+    assert "Daftar Akun Baru" in signup, (
+        "Signup: tell customers where to find the real registration form"
+    )
+    print("SIGNUP_BRIDGE_DRAFT_QA_PASS|NOINDEX=1|URL_CONSISTENT=3|DEEP_LINK=HOLD")
+
+
 def audit() -> None:
     xml_path = ROOT / "sitemap.xml"
     doc = ET.parse(xml_path).getroot()
@@ -167,6 +203,7 @@ def audit() -> None:
             checked_articles.add(route)
         print(f"PASS {route}: title/H1, canonical, meta, OG URL and applicable Article dates")
     assert checked_articles == set(ARTICLE_DATES), "Missing expected Article dates in sitemap"
+    audit_registration_bridge()
     print(f"SEO_DRAFT_STATIC_QA_PASS|PAGES={len(links)}|DATED_ARTICLES={len(checked_articles)}")
 
 
