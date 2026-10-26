@@ -1,0 +1,25 @@
+name: MRXPANEL Legacy Auth Bridge SEO QA
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'auth/login/index.html'
+      - 'auth/register/index.html'
+      - 'qa/legacy-auth-bridges.test.cjs'
+      - '.github/workflows/legacy-auth-bridges-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  legacy-bridges:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Read-only checkout of proposed changes
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify legacy redirect SEO safeguards
+        run: node qa/legacy-auth-bridges.test.cjs
