@@ -1,4 +1,4 @@
-name: MRXPANEL Legacy Auth Bridge SEO QA
+name: MRXPANEL Legacy Redirect and Favicon SEO QA
 
 on:
   pull_request:
@@ -7,6 +7,9 @@ on:
       - 'auth/login/index.html'
       - 'auth/register/index.html'
       - 'qa/legacy-auth-bridges.test.cjs'
+      - 'favicon.ico'
+      - 'favicon-mrx.svg'
+      - 'qa/favicon-ico.test.cjs'
       - '.github/workflows/legacy-auth-bridges-qa.yml'
 
 permissions:
@@ -23,3 +26,5 @@ jobs:
           persist-credentials: false
       - name: Verify legacy redirect SEO safeguards
         run: node qa/legacy-auth-bridges.test.cjs
+      - name: Verify MRXPANEL favicon at default browser path
+        run: node qa/favicon-ico.test.cjs
