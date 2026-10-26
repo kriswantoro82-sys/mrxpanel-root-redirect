@@ -116,6 +116,35 @@ def audit_registration_bridge() -> None:
     assert "Daftar Akun Baru" in signup, (
         "Signup: tell customers where to find the real registration form"
     )
+    hint = re.search(r'<p class="hero-register-hint">(?P<body>.*?)</p>', homepage, re.S)
+    assert hint is not None, "Homepage: registration confirmation hint missing"
+    assert "konfirmasi melalui email" in hint.group("body"), (
+        "Homepage: confirmation-before-login instruction missing"
+    )
+    assert "Bantuan Verifikasi Email" in hint.group("body"), (
+        "Homepage: resend help entry point missing near primary CTA"
+    )
+    question = "<summary>Bagaimana jika email verifikasi pendaftaran tidak diterima?</summary>"
+    assert homepage.count(question) == 1, (
+        "Homepage: missing or duplicate email verification support FAQ"
+    )
+    faq = re.search(
+        re.escape(question) + r'\s*<div class="faq-answer">(?P<answer>.*?)</div>',
+        homepage,
+        re.S,
+    )
+    assert faq is not None, "Homepage: email verification FAQ answer missing"
+    answer = re.sub(r"\s+", " ", faq.group("answer"))
+    assert 'href="' + member_root + '"' in answer, (
+        "Homepage: email help must point to the supported Member Area root"
+    )
+    for required in ("Spam", "Promosi", "Bantuan Verifikasi Email", "Kirim Ulang Verifikasi"):
+        assert required in answer, f"Homepage: email FAQ missing {required}"
+    assert "Jangan membuat akun baru berulang kali" in answer, (
+        "Homepage: avoid unnecessary repeated registration"
+    )
+    print("EMAIL_CONFIRMATION_HELP_DRAFT_QA_PASS|FAQ=1|SUPPORTED_MEMBER_ROOT=1")
+
     print("SIGNUP_BRIDGE_DRAFT_QA_PASS|NOINDEX=1|URL_CONSISTENT=3|DEEP_LINK=HOLD")
 
 
