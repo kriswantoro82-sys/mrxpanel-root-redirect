@@ -10,6 +10,7 @@ from datetime import date
 from html.parser import HTMLParser
 import json
 from pathlib import Path
+import re
 import sys
 from urllib.parse import urlsplit
 import xml.etree.ElementTree as ET
@@ -127,6 +128,28 @@ def audit() -> None:
         assert parser.meta.get("robots", "").lower() == "index,follow", f"{route}: robots mismatch"
         if "og:url" in parser.opengraph:
             assert parser.opengraph["og:url"] == url, f"{route}: Open Graph URL mismatch"
+        if route == "/":
+            # Homepage non-brand FAQ must be genuinely visible, not only a hidden
+            # SEO keyword or footer link. Verify its answer links to the guide.
+            question = "Apa itu panel SMM (SMM panel)?"
+            assert html_source.count("<summary>" + question + "</summary>") == 1, (
+                "Homepage: missing/duplicate panel SMM FAQ question"
+            )
+            faq = re.search(
+                r'<details class="reveal">\s*<summary>Apa itu panel SMM \(SMM panel\)\?</summary>'
+                r'\s*<div class="faq-answer">(?P<answer>.*?)</div>\s*</details>',
+                html_source,
+                flags=re.DOTALL,
+            )
+            assert faq is not None, "Homepage: FAQ answer must be visible in a details block"
+            answer = faq.group("answer")
+            assert "Panel SMM adalah dashboard" in answer, "Homepage: missing clear SMM definition"
+            assert answer.count('href="/apa-itu-panel-smm/"') == 1, (
+                "Homepage: FAQ must link once to the educational explainer"
+            )
+            assert "hasil tidak boleh dijanjikan di luar ketentuan" in answer, (
+                "Homepage: preserve limits on reseller outcome promises"
+            )
         if route == "/cara-menggunakan-panel-smm/":
             assert parser.opengraph.get("og:title") == parser.titles[0], "Tutorial Open Graph title drift"
             assert parser.opengraph.get("og:description") == parser.meta["description"], "Tutorial Open Graph description drift"
