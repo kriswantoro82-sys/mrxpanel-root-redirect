@@ -147,7 +147,7 @@ def audit() -> None:
             assert answer.count('href="/apa-itu-panel-smm/"') == 1, (
                 "Homepage: FAQ must link once to the educational explainer"
             )
-            assert "hasil tidak boleh dijanjikan di luar ketentuan" in answer, (
+            assert re.search(r"hasil\s+tidak\s+boleh\s+dijanjikan\s+di\s+luar\s+ketentuan", answer), (
                 "Homepage: preserve limits on reseller outcome promises"
             )
         if route == "/cara-menggunakan-panel-smm/":
