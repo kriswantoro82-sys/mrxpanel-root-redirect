@@ -1,10 +1,11 @@
-name: MRXPANEL Signup UTM Bridge Review (offline)
+name: MRXPANEL Signup UTM Bridge Review (offline and isolated browser)
 on:
   pull_request:
     branches: [main]
     paths:
       - 'signup/index.html'
       - 'qa/signup-utm-bridge-review.test.cjs'
+      - 'qa/signup-utm-bridge-browser.test.cjs'
       - '.github/workflows/signup-utm-bridge-review.yml'
 permissions:
   contents: read
@@ -21,3 +22,19 @@ jobs:
           node-version: '22'
       - name: Verify fixed destination and UTM allowlist offline
         run: node qa/signup-utm-bridge-review.test.cjs
+  isolated-browser-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Chromium test dependency
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Verify JS and no-JS redirection against intercepted Member stub
+        run: node qa/signup-utm-bridge-browser.test.cjs
