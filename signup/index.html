@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,follow">
   <meta name="theme-color" content="#111318">
-  <meta http-equiv="refresh" content="0; url=https://member.mrxpanel.com/">
+  <meta http-equiv="refresh" content="3; url=https://member.mrxpanel.com/">
   <title>Daftar Akun MRXPANEL — Buka Member Area Resmi</title>
   <meta name="description" content="Pendaftaran akun MRXPANEL kini tersedia melalui Member Area resmi.">
   <style>
@@ -14,13 +14,31 @@
     h1{font-size:1.55rem;margin:0 0 12px}p{color:#bec2ca}
     a{display:inline-block;padding:12px 20px;border-radius:10px;background:#f1cc6c;color:#111318;font-weight:800;text-decoration:none}
   </style>
-  <script>window.location.replace("https://member.mrxpanel.com/");</script>
 </head>
 <body>
   <main>
     <h1>Pendaftaran MRXPANEL telah berpindah</h1>
     <p>Anda akan diarahkan ke Member Area resmi. Untuk membuat akun, pilih tombol <strong>Daftar Akun Baru</strong> di halaman tersebut.</p>
-    <p><a href="https://member.mrxpanel.com/">Buka Member Area MRXPANEL</a></p>
+    <p><a id="member-area-link" href="https://member.mrxpanel.com/">Buka Member Area MRXPANEL</a></p>
   </main>
+  <script id="signup-utm-bridge">
+    (function () {
+      'use strict';
+      // Forward only bounded campaign labels to the fixed official Member Area.
+      // No auth/recovery, redirect targets, tracking IDs, or arbitrary query keys.
+      var destination = new URL('https://member.mrxpanel.com/');
+      var source = new URLSearchParams(window.location.search);
+      ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content'].forEach(function (key) {
+        var values = source.getAll(key);
+        if (values.length !== 1) return;
+        var value = values[0];
+        if (/^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/.test(value)) {
+          destination.searchParams.set(key, value);
+        }
+      });
+      document.getElementById('member-area-link').href = destination.href;
+      window.location.replace(destination.href);
+    })();
+  </script>
 </body>
 </html>
