@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'qa/member-anonymous-ui-readonly-browser.cjs'
+      - 'qa/member-anon-register-navigation-review.cjs'
       - '.github/workflows/member-anonymous-ui-review.yml'
 permissions:
   contents: read
@@ -26,3 +27,5 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Compare public anonymous login and register-intent views
         run: node qa/member-anonymous-ui-readonly-browser.cjs
+      - name: Check one public registration navigation without form submission
+        run: node qa/member-anon-register-navigation-review.cjs
