@@ -104,14 +104,31 @@ def audit_registration_bridge() -> None:
     assert '<meta name="robots" content="noindex,follow">' in signup, (
         "Signup: preserve noindex for the bridge"
     )
-    assert '<meta http-equiv="refresh" content="0; url=' + member_root + '">' in signup, (
-        "Signup: meta refresh must target the currently supported Member Area root"
+    # This integrated candidate preserves bounded UTM labels only in JS.
+    # When JS is disabled, a 3-second meta refresh retains the fixed member root.
+    assert '<meta http-equiv="refresh" content="3; url=' + member_root + '">' in signup, (
+        "Signup: delayed no-JS fallback must target the supported Member Area root"
     )
-    assert 'window.location.replace("' + member_root + '")' in signup, (
-        "Signup: JS redirect must match the supported Member Area root"
+    assert signup.count('<script id="signup-utm-bridge">') == 1, (
+        "Signup: exactly one reviewed UTM bridge script required"
     )
-    assert '<a href="' + member_root + '">Buka Member Area MRXPANEL</a>' in signup, (
-        "Signup: accessible manual fallback link missing or mismatched"
+    assert "var destination = new URL('" + member_root + "')" in signup, (
+        "Signup: JavaScript destination must be pinned to the official Member Area"
+    )
+    assert "window.location.replace(destination.href)" in signup, (
+        "Signup: navigation must use the fixed destination with bounded campaign labels"
+    )
+    assert "['utm_source', 'utm_medium', 'utm_campaign', 'utm_content']" in signup, (
+        "Signup: only the four approved campaign keys may be forwarded"
+    )
+    assert "/^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/.test(value)" in signup, (
+        "Signup: reject unbounded or unsafe campaign labels"
+    )
+    assert '<a id="member-area-link" href="' + member_root + '">Buka Member Area MRXPANEL</a>' in signup, (
+        "Signup: accessible manual fallback link must pin the official root"
+    )
+    assert "document.getElementById('member-area-link').href = destination.href" in signup, (
+        "Signup: manual fallback must match the reviewed redirect"
     )
     assert "Daftar Akun Baru" in signup, (
         "Signup: tell customers where to find the real registration form"
