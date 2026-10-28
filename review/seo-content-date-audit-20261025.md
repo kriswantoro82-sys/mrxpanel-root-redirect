@@ -31,3 +31,24 @@
 - Google Search Central, **tanggal artikel**: https://developers.google.com/search/docs/appearance/publication-dates
 
 **Batas bukti:** kode Draft dan riwayat Git memberi indikasi sifat perubahan; tidak membuktikan publish produksi, indexing Google, atau persetujuan bisnis. Seluruh keputusan tanggal final harus cocok dengan rilis nyata.
+
+---
+
+## ADDENDUM CMO GEN 5 — 28 Oktober 2026 (review-only)
+
+**Koreksi atas baseline 25 Oktober:** baris beranda pada tabel di atas adalah **snapshot historis**, bukan lagi seluruh diff terbaru PR #19. Setelah snapshot tersebut, integrasi Draft menambahkan dua FAQ substantif pada `index.html`:
+
+1. **Apa itu panel SMM?** — menjelaskan pengertian layanan dan menautkan ke `/apa-itu-panel-smm/`.
+2. **Bagaimana jika email verifikasi pendaftaran tidak diterima?** — memberikan prosedur Inbox/Spam/Promosi, bantuan verifikasi resmi, dan permintaan ulang secara hati-hati.
+
+Hero beranda juga menambah panduan email verifikasi. Perubahan ini menyangkut **konten utama dan tautan internal**, tidak bisa diklasifikasi sebagai perubahan footer semata. Pada checkpoint HEAD `141f156975408b7819a8d0d89bfc61093a90e18c`, `sitemap.xml` masih mengandung `lastmod=2026-10-24` untuk ketujuh URL. Enam halaman artikel/kalkulator tidak memiliki ketidakselarasan tanggal yang terdeteksi dalam pemeriksaan statis, dan empat Article schema yang relevan tetap mempunyai `dateModified=2026-10-24`.
+
+### Keputusan review terbaru (belum keputusan rilis)
+
+- Tambahkan beranda `/` sebagai **kandidat ketiga** yang perlu review `lastmod` saat konten PR #19 benar-benar diterbitkan, di samping `/cara-menggunakan-panel-smm/` dan `/apa-itu-panel-smm/`.
+- **Jangan** mengubah semua `lastmod` menjadi 28 Oktober hanya karena hari audit. Tanggal final harus mencerminkan saat pembaruan signifikan tayang kepada publik, dengan bukti release/merge/deployment yang sah.
+- Perubahan metadata tanggal pada halaman lain hanya diperlukan bila perubahan kontennya memang signifikan. Pertahankan `datePublished` awal; bila `dateModified` diganti, selaraskan tag `<time>` yang terlihat dan `sitemap.xml`.
+- Uji rilis `qa/seo-release-date-review.cjs --mode=release` sengaja **fail-closed**; skor QA hijau dalam mode review **tidak** mengotorisasi penerbitan.
+- Tidak ada perubahan HTML produksi, sitemap, DNS, GSC, Search Console indexing, maupun deployment dalam addendum ini. PR tetap Draft/HOLD.
+
+**Rujukan Google:** [Sitemap `lastmod`](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap), [Article `dateModified`](https://developers.google.com/search/docs/appearance/structured-data/article).
