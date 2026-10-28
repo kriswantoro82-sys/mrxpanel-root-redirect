@@ -6,7 +6,7 @@ const fs=require('node:fs');
 const http=require('node:http');
 const path=require('node:path');
 const {chromium}=require('playwright');
-const home=fs.readFileSync(path.resolve(__dirname,'../index.html'),'utf8');
+const home=fs.readFileSync(process.env.MRXPANEL_HOME_HTML_PATH || path.resolve(__dirname,'../index.html'),'utf8');
 const signup=fs.readFileSync(path.resolve(__dirname,'../signup/index.html'),'utf8');
 const server=http.createServer((req,res)=>{
   const url=new URL(req.url,'http://localhost');
