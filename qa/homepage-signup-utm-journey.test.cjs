@@ -49,7 +49,7 @@ async function close(){await new Promise(resolve=>server.close(resolve));}
    assert.equal(destinations.length,5,item.name+': five signup CTA anchors expected');
    const expectedLanding='/signup/'+(item.js?item.expectQuery:'');
    assert.ok(destinations.every(x=>x===expectedLanding),item.name+': all CTAs match '+JSON.stringify(destinations));
-   await page.locator('a[href^="/signup/"]').first().evaluate(a=>a.click());
+   await page.locator('a[href^="/signup/"]').first().click({timeout:8000});
    await page.waitForURL(u=>u.origin==='https://member.mrxpanel.com',{timeout:11000});
    assert.equal(page.url(),'https://member.mrxpanel.com/'+(item.js?item.expectQuery:''),item.name+': destination');
    assert.equal(await page.title(),'ISOLATED_MEMBER_MOCK',item.name+': mock loaded');
