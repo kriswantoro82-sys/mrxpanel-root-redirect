@@ -1,0 +1,22 @@
+name: MRXPANEL Member Public Live Read-Only Gate
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'qa/member-public-live-readonly-smoke.cjs'
+      - '.github/workflows/member-public-readonly-gate.yml'
+permissions:
+  contents: read
+jobs:
+  anonymous-public-response:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect public Member Area HTML and first-party JS via two bounded anonymous GETs
+        run: node qa/member-public-live-readonly-smoke.cjs
