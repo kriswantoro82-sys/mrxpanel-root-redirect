@@ -8,6 +8,7 @@ on:
       - 'qa/signup-utm-bridge-review.test.cjs'
       - 'qa/signup-utm-bridge-browser.test.cjs'
       - 'qa/homepage-signup-utm-journey.test.cjs'
+      - 'qa/seo-signup-utm-integration.test.cjs'
       - '.github/workflows/signup-utm-bridge-review.yml'
 permissions:
   contents: read
@@ -42,3 +43,11 @@ jobs:
         run: node qa/signup-utm-bridge-browser.test.cjs
       - name: Verify homepage CTA to signup to isolated Member journey
         run: node qa/homepage-signup-utm-journey.test.cjs
+      - name: Pin and verify PR19 SEO draft source revision (no production)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin refs/heads/seo/cmo-integrated-review-20261025
+          test "$(git rev-parse FETCH_HEAD)" = "e4320a1f6f84d49da6ba7e83765f69782aa7cf43"
+      - name: Verify PR19 SEO plus PR22 UTM combine in disposable Chromium fixture
+        run: node qa/seo-signup-utm-integration.test.cjs
