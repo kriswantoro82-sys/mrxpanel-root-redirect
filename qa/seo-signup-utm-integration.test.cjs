@@ -15,7 +15,7 @@ const scriptMatch=pr22.match(/  <script id="signup-utm-link-propagation">[\s\S]*
 assert.ok(scriptMatch,'One UTM propagation script expected in PR22');
 assert.equal((pr22.match(/id="signup-utm-link-propagation"/g)||[]).length,1);
 assert.equal((seo.match(/id="signup-utm-link-propagation"/g)||[]).length,0,'PR19 unexpectedly has same script; re-review');
-assert.equal((seo.match(/href="\/signup\/"/g)||[]).length,5,'PR19 signup CTA count changed');
+assert.equal((seo.match(/<a\b[^>]*\bhref="\/signup\/"[^>]*>/g)||[]).length,5,'PR19 signup CTA count changed');
 assert.ok(seo.includes('Bagaimana jika email verifikasi pendaftaran tidak diterima?'),'PR19 email FAQ missing');
 assert.ok(seo.includes('PT Mrxpanel Media Group'),'PR19 legal identity missing');
 const tracker='  <script src="https://mrxpanel-tracker.mrxpanel01.workers.dev/tracker-v1.js" defer></script>';
@@ -24,7 +24,7 @@ assert.equal(pr22.split(tracker).length,2,'PR22 must have exactly one tracker ma
 const merged=seo.replace(tracker,scriptMatch[0]+tracker);
 assert.ok(merged.includes('Bagaimana jika email verifikasi pendaftaran tidak diterima?'));
 assert.ok(merged.includes('PT Mrxpanel Media Group'));
-assert.equal((merged.match(/href="\/signup\/"/g)||[]).length,5);
+assert.equal((merged.match(/<a\b[^>]*\bhref="\/signup\/"[^>]*>/g)||[]).length,5);
 assert.equal((merged.match(/signup-utm-link-propagation/g)||[]).length,1);
 const folder=fs.mkdtempSync(path.join(os.tmpdir(),'mrx-cmo-pr19-pr22-'));
 try {
