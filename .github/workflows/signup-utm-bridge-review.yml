@@ -1,0 +1,53 @@
+name: MRXPANEL Signup UTM Bridge Review (offline and isolated browser)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'signup/index.html'
+      - 'qa/signup-utm-bridge-review.test.cjs'
+      - 'qa/signup-utm-bridge-browser.test.cjs'
+      - 'qa/homepage-signup-utm-journey.test.cjs'
+      - 'qa/seo-signup-utm-integration.test.cjs'
+      - '.github/workflows/signup-utm-bridge-review.yml'
+permissions:
+  contents: read
+jobs:
+  static-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify fixed destination and UTM allowlist offline
+        run: node qa/signup-utm-bridge-review.test.cjs
+  isolated-browser-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Chromium test dependency
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Verify JS and no-JS redirection against intercepted Member stub
+        run: node qa/signup-utm-bridge-browser.test.cjs
+      - name: Verify homepage CTA to signup to isolated Member journey
+        run: node qa/homepage-signup-utm-journey.test.cjs
+      - name: Pin and verify PR19 SEO draft source revision (no production)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin refs/heads/seo/cmo-integrated-review-20261025
+          test "$(git rev-parse FETCH_HEAD)" = "e4320a1f6f84d49da6ba7e83765f69782aa7cf43"
+      - name: Verify PR19 SEO plus PR22 UTM combine in disposable Chromium fixture
+        run: node qa/seo-signup-utm-integration.test.cjs
