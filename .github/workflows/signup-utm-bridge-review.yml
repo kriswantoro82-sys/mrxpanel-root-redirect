@@ -3,9 +3,11 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'index.html'
       - 'signup/index.html'
       - 'qa/signup-utm-bridge-review.test.cjs'
       - 'qa/signup-utm-bridge-browser.test.cjs'
+      - 'qa/homepage-signup-utm-journey.test.cjs'
       - '.github/workflows/signup-utm-bridge-review.yml'
 permissions:
   contents: read
@@ -38,3 +40,5 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Verify JS and no-JS redirection against intercepted Member stub
         run: node qa/signup-utm-bridge-browser.test.cjs
+      - name: Verify homepage CTA to signup to isolated Member journey
+        run: node qa/homepage-signup-utm-journey.test.cjs
