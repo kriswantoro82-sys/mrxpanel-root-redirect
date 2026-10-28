@@ -28,3 +28,22 @@ Run `node qa/signup-utm-bridge-review.test.cjs`. 22 cases exercise fixed destina
 6. Respect MASB5 `max_attempts=1`. No automatic retries for ambiguous releases or irreversible actions.
 
 **No deploy, merge, DNS modification, database write, WhatsApp posting, or indexing submission occurs in this review.**
+
+
+---
+
+## HOME PAGE JOURNEY EXTENSION — CMO 28 OCT 2026
+
+The initial bridge fix only forwarded UTM values that were **already on `/signup/`**. But the live homepage's five account-registration links all used literal `href="/signup/"`. Campaign tags from `/?utm_source=...` were therefore dropped by the very first CTA click, before reaching the bridge. This was a **material gap** in initial Draft scope.
+
+The same Draft PR now proposes a small `<script id="signup-utm-link-propagation">` on `index.html`:
+- Read bounded allowlisted campaign values only from current homepage query.
+- Rewrite **only** the five anchors whose exact original value is `/signup/`, retaining that exact official path with approved UTM query.
+- Never touch sign-in links, external links, navigation fragments, credentials or URL fragments.
+- No local or session storage; no extra pageview or event; no private browsing data read.
+- If no valid UTM values exist, keep existing links unchanged.
+- Added separate Chromium test `qa/homepage-signup-utm-journey.test.cjs` that uses a localhost homepage and signup bridge with an intercepted Member Area response. The simulated journey tests normal JavaScript and no-JavaScript behavior, including attempted redirect overrides.
+
+**Known limits:** JavaScript-disabled homepage navigation uses the existing plain `/signup/` links and cannot preserve campaign tags. Neither this patch nor its tests prove that Member Web stores tags beyond the incoming URL, associates tags with real signup, or that CTA database tracking works. The external tracking Worker needs a separate compatibility review against this modified link query. Article-page navigation can also discard original homepage UTM parameters; this Draft does not add cross-page storage or automatic campaign propagation.
+
+**Release decision:** the staging evidence addresses a known attribution gap but is not permission to publish. CTO needs to reconcile current homepage (PR #19 also changes homepage), mobile accessibility, Member Web login/recovery behavior and actual tracker interception in the authorized release environment. Do not merge either overlapping homepage PR without conflict review. No production mutation or customer event was performed in this extension.
