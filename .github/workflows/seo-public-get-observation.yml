@@ -24,8 +24,11 @@ jobs:
           import datetime
           import hashlib
           import json
+          import re
           import urllib.error
           import urllib.request
+          import xml.etree.ElementTree as ET
+          from html.parser import HTMLParser
           from pathlib import Path
 
           host = 'https://mrxpanel.com'
@@ -37,6 +40,28 @@ jobs:
               '/favicon.ico', '/favicon-mrx.svg',
               '/auth/login/', '/auth/register/', '/signup/', '/signin/'
           ]
+          routes = paths[:7]
+
+          class PageTags(HTMLParser):
+              def __init__(self):
+                  super().__init__(convert_charrefs=True)
+                  self.canonicals = []
+                  self.robots = []
+                  self.refresh = []
+                  self.links = []
+
+              def handle_starttag(self, tag, attrs):
+                  a = dict(attrs)
+                  if tag == 'link' and a.get('rel') == 'canonical':
+                      self.canonicals.append(a.get('href'))
+                  elif tag == 'meta':
+                      if a.get('name') == 'robots':
+                          self.robots.append(a.get('content'))
+                      if a.get('http-equiv', '').lower() == 'refresh':
+                          self.refresh.append(a.get('content'))
+                  elif tag == 'a':
+                      self.links.append(a.get('href'))
+
           expected_og_b_sha256 = '2f4faac685007209ff85228dd2a7a88647fa1a03a384b40f780ce74057035514'
           expected_ico_sha256 = 'd665d7c54f9af6c016be108b43be2d2de3965581326d377fc3f5a7b6795b2d07'
           markers = {
@@ -69,10 +94,42 @@ jobs:
                           'bytes_read': len(data),
                           'sha256': hashlib.sha256(data).hexdigest(),
                       })
+                      if path in routes or path in ('/auth/login/', '/auth/register/'):
+                          html = data.decode('utf-8', errors='replace')
+                          tags = PageTags()
+                          tags.feed(html)
+                          if path in routes:
+                              row['canonical_exact'] = tags.canonicals == [host + path]
+                              row['robots_index_follow_exact'] = tags.robots == ['index,follow']
+                              row['has_h1'] = re.search(r'<h1\\b', html, re.I) is not None
+                          else:
+                              row['noindex_follow_present'] = tags.robots == ['noindex,follow']
+                              row['member_bridge_verified'] = (
+                                  tags.refresh == ['0; url=https://member.mrxpanel.com/']
+                                  and 'https://member.mrxpanel.com/' in tags.links
+                                  and re.search(r'<form\\b', html, re.I) is None
+                              )
                       if path in markers:
                           row['pr19_marker_present'] = markers[path] in data.decode('utf-8', errors='replace')
-                      if path in ('/auth/login/', '/auth/register/'):
-                          row['noindex_follow_present'] = 'noindex,follow' in data.decode('utf-8', errors='replace')
+                      if path == '/sitemap.xml':
+                          try:
+                              tree = ET.fromstring(data)
+                              ns = '{http://www.sitemaps.org/schemas/sitemap/0.9}'
+                              items = tree.findall(ns + 'url')
+                              found = [(x.findtext(ns + 'loc'), x.findtext(ns + 'lastmod')) for x in items]
+                              row['sitemap_seven_canonical_valid'] = (
+                                  len(found) == len(routes)
+                                  and [url for url, _ in found] == [host + p for p in routes]
+                                  and all(
+                                      d and re.fullmatch(r'\\d{4}-\\d{2}-\\d{2}', d)
+                                      and datetime.date.fromisoformat(d)
+                                      for _, d in found
+                                  )
+                              ) is True
+                              row['sitemap_lastmod'] = {p: d for p, d in found}
+                          except (ValueError, ET.ParseError, AttributeError) as exc:
+                              row['sitemap_seven_canonical_valid'] = False
+                              row['sitemap_parse_error'] = type(exc).__name__
                       if path == '/assets/mrxpanel-og-1200x630.png':
                           row['exact_candidate_b'] = row['sha256'] == expected_og_b_sha256
                       if path == '/favicon.ico':
@@ -90,6 +147,17 @@ jobs:
           observed = {r['path']: r for r in out}
           missing = [r['path'] for r in out if r.get('status') == 404]
           errors = [r['path'] for r in out if r.get('status') is None]
+          canonical_seven = all(
+              observed[p].get('canonical_exact') is True
+              and observed[p].get('robots_index_follow_exact') is True
+              and observed[p].get('has_h1') is True
+              for p in routes
+          )
+          sitemap_seven = observed['/sitemap.xml'].get('sitemap_seven_canonical_valid') is True
+          member_auth_bridges = all(
+              observed[p].get('member_bridge_verified') is True
+              for p in ('/auth/login/', '/auth/register/')
+          )
           pr19_markers = all(observed[p].get('pr19_marker_present') is True for p in markers)
           pr21_noindex = all(
               observed[p].get('noindex_follow_present') is True
@@ -99,12 +167,16 @@ jobs:
           pr21_ico_exact = observed['/favicon.ico'].get('exact_pr21_ico') is True
           all_urls_200 = success_200 == len(paths)
           draft_targets_observed = (
-              all_urls_200 and pr19_markers and pr21_noindex
+              all_urls_200 and canonical_seven and sitemap_seven
+              and member_auth_bridges and pr19_markers and pr21_noindex
               and og_b_exact and pr21_ico_exact
           )
           # Fail-closed local regression: never confuse a 404 with success.
           assert not (len(missing) and all_urls_200)
           assert not (len(missing) and draft_targets_observed)
+          assert not (not canonical_seven and draft_targets_observed)
+          assert not (not sitemap_seven and draft_targets_observed)
+          assert not (not member_auth_bridges and draft_targets_observed)
           report = {
               'checked_at_utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
               'scope': 'PUBLIC_GET_ONLY_NO_LOGIN_NO_PRODUCTION_WRITES_NOT_RELEASE_AUTHORIZATION',
@@ -114,6 +186,9 @@ jobs:
               'all_urls_http_200': all_urls_200,
               'http_404_paths': missing,
               'unreachable_paths': errors,
+              'canonical_robots_h1_seven_valid': canonical_seven,
+              'sitemap_seven_urls_and_dates_valid': sitemap_seven,
+              'member_auth_bridges_both_valid': member_auth_bridges,
               'pr19_content_markers_all_present': pr19_markers,
               'pr21_auth_noindex_both_present': pr21_noindex,
               'og_png_exact_candidate_b_live': og_b_exact,
@@ -131,6 +206,9 @@ jobs:
               'http_200_responses': success_200,
               'total_urls': len(paths),
               'http_404_paths': missing,
+              'canonical_robots_h1_seven_valid': canonical_seven,
+              'sitemap_seven_urls_and_dates_valid': sitemap_seven,
+              'member_auth_bridges_both_valid': member_auth_bridges,
               'draft_targets_observed': draft_targets_observed,
               'report_only': True,
           }))
