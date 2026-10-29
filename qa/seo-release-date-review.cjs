@@ -21,8 +21,8 @@ const routes = [
   { route: '/cara-menggunakan-panel-smm/', file: 'cara-menggunakan-panel-smm/index.html', dated: true, significant: true },
   { route: '/memilih-provider-smm/', file: 'memilih-provider-smm/index.html', dated: true, significant: true },
   { route: '/apa-itu-panel-smm/', file: 'apa-itu-panel-smm/index.html', article: true, significant: true },
-  { route: '/api-panel-smm-reseller/', file: 'api-panel-smm-reseller/index.html' },
-  { route: '/kalkulator-harga-jual-reseller-smm/', file: 'kalkulator-harga-jual-reseller-smm/index.html' },
+  { route: '/api-panel-smm-reseller/', file: 'api-panel-smm-reseller/index.html', schemaOnly: true, significant: true },
+  { route: '/kalkulator-harga-jual-reseller-smm/', file: 'kalkulator-harga-jual-reseller-smm/index.html', schemaOnly: true },
 ];
 function isDate(s) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(s || '')) return false;
@@ -54,6 +54,7 @@ try {
   assert.equal(map.size, routes.length, 'Duplicate sitemap URLs');
   let visibleCount = 0;
   let proseDateCount = 0;
+  let schemaOnlyCount = 0;
   let articles = 0;
   for (const item of routes) {
     const url = 'https://mrxpanel.com' + item.route;
@@ -61,7 +62,7 @@ try {
     assert.ok(isDate(lastmod), item.route + ' missing/invalid lastmod');
     const html = fs.readFileSync(path.join(root, item.file), 'utf8');
     assert.ok(html.includes('href="' + url + '"') || /<link rel="canonical"/.test(html), item.route + ' missing canonical tag');
-    if (item.dated || item.article) {
+    if (item.dated || item.article || item.schemaOnly) {
       const article = schemaArticle(html);
       assert.ok(isDate(article.datePublished), item.route + ' invalid datePublished');
       assert.ok(isDate(article.dateModified), item.route + ' invalid dateModified');
@@ -81,13 +82,18 @@ try {
         assert.ok(html.includes(shown),
           item.route + ' visible Indonesian prose date disagrees with Article schema');
         proseDateCount++;
+      } else if (item.schemaOnly) {
+        // API and calculator have Article JSON-LD but no visible publication-date label.
+        // Check structured dates and sitemap; do not invent a user-visible date.
+        schemaOnlyCount++;
       }
     }
   }
-  assert.equal(articles, 4, 'Article schema count mismatch');
+  assert.equal(articles, 6, 'Article schema count mismatch');
   assert.equal(visibleCount, 3, 'Visible Article dates count mismatch');
   assert.equal(proseDateCount, 1, 'Missing visible prose date validation');
-  console.log('SEO_DATE_INTEGRITY_PASS|PAGES=7|ARTICLE=4|VISIBLE_DATES=3|PROSE_DATES=1');
+  assert.equal(schemaOnlyCount, 2, 'Missing API/calculator Article date validation');
+  console.log('SEO_DATE_INTEGRITY_PASS|PAGES=7|ARTICLE=6|VISIBLE_DATES=3|PROSE_DATES=1|SCHEMA_ONLY=2');
   if (mode === 'review') {
     console.log('SEO_RELEASE_DATE_GATE=HOLD|ACTUAL_PUBLICATION_DATE_REQUIRED|DRAFT_ONLY');
     console.log('DATE_REVIEW_ROUTES=' + routes.filter(x => x.significant).map(x => x.route).join(','));
