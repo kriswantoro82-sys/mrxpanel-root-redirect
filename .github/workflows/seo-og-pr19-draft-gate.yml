@@ -1,0 +1,33 @@
+name: MRXPANEL PR19 Draft OG Review Gate
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '**/index.html'
+      - 'qa/seo-og-draft-guard.py'
+      - 'review/og-pr19-hold.json'
+      - 'assets/mrxpanel-og-1200x630.png'
+      - '.github/workflows/seo-og-pr19-draft-gate.yml'
+permissions:
+  contents: read
+jobs:
+  og-release-hold:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Read-only checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate seven pages and explicit review hold
+        if: github.event.pull_request.draft == true
+        run: |
+          python3 qa/seo-og-draft-guard.py --mode review
+          if python3 qa/seo-og-draft-guard.py --mode release >/tmp/og-negative.log 2>&1; then
+            echo "UNAUTHORIZED_OG_RELEASE_WAS_ACCEPTED" >&2
+            exit 1
+          fi
+          grep -q 'OWNER_VISUAL_CHOICE_REQUIRED' /tmp/og-negative.log
+      - name: Fail closed if promoted without asset and approvals
+        if: github.event.pull_request.draft == false
+        run: python3 qa/seo-og-draft-guard.py --mode release
