@@ -9,6 +9,7 @@ on:
       - 'qa/seo-release-date-review.cjs'
       - 'qa/seo-visible-prose-date-negative.test.cjs'
       - 'qa/seo-schema-only-date-negative.test.cjs'
+      - 'qa/seo-canonical-negative.test.cjs'
       - '.github/workflows/seo-release-date-review.yml'
 
 permissions:
@@ -30,6 +31,8 @@ jobs:
         run: node qa/seo-visible-prose-date-negative.test.cjs
       - name: Reject API and calculator structured-date drift in memory
         run: node qa/seo-schema-only-date-negative.test.cjs
+      - name: Reject missing duplicate or mismatched canonical in memory
+        run: node qa/seo-canonical-negative.test.cjs
       - name: Prove production date cannot be inferred automatically
         shell: bash
         run: |
