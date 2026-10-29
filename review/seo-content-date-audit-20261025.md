@@ -52,3 +52,33 @@ Hero beranda juga menambah panduan email verifikasi. Perubahan ini menyangkut **
 - Tidak ada perubahan HTML produksi, sitemap, DNS, GSC, Search Console indexing, maupun deployment dalam addendum ini. PR tetap Draft/HOLD.
 
 **Rujukan Google:** [Sitemap `lastmod`](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap), [Article `dateModified`](https://developers.google.com/search/docs/appearance/structured-data/article).
+
+---
+
+## ADDENDUM CMO GEN 7 — 30 Oktober 2026 (matriks keputusan rilis PR #19, belum izin publikasi)
+
+**Referensi aktual yang diperiksa:** diff seluruh 23 file Draft PR #19 pada HEAD `ab322979aedc0b4bca7138c5a2d0de765c167740` terhadap `main`, diikuti pemeriksaan enam artikel JSON-LD, tujuh halaman sitemap, dan keenam GitHub Actions yang **SUCCESS**. Addendum ini **menggantikan klasifikasi lama yang sudah tidak berlaku untuk kondisi Draft terbaru**, tetapi tidak menghapus bukti historis di atas. Khususnya, catatan versi Gen 4 bahwa **artikel API tidak berubah** kini **usang** karena satu paragraf tautan kalkulator dari PR #24 sudah masuk ke #19.
+
+### Matriks final untuk pengesahan CTO/owner
+
+| URL | Perubahan Draft dibanding `main` | Keputusan tanggal saat izin rilis |
+| --- | --- | --- |
+| `/` | FAQ pengertian panel SMM, FAQ bantuan verifikasi email, pembaruan petunjuk hero, dan identitas badan hukum footer | Konten utama berubah; kandidat **`sitemap.xml lastmod = D`** sesudah benar-benar terbit |
+| `/cara-menggunakan-panel-smm/` | Menambah konteks FAQ dan tautan kalkulator, memperbarui metadata pratinjau sosial, label tanggal Article | Jika CTO menyetujui signifikansi, **`Article.dateModified = D`**, tanggal kedua `<time datetime>` beserta teks tampilannya **= D**, **sitemap lastmod = D**. `datePublished` historis **2026-10-19** tidak diubah |
+| `/apa-itu-panel-smm/` | Paragraf baru berisi tautan kalkulator dan disclaimer simulasi | Jika disetujui, **`Article.dateModified = D`**, **prosa tanggal terlihat “diperbarui ...” = D**, **sitemap lastmod = D**. `datePublished` historis **2026-10-22** dipertahankan |
+| `/api-panel-smm-reseller/` | **Satu paragraf baru** perhitungan biaya/harga dan tautan kalkulator, dari PR #24 yang sudah ditutup sebagai superseded | Jika dianggap pembaruan substantif, **`Article.dateModified = D`** dan **sitemap lastmod = D**. Tidak ada label tanggal terlihat pada versi sekarang, jadi **jangan membuat klaim tanggal baru tanpa desain/review**; `datePublished = 2026-10-24` tetap |
+| `/panduan-reseller/` | Penyelarasan label tanggal dan JSON-LD; isi inti tetap | **Pertahankan `datePublished=2026-10-19` dan `dateModified/lastmod=2026-10-24`** kecuali ditemukan pembaruan isi lain |
+| `/memilih-provider-smm/` | Penyelarasan label tanggal dan `dateModified` historis ke 24 Okt; isi inti tetap | **Pertahankan `datePublished=2026-10-22` dan `dateModified/lastmod=2026-10-24`** kecuali ditemukan pembaruan isi lain |
+| `/kalkulator-harga-jual-reseller-smm/` | **Tidak ada perubahan HTML kalkulator pada PR #19**; yang berubah adalah tautan dari halaman lain | **Pertahankan `datePublished/dateModified/lastmod=2026-10-24`**. Jangan memperbarui tanggal kalkulator karena halaman *lain* menautkannya |
+
+**Definisi `D`: tanggal kalender saat perubahan substansial benar-benar muncul di website publik**, dengan zona kerja Indonesia/WIB; **belum diisi** sebelum release disetujui. `D` bukan tanggal komentar, tanggal commit Draft, tanggal crawler Google, tanggal screenshot, atau tanggal percobaan QA. Reviewer boleh menyimpulkan suatu perubahan hanya minor, tetapi wajib mencatat alasannya sebelum menyimpan tanggal historis.
+
+### Urutan pelaksanaan yang belum diotorisasi
+
+1. CTO mengevaluasi dan mengesahkan klasifikasi **empat URL kandidat** di atas, mencatat tanggal rilis yang nyata, scope 23 file, dan potensi benturan PR komponen. Jangan mem-merge PR #9/#11/#14/#15 di samping #19 bila kontennya sudah terkandung. PR #24 **CLOSED tanpa merge**.
+2. Owner memberi otorisasi **khusus merge/deploy produksi** melalui mekanisme MASB5 yang dapat dibuktikan. `lanjut` untuk audit/review **bukan pengganti izin produksi**. Catat commit `main` sebelumnya sebagai titik rollback.
+3. Setelah jadwal publikasi diotorisasi, sesuaikan **hanya** tanggal yang relevan dalam Draft PR #19; biarkan `datePublished` historis tetap. Ulangi semua CI, validasi `dateModified`, `<time>`, prosa tanggal Indonesia, canonical, dan sitemap agar saling konsisten.
+4. Merge/deploy hanya melalui gerbang rilis berizin. Setelah publikasi, catat commit merge/waktu tayang dan lakukan smoke test **7/7 URL HTTPS 200**, canonical, robots, FAQ, link kalkulator **6 halaman sumber**, Member Area/signup bridge, dan analitik tanpa menyentuh transaksi. Jika regresi, **revert commit rilis hanya dengan izin pemulihan**, jangan reset DNS atau domain.
+5. Pantau Google Search Console setelah latensi data dan crawl. Kalkulator telah berhasil di-crawl dan boleh diindeks tetapi inspeksi terakhir masih **“Di-crawl — saat ini tidak diindeks”**; tidak ada bukti penambahan tautan pasti akan mengubah keputusan Google. Jangan mengulang permintaan indexing yang telah diterima 26 Oktober.
+
+**Status penyelesaian addendum:** dokumen perencanaan Draft saja; **`SEO_QA_PASS | DATE_APPROVAL_MISSING | PRODUCTION_RELEASE_HOLD`**. Tidak ada perubahan HTML, sitemap, domain, `main`, Google Search Console, pembayaran, atau database dalam pembaruan dokumen ini.
