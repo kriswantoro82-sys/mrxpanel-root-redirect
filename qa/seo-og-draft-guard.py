@@ -66,10 +66,10 @@ def verify():
   assert hashval==original,(path,'original PR19 content replaced',hashval)
   print('OG_PR19_PAGE_OK|'+path)
  return m
-def release(m):
+def validate_selected_image(m):
+ """Validate a visually selected A/B PNG without authorizing publication."""
  assert m['owner_visual_choice'] in ('A','B'),'OWNER_VISUAL_CHOICE_REQUIRED'
  assert m['owner_visual_approved'] is True,'OWNER_VISUAL_APPROVAL_REQUIRED'
- assert m['approved_for_production'] is True,'PRODUCTION_APPROVAL_REQUIRED'
  selected=CHOICE_SHA256[m['owner_visual_choice']]
  assert m['asset_sha256']==selected,'APPROVED_DESIGN_HASH_MISMATCH'
  p=ROOT/IMAGE;assert p.is_file(),'APPROVED_PNG_NOT_COMMITTED'
@@ -77,18 +77,31 @@ def release(m):
  assert hashlib.sha256(b).hexdigest()==selected,'ASSET_HASH_MISMATCH'
  assert b[:8]==b'\x89PNG\r\n\x1a\n','NOT_PNG'
  assert struct.unpack('>II',b[16:24])==(1200,630),'WRONG_PNG_SIZE'
- print('OG_TECH_RELEASE_CHECK_PASS|OWNER_RELEASE_CONSENT_SEPARATE')
+
+def review(m):
+ """Allow two Draft states: unselected HOLD or visually approved/staged PNG."""
+ assert m['approved_for_production'] is False,'DRAFT_PRODUCTION_NOT_APPROVED'
+ if m['owner_visual_choice'] is None:
+  assert m['owner_visual_approved'] is False,'DRAFT_VISUAL_NOT_APPROVED'
+  assert m['asset_sha256'] is None,'DRAFT_MUST_HAVE_NO_PNG_SHA'
+  assert not (ROOT/IMAGE).exists(),'DRAFT_MUST_NOT_INCLUDE_UNSELECTED_IMAGE'
+  print('OG_PR19_DRAFT_PASS=7/7|RELEASE=HOLD|DESIGN_UNSELECTED|PNG_MISSING')
+ else:
+  validate_selected_image(m)
+  print('OG_PR19_DRAFT_PASS=7/7|RELEASE=HOLD|DESIGN_SELECTED|PNG_VERIFIED')
+
+def release(m):
+ """Technical verification only; self-edited manifest is NOT external release consent."""
+ assert m['owner_visual_choice'] in ('A','B'),'OWNER_VISUAL_CHOICE_REQUIRED'
+ assert m['owner_visual_approved'] is True,'OWNER_VISUAL_APPROVAL_REQUIRED'
+ assert m['approved_for_production'] is True,'PRODUCTION_APPROVAL_REQUIRED'
+ validate_selected_image(m)
+ print('OG_TECH_RELEASE_CHECK_PASS|EXTERNAL_OWNER_RELEASE_AUTHORIZATION_STILL_REQUIRED')
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('--mode',choices=('review','release'),required=True)
  try:
   m=verify()
-  if p.parse_args().mode=='review':
-   assert m['owner_visual_choice'] is None,'DRAFT_MUST_HAVE_NO_VISUAL_CHOICE'
-   assert m['asset_sha256'] is None,'DRAFT_MUST_HAVE_NO_PNG_SHA'
-   assert m['owner_visual_approved'] is False,'DRAFT_VISUAL_NOT_APPROVED'
-   assert m['approved_for_production'] is False,'DRAFT_PRODUCTION_NOT_APPROVED'
-   assert not (ROOT/IMAGE).exists(),'DRAFT_MUST_NOT_CONTAIN_IMAGE'
-   print('OG_PR19_DRAFT_PASS=7/7|RELEASE=HOLD|DESIGN_UNSELECTED|PNG_MISSING')
+  if p.parse_args().mode=='review':review(m)
   else:release(m)
  except (AssertionError,OSError,ValueError,KeyError,UnicodeError) as exc:
   print('OG_PR19_GATE_FAIL|'+str(exc)[:240],file=sys.stderr);sys.exit(2)
