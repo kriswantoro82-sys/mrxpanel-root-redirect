@@ -31,3 +31,15 @@ jobs:
         run: node qa/favicon-ico.test.cjs
       - name: Validate manual-only read-only public smoke script syntax
         run: node --check qa/legacy-auth-favicon-live-smoke.cjs
+
+      - name: Verify exact reviewed ICO bytes before archival
+        run: |
+          test "$(git hash-object favicon.ico)" = "4db26c351c07812093558c0a6f022dd345414330"
+          test "$(sha256sum favicon.ico | awk '{print $1}')" = "d665d7c54f9af6c016be108b43be2d2de3965581326d377fc3f5a7b6795b2d07"
+      - name: Attach original ICO for independent review (not deploy)
+        uses: actions/upload-artifact@v4
+        with:
+          name: mrxpanel-pr21-favicon-ico-review
+          path: favicon.ico
+          if-no-files-found: error
+          retention-days: 7
