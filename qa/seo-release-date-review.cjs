@@ -61,7 +61,10 @@ try {
     const lastmod = map.get(url);
     assert.ok(isDate(lastmod), item.route + ' missing/invalid lastmod');
     const html = fs.readFileSync(path.join(root, item.file), 'utf8');
-    assert.ok(html.includes('href="' + url + '"') || /<link rel="canonical"/.test(html), item.route + ' missing canonical tag');
+    const canonicals = [...html.matchAll(/<link\b[^>]*\brel="canonical"[^>]*>/gi)];
+    assert.equal(canonicals.length, 1, item.route + ' missing/duplicate canonical');
+    const canonicalHref = canonicals[0][0].match(/\bhref="([^"]+)"/i)?.[1];
+    assert.equal(canonicalHref, url, item.route + ' canonical does not match sitemap URL');
     if (item.dated || item.article || item.schemaOnly) {
       const article = schemaArticle(html);
       assert.ok(isDate(article.datePublished), item.route + ' invalid datePublished');
