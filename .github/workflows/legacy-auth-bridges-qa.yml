@@ -10,6 +10,7 @@ on:
       - 'favicon.ico'
       - 'favicon-mrx.svg'
       - 'qa/favicon-ico.test.cjs'
+      - 'qa/legacy-auth-favicon-live-smoke.cjs'
       - '.github/workflows/legacy-auth-bridges-qa.yml'
 
 permissions:
@@ -28,3 +29,5 @@ jobs:
         run: node qa/legacy-auth-bridges.test.cjs
       - name: Verify MRXPANEL favicon at default browser path
         run: node qa/favicon-ico.test.cjs
+      - name: Validate manual-only read-only public smoke script syntax
+        run: node --check qa/legacy-auth-favicon-live-smoke.cjs
