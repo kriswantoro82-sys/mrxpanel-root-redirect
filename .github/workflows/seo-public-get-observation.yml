@@ -101,13 +101,13 @@ jobs:
                           if path in routes:
                               row['canonical_exact'] = tags.canonicals == [host + path]
                               row['robots_index_follow_exact'] = tags.robots == ['index,follow']
-                              row['has_h1'] = re.search(r'<h1\\b', html, re.I) is not None
+                              row['has_h1'] = re.search(r'<h1\b', html, re.I) is not None
                           else:
                               row['noindex_follow_present'] = tags.robots == ['noindex,follow']
                               row['member_bridge_verified'] = (
                                   tags.refresh == ['0; url=https://member.mrxpanel.com/']
                                   and 'https://member.mrxpanel.com/' in tags.links
-                                  and re.search(r'<form\\b', html, re.I) is None
+                                  and re.search(r'<form\b', html, re.I) is None
                               )
                       if path in markers:
                           row['pr19_marker_present'] = markers[path] in data.decode('utf-8', errors='replace')
@@ -121,7 +121,7 @@ jobs:
                                   len(found) == len(routes)
                                   and [url for url, _ in found] == [host + p for p in routes]
                                   and all(
-                                      d and re.fullmatch(r'\\d{4}-\\d{2}-\\d{2}', d)
+                                      d and re.fullmatch(r'\d{4}-\d{2}-\d{2}', d)
                                       and datetime.date.fromisoformat(d)
                                       for _, d in found
                                   )
