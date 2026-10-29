@@ -83,14 +83,43 @@ jobs:
                   row.update({'status': None, 'error_type': type(exc).__name__, 'error': str(exc)[:160]})
               out.append(row)
               print('OBSERVATION ' + json.dumps(row, ensure_ascii=False))
+          # Count HTTP responses and successful targets SEPARATELY.
+          # An HTTP 404 is reachable, but it is not a published SEO asset.
           responses = sum(isinstance(r.get('status'), int) for r in out)
+          success_200 = sum(r.get('status') == 200 for r in out)
+          observed = {r['path']: r for r in out}
+          missing = [r['path'] for r in out if r.get('status') == 404]
+          errors = [r['path'] for r in out if r.get('status') is None]
+          pr19_markers = all(observed[p].get('pr19_marker_present') is True for p in markers)
+          pr21_noindex = all(
+              observed[p].get('noindex_follow_present') is True
+              for p in ('/auth/login/', '/auth/register/')
+          )
+          og_b_exact = observed['/assets/mrxpanel-og-1200x630.png'].get('exact_candidate_b') is True
+          pr21_ico_exact = observed['/favicon.ico'].get('exact_pr21_ico') is True
+          all_urls_200 = success_200 == len(paths)
+          draft_targets_observed = (
+              all_urls_200 and pr19_markers and pr21_noindex
+              and og_b_exact and pr21_ico_exact
+          )
+          # Fail-closed local regression: never confuse a 404 with success.
+          assert not (len(missing) and all_urls_200)
+          assert not (len(missing) and draft_targets_observed)
           report = {
               'checked_at_utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
               'scope': 'PUBLIC_GET_ONLY_NO_LOGIN_NO_PRODUCTION_WRITES_NOT_RELEASE_AUTHORIZATION',
               'reachable_http_responses': responses,
+              'http_200_responses': success_200,
               'total_urls': len(paths),
-              'production_verified_all_urls': responses == len(paths),
-              'note': 'A CI success means report generation succeeded, NOT that production passed.',
+              'all_urls_http_200': all_urls_200,
+              'http_404_paths': missing,
+              'unreachable_paths': errors,
+              'pr19_content_markers_all_present': pr19_markers,
+              'pr21_auth_noindex_both_present': pr21_noindex,
+              'og_png_exact_candidate_b_live': og_b_exact,
+              'pr21_favicon_ico_exact_live': pr21_ico_exact,
+              'draft_targets_observed': draft_targets_observed,
+              'note': 'CI success means observation report generated, NOT release authorization, visual approval or Google indexing.',
               'results': out,
           }
           Path('observation/public-get-report.json').write_text(
@@ -98,8 +127,11 @@ jobs:
               encoding='utf-8',
           )
           print('MRXPANEL_PUBLIC_OBSERVATION=' + json.dumps({
-              'reachable_http_responses': responses, 'total_urls': len(paths),
-              'production_verified_all_urls': responses == len(paths),
+              'reachable_http_responses': responses,
+              'http_200_responses': success_200,
+              'total_urls': len(paths),
+              'http_404_paths': missing,
+              'draft_targets_observed': draft_targets_observed,
               'report_only': True,
           }))
           PY
