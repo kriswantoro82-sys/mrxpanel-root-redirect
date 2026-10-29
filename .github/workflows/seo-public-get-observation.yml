@@ -1,0 +1,112 @@
+name: MRXPANEL Public HTTP Observation (Draft, GET only)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/seo-public-get-observation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  live-observation:
+    if: github.event.pull_request.draft == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Observe public URLs, GET only (not release QA)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p observation
+          python3 - <<'PY'
+          import datetime
+          import hashlib
+          import json
+          import urllib.error
+          import urllib.request
+          from pathlib import Path
+
+          host = 'https://mrxpanel.com'
+          paths = [
+              '/', '/panduan-reseller/', '/cara-menggunakan-panel-smm/',
+              '/memilih-provider-smm/', '/apa-itu-panel-smm/',
+              '/api-panel-smm-reseller/', '/kalkulator-harga-jual-reseller-smm/',
+              '/sitemap.xml', '/assets/mrxpanel-og-1200x630.png',
+              '/favicon.ico', '/favicon-mrx.svg',
+              '/auth/login/', '/auth/register/', '/signup/', '/signin/'
+          ]
+          expected_og_b_sha256 = '2f4faac685007209ff85228dd2a7a88647fa1a03a384b40f780ce74057035514'
+          expected_ico_sha256 = 'd665d7c54f9af6c016be108b43be2d2de3965581326d377fc3f5a7b6795b2d07'
+          markers = {
+              '/': 'Bagaimana jika email verifikasi pendaftaran tidak diterima?',
+              '/cara-menggunakan-panel-smm/': 'kalkulator harga jual dan laba bersih reseller',
+              '/apa-itu-panel-smm/': 'kalkulator harga jual reseller SMM',
+              '/api-panel-smm-reseller/': 'kalkulator harga jual dan laba bersih reseller',
+          }
+          out = []
+          for path in paths:
+              req = urllib.request.Request(
+                  host + path,
+                  method='GET',
+                  headers={
+                      'User-Agent': 'MRXPANEL-SEO-ReadOnly-Observation/1.0',
+                      'Accept': 'text/html,application/xml,image/png,image/x-icon,image/svg+xml,*/*',
+                      'Cache-Control': 'no-cache',
+                  },
+              )
+              row = {'path': path}
+              try:
+                  with urllib.request.urlopen(req, timeout=12) as r:
+                      data = r.read(2_000_000)
+                      row.update({
+                          'status': r.status,
+                          'final_url': r.geturl(),
+                          'content_type': r.headers.get('Content-Type'),
+                          'date_header': r.headers.get('Date'),
+                          'etag': r.headers.get('ETag'),
+                          'bytes_read': len(data),
+                          'sha256': hashlib.sha256(data).hexdigest(),
+                      })
+                      if path in markers:
+                          row['pr19_marker_present'] = markers[path] in data.decode('utf-8', errors='replace')
+                      if path in ('/auth/login/', '/auth/register/'):
+                          row['noindex_follow_present'] = 'noindex,follow' in data.decode('utf-8', errors='replace')
+                      if path == '/assets/mrxpanel-og-1200x630.png':
+                          row['exact_candidate_b'] = row['sha256'] == expected_og_b_sha256
+                      if path == '/favicon.ico':
+                          row['exact_pr21_ico'] = row['sha256'] == expected_ico_sha256
+              except urllib.error.HTTPError as exc:
+                  row.update({'status': exc.code, 'final_url': exc.url, 'error_type': 'HTTPError'})
+              except Exception as exc:
+                  row.update({'status': None, 'error_type': type(exc).__name__, 'error': str(exc)[:160]})
+              out.append(row)
+              print('OBSERVATION ' + json.dumps(row, ensure_ascii=False))
+          responses = sum(isinstance(r.get('status'), int) for r in out)
+          report = {
+              'checked_at_utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'scope': 'PUBLIC_GET_ONLY_NO_LOGIN_NO_PRODUCTION_WRITES_NOT_RELEASE_AUTHORIZATION',
+              'reachable_http_responses': responses,
+              'total_urls': len(paths),
+              'production_verified_all_urls': responses == len(paths),
+              'note': 'A CI success means report generation succeeded, NOT that production passed.',
+              'results': out,
+          }
+          Path('observation/public-get-report.json').write_text(
+              json.dumps(report, ensure_ascii=False, indent=2) + '\n',
+              encoding='utf-8',
+          )
+          print('MRXPANEL_PUBLIC_OBSERVATION=' + json.dumps({
+              'reachable_http_responses': responses, 'total_urls': len(paths),
+              'production_verified_all_urls': responses == len(paths),
+              'report_only': True,
+          }))
+          PY
+      - name: Preserve source-independent observation evidence for seven days
+        uses: actions/upload-artifact@v4
+        with:
+          name: mrxpanel-public-get-observation-draft
+          path: observation/public-get-report.json
+          if-no-files-found: error
+          retention-days: 7
