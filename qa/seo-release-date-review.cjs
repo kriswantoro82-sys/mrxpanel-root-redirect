@@ -29,6 +29,12 @@ function isDate(s) {
   const value = new Date(s + 'T00:00:00.000Z');
   return !Number.isNaN(value.getTime()) && value.toISOString().slice(0, 10) === s;
 }
+const ID_MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+function readableIdDate(iso) {
+  assert.ok(isDate(iso), 'Invalid Indonesian article date: ' + iso);
+  const [year, month, day] = iso.split('-').map(Number);
+  return day + ' ' + ID_MONTHS[month - 1] + ' ' + year;
+}
 function schemaArticle(html) {
   const schemas = [...html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)]
     .map(m => JSON.parse(m[1])).filter(v => v && v['@type'] === 'Article');
@@ -47,6 +53,7 @@ try {
   const map = new Map(entries.map(m => [m[1], m[2]]));
   assert.equal(map.size, routes.length, 'Duplicate sitemap URLs');
   let visibleCount = 0;
+  let proseDateCount = 0;
   let articles = 0;
   for (const item of routes) {
     const url = 'https://mrxpanel.com' + item.route;
@@ -66,12 +73,21 @@ try {
         assert.deepEqual(timeDates, [article.datePublished, article.dateModified],
           item.route + ' visible and structured dates disagree');
         visibleCount++;
+      } else if (item.article) {
+        // This article uses human-readable copy, not <time>. The copy is
+        // just as user-visible as dated <time> labels and must not go stale.
+        const shown = 'Diterbitkan ' + readableIdDate(article.datePublished) +
+          '; diperbarui ' + readableIdDate(article.dateModified);
+        assert.ok(html.includes(shown),
+          item.route + ' visible Indonesian prose date disagrees with Article schema');
+        proseDateCount++;
       }
     }
   }
   assert.equal(articles, 4, 'Article schema count mismatch');
   assert.equal(visibleCount, 3, 'Visible Article dates count mismatch');
-  console.log('SEO_DATE_INTEGRITY_PASS|PAGES=7|ARTICLE=4|VISIBLE_DATES=3');
+  assert.equal(proseDateCount, 1, 'Missing visible prose date validation');
+  console.log('SEO_DATE_INTEGRITY_PASS|PAGES=7|ARTICLE=4|VISIBLE_DATES=3|PROSE_DATES=1');
   if (mode === 'review') {
     console.log('SEO_RELEASE_DATE_GATE=HOLD|ACTUAL_PUBLICATION_DATE_REQUIRED|DRAFT_ONLY');
     console.log('DATE_REVIEW_ROUTES=' + routes.filter(x => x.significant).map(x => x.route).join(','));
