@@ -1,0 +1,53 @@
+name: MRXPANEL Seven-Page OG Metadata Release Gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+    paths:
+      - '**/index.html'
+      - 'assets/mrxpanel-og-1200x630.png'
+      - 'qa/verify_og_release_gate.py'
+      - 'review/og-seven-page-release-20261025/**'
+      - '.github/workflows/og-seven-page-gate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  draft-review:
+    if: github.event.pull_request.draft == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out Draft source only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify exactly seven pages and explicit release HOLD
+        run: python3 qa/verify_og_release_gate.py --mode review
+      - name: Prove unauthorized release fails closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if python3 qa/verify_og_release_gate.py --mode release > /tmp/mrxpanel-og-release-gate-check.log 2>&1; then
+            echo "UNSAFE_RELEASE_GATE_ACCEPTED_DRAFT" >&2
+            exit 1
+          fi
+          if ! grep -q 'OWNER_VISUAL_APPROVAL_REQUIRED' /tmp/mrxpanel-og-release-gate-check.log; then
+            echo "UNEXPECTED_GATE_FAILURE_CHECK_SCRIPT" >&2
+            tail -n 5 /tmp/mrxpanel-og-release-gate-check.log >&2
+            exit 1
+          fi
+          echo "MRXPANEL_OG_RELEASE_HOLD_PROVEN=PASS|OWNER_APPROVAL_PENDING|PNG_NOT_COMMITTED"
+
+  release-gate:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out candidate release commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Require approved design, matching PNG and validated OG metadata
+        run: python3 qa/verify_og_release_gate.py --mode release

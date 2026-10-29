@@ -1,0 +1,11 @@
+{
+  "asset": "assets/mrxpanel-og-1200x630.png",
+  "asset_sha256": "ea2c611f2c5302561cd93afe15d0679f66926015d4d31c71bdb1b1b68d7ce929",
+  "source_commit": "11ef2f5309019eda0954f550e23521dcd08dc887",
+  "reference_pr": 17,
+  "approved_for_production": false,
+  "approval_status": "pending_owner_review",
+  "technical_review": "metadata_integration_only",
+  "asset_live": false,
+  "note": "Never merge while binary asset is missing or owner approval is pending; release command must PASS before review promotion."
+}
