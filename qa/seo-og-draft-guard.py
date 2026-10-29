@@ -5,6 +5,11 @@ from pathlib import Path
 from html.parser import HTMLParser
 ROOT=Path(__file__).resolve().parents[1]
 IMAGE='assets/mrxpanel-og-1200x630.png'
+# Exact immutable local-review image digests, not any user-supplied PNG.
+CHOICE_SHA256={
+ 'A':'ea2c611f2c5302561cd93afe15d0679f66926015d4d31c71bdb1b1b68d7ce929',
+ 'B':'2f4faac685007209ff85228dd2a7a88647fa1a03a384b40f780ce74057035514',
+}
 URL='https://mrxpanel.com/'+IMAGE
 HASHES={
 'index.html':'d986d572ad86e8308d40609d35d62bcd53378902',
@@ -65,10 +70,11 @@ def release(m):
  assert m['owner_visual_choice'] in ('A','B'),'OWNER_VISUAL_CHOICE_REQUIRED'
  assert m['owner_visual_approved'] is True,'OWNER_VISUAL_APPROVAL_REQUIRED'
  assert m['approved_for_production'] is True,'PRODUCTION_APPROVAL_REQUIRED'
- assert isinstance(m['asset_sha256'],str) and len(m['asset_sha256'])==64,'ASSET_SHA256_REQUIRED'
+ selected=CHOICE_SHA256[m['owner_visual_choice']]
+ assert m['asset_sha256']==selected,'APPROVED_DESIGN_HASH_MISMATCH'
  p=ROOT/IMAGE;assert p.is_file(),'APPROVED_PNG_NOT_COMMITTED'
  b=p.read_bytes()
- assert hashlib.sha256(b).hexdigest()==m['asset_sha256'],'ASSET_HASH_MISMATCH'
+ assert hashlib.sha256(b).hexdigest()==selected,'ASSET_HASH_MISMATCH'
  assert b[:8]==b'\x89PNG\r\n\x1a\n','NOT_PNG'
  assert struct.unpack('>II',b[16:24])==(1200,630),'WRONG_PNG_SIZE'
  print('OG_TECH_RELEASE_CHECK_PASS|OWNER_RELEASE_CONSENT_SEPARATE')
