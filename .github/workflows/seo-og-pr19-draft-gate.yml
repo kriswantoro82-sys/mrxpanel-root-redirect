@@ -1,15 +1,10 @@
 name: MRXPANEL PR19 Draft OG Review Gate
+# Always run on Draft status transitions, including ready_for_review.
+# No paths filter: a non-OG code change must not suppress the release gate.
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
     branches: [main]
-    paths:
-      - '**/index.html'
-      - 'qa/seo-og-draft-guard.py'
-      - 'qa/seo-og-choice-sha-negative.py'
-      - 'qa/seo-og-design-stage-regression.py'
-      - 'review/og-pr19-hold.json'
-      - 'assets/mrxpanel-og-1200x630.png'
-      - '.github/workflows/seo-og-pr19-draft-gate.yml'
 permissions:
   contents: read
 jobs:
@@ -21,6 +16,19 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Verify required PR status-transition triggers are not path-filtered
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s = Path('.github/workflows/seo-og-pr19-draft-gate.yml').read_text()
+          assert 'types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]' in s
+          trigger = s.split('on:\n  pull_request:',1)[1].split('\npermissions:',1)[0]
+          assert '\n    paths:' not in trigger, 'Release check must not be path-filtered'
+          assert '\n    branches: [main]' in trigger
+          assert 'if: github.event.pull_request.draft == false' in s
+          print('OG_PR19_STATUS_TRANSITION_TRIGGER_QA_PASS|READY_FOR_REVIEW_COVERED')
+          PY
       - name: Validate seven pages and explicit review hold
         if: github.event.pull_request.draft == true
         run: |
