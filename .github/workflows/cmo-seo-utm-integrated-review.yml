@@ -25,7 +25,7 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --no-tags --depth=1 origin refs/heads/cmo/gen8-seo-text-only-review-20261030
-          test "$(git rev-parse FETCH_HEAD)" = "7fb120378697e98c6ee7145f9e54ee4a2aa298af"
+          test "$(git rev-parse FETCH_HEAD)" = "4363724ad2c3029bf1b3de136cc0bcdbd9ee5455"
       - name: Check exact static SEO and signup safety assertions
         run: |
           python3 scripts/seo_review_check.py
