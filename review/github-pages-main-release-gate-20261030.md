@@ -38,3 +38,11 @@
 **Candidate-only correction:** Add root `_config.yml` with `exclude` entries for `qa`, `review`, `scripts` plus Jekyll v3 traditional defaults (`Gemfile`, `Gemfile.lock`, `node_modules`, `vendor`). Do not disable Jekyll with `.nojekyll`. Extend universal `qa/main-safety-baseline.cjs` to require the publishing exclusions and deliberately reject missing `review` exclusion. Targeted local test PASS; negative checks 4/4. This correction does not remove files from the public GitHub **repository**, only requests exclusion from the generated **website**.
 
 **Verification limitation:** No local Jekyll runtime was installed on Office. After an authorized release, verify the actual GitHub Pages build and GET that public website paths under `/qa/`, `/review/`, `/scripts/` return 404 while all seven SEO routes, `sitemap.xml`, `CNAME` behavior and `robots.txt` remain intact. Never assert production isolation based solely on static config check.
+
+## Postdeployment Jekyll output exposure detection, review candidate only (30 October 2026)
+
+Updated the manual GET-only `qa/seo-postdeploy-live-smoke.cjs`: when explicitly run with `--mode=postdeploy` **after an authorized deployment**, it now requires strict HTTP 404 at the unredirected URLs `/qa/main-safety-baseline.cjs`, `/review/github-pages-main-release-gate-20261030.md` and `/scripts/seo_review_check.py`. A 200, unexpected redirect, HTTP/network error, or 403 is not accepted as proof of exclusion. No mutation is performed.
+
+Added network-free `--self-test` (3 deliberate negative cases), wired into the universal `main-safety-baseline` CI job. Positive example is accepted. A **separate GET-only live baseline** confirms these three URLs are presently HTTP 404 on production `main`; this does not prove the post-merge Jekyll output, which must be checked after release. The check does **not** assume a GitHub repository is private: excluded source files remain visible in a public repository.
+
+After the separately approved Pages release: `node qa/seo-postdeploy-live-smoke.cjs --mode=postdeploy`; independently confirm GitHub Pages deployment and all three 404 checks. A passing pre-deploy self-test does not grant release authorization.

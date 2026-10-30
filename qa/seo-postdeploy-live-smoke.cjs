@@ -15,6 +15,22 @@ const routes = [
 ];
 const sources = routes.filter(x => x !== '/kalkulator-harga-jual-reseller-smm/');
 const baselineLinks = new Set(['/', '/panduan-reseller/', '/memilih-provider-smm/']);
+// The site is published from GitHub Pages main/root; these source files must NOT be published.
+const internalSourcePaths = [
+  '/qa/main-safety-baseline.cjs',
+  '/review/github-pages-main-release-gate-20261030.md',
+  '/scripts/seo_review_check.py'
+];
+const isMissingPublicSource = (status, finalUrl, expectedUrl) =>
+  status === 404 && finalUrl === expectedUrl;
+if (process.argv.includes('--self-test')) {
+  assert.ok(isMissingPublicSource(404,base+'/qa/main-safety-baseline.cjs',base+'/qa/main-safety-baseline.cjs'));
+  assert.equal(isMissingPublicSource(200,base+'/qa/main-safety-baseline.cjs',base+'/qa/main-safety-baseline.cjs'),false);
+  assert.equal(isMissingPublicSource(403,base+'/qa/main-safety-baseline.cjs',base+'/qa/main-safety-baseline.cjs'),false);
+  assert.equal(isMissingPublicSource(404,base+'/unexpected/',base+'/qa/main-safety-baseline.cjs'),false);
+  console.log('PUBLISH_BOUNDARY_SMOKE_NEGATIVE_PASS=3/3');
+  process.exit(0);
+}
 const mode = process.argv.find(x => x.startsWith('--mode='))?.slice(7);
 if (!['baseline', 'postdeploy'].includes(mode)) {
   console.error('USAGE: node qa/seo-postdeploy-live-smoke.cjs --mode=baseline|postdeploy');
@@ -81,6 +97,17 @@ async function get(url) {
       record('member bridge '+route,p.status===200&&p.url===base+route&&hasMetaRefresh,
         {status:p.status,finalUrl:p.url,hasMetaRefresh});
     }catch(e){record('member bridge '+route,false,{error:e.message})}
+  }
+  if(mode==='postdeploy'){
+    // Source exclusion must be verified on the LIVE Pages build, not assumed from _config.yml.
+    for(const route of internalSourcePaths){
+      try{
+        const p=await get(base+route);
+        record('internal source not published '+route,
+          isMissingPublicSource(p.status,p.url,base+route),
+          {status:p.status,finalUrl:p.url});
+      }catch(e){record('internal source not published '+route,false,{error:String(e.message)})}
+    }
   }
   const count=results.filter(x=>x.pass).length,full=results.length;
   console.log('MRXPANEL_SEO_LIVE_SMOKE='+JSON.stringify({

@@ -21,3 +21,5 @@ jobs:
           persist-credentials: false
       - name: Verify canonical, sitemap, links, dates, and local OG image assets
         run: node qa/main-safety-baseline.cjs --self-test
+      - name: Verify read-only postdeploy source-exposure guard
+        run: node qa/seo-postdeploy-live-smoke.cjs --self-test
