@@ -1,9 +1,9 @@
 name: MRXPANEL SEO Text-Only Candidate QA
-# Review-only workflow. No deploy, token write, GSC action or merge.
+# Read-only, review-stage workflow. No deploy, GSC mutation, token write, or merge.
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
-    branches: [main]
+    branches: [main, seo/cmo-integrated-review-20261025]
 permissions:
   contents: read
 jobs:
@@ -19,15 +19,18 @@ jobs:
         run: node qa/seo-text-only-social-qa.cjs
       - name: Verify Article dates and retain separate release approval
         run: node qa/seo-release-date-review.cjs --mode=review
-      - name: Verify links, canonical, identity and auth bridge
+      - name: Verify SEO content, safe legacy auth, favicon and negative cases
         run: |
           node qa/seo-article-calculator-links.cjs
           node qa/seo-canonical-negative.test.cjs
+          node qa/seo-schema-only-date-negative.test.cjs
+          node qa/seo-visible-prose-date-negative.test.cjs
           node qa/cmo-gen7-api-calculator-link.test.cjs
           node qa/homepage-legal-identity.test.cjs
           node qa/legacy-auth-bridges.test.cjs
           node qa/favicon-ico.test.cjs
-      - name: Reject production release from review-only state
+          node qa/tutorial-social-preview.test.cjs
+      - name: Reject promotion from review-only state
         if: github.event.pull_request.draft == false
         run: |
           echo "SEO_TEXT_ONLY_RELEASE=HOLD|OWNER_AND_CTO_APPROVAL_REQUIRED"
