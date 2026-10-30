@@ -46,3 +46,11 @@ Updated the manual GET-only `qa/seo-postdeploy-live-smoke.cjs`: when explicitly 
 Added network-free `--self-test` (3 deliberate negative cases), wired into the universal `main-safety-baseline` CI job. Positive example is accepted. A **separate GET-only live baseline** confirms these three URLs are presently HTTP 404 on production `main`; this does not prove the post-merge Jekyll output, which must be checked after release. The check does **not** assume a GitHub repository is private: excluded source files remain visible in a public repository.
 
 After the separately approved Pages release: `node qa/seo-postdeploy-live-smoke.cjs --mode=postdeploy`; independently confirm GitHub Pages deployment and all three 404 checks. A passing pre-deploy self-test does not grant release authorization.
+
+## CI verification of actual GitHub Pages/Jekyll build artifact (30 October 2026)
+
+The prior _config.yml exclusion tests only examined source configuration. Added GitHub Actions workflow `.github/workflows/seo-pages-artifact-qa.yml` to build a **PR-only local preview** using the official `actions/jekyll-build-pages@v1` Jekyll build action. It has only `contents: read`, **no deploy job**, **no Pages write or OIDC permission**, no artifact upload, and does not change the configured branch publishing source.
+
+The generated `./_site` is independently checked by `qa/seo-pages-artifact.test.cjs`: the seven existing SEO page output files, sitemap.xml, robots.txt, CNAME and both icon assets must exist; folders `qa`, `review`, `scripts`, `.github` and config file `_config.yml` must **not** appear in built output. CNAME must equal `mrxpanel.com`; every SEO page must retain an H1. The standalone network-free self-test rejects six intentionally broken cases (five published-source directories and missing homepage). Local 6/6 self-test PASS.
+
+This is a **real build-artifact CI guard**, stronger than merely matching `exclude` text, but it is not a production deployment or a live CDN inspection. It must pass on the final date-adjusted release SHA and the approved GitHub Pages deploy and GET-only smoke must still be verified separately. Official action reference: https://github.com/actions/jekyll-build-pages .
