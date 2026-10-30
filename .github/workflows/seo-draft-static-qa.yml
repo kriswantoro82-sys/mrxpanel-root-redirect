@@ -1,0 +1,26 @@
+name: MRXPANEL SEO Draft Static QA
+
+on:
+  pull_request:
+    paths:
+      - 'sitemap.xml'
+      - '**/index.html'
+      - 'scripts/seo_review_check.py'
+      - '.github/workflows/seo-draft-static-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Canonical, sitemap, Article dates
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout proposed SEO branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Audit SEO without network or deployment
+        run: python3 scripts/seo_review_check.py
