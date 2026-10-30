@@ -9,6 +9,9 @@ on:
       - 'qa/signup-utm-bridge-browser.test.cjs'
       - 'qa/homepage-signup-utm-journey.test.cjs'
       - 'scripts/seo_review_check.py'
+      - '_config.yml'
+      - 'qa/seo-pages-artifact.test.cjs'
+      - 'qa/main-safety-baseline.cjs'
       - '.github/workflows/cmo-seo-utm-integrated-review.yml'
 permissions:
   contents: read
@@ -51,3 +54,26 @@ jobs:
         run: node qa/signup-utm-bridge-browser.test.cjs
       - name: Verify exact combined homepage CTA through signup to isolated Member
         run: node qa/homepage-signup-utm-journey.test.cjs
+
+  pages-output-boundary:
+    name: pages-output-boundary
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout combined PR26 source only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate source and Jekyll exclusion guards offline
+        run: |
+          node qa/main-safety-baseline.cjs --self-test
+          node qa/seo-pages-artifact.test.cjs --self-test
+      - name: Build GitHub Pages preview artifact only, never deploy
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+      - name: Verify generated seven-page website excludes internal QA and review source
+        run: node qa/seo-pages-artifact.test.cjs --path=./_site
