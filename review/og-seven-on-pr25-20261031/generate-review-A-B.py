@@ -8,13 +8,15 @@ from pathlib import Path
 import subprocess
 import sys
 
-from PIL import Image, ImageDraw
-import cairosvg
+from PIL import Image
+import base64
+import zlib
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 ORIGINAL_GENERATOR = HERE / "original-pr17-og-generator.py"
 OFFICIAL_FAVICON = ROOT / "favicon-mrx.svg"
+PINNED_LOGO_PATCH = HERE / "B_logo_patch_rgb68.zlib.b64"
 EXPECTED = {
     "A": "ea2c611f2c5302561cd93afe15d0679f66926015d4d31c71bdb1b1b68d7ce929",
     "B": "1508d09e5c99850457e5dd05501f7bd22bdc398d21c415592351267bf3ca74c8",
@@ -47,7 +49,7 @@ def main() -> None:
         raise SystemExit("FAIL_CLOSED_IMAGE_HASH_MANIFEST_DRIFT")
     if (ROOT / "assets" / "mrxpanel-og-1200x630.png").exists():
         raise SystemExit("FAIL_CLOSED_PRODUCTION_ASSET_PRESENT")
-    if not ORIGINAL_GENERATOR.is_file() or not OFFICIAL_FAVICON.is_file():
+    if not ORIGINAL_GENERATOR.is_file() or not OFFICIAL_FAVICON.is_file() or not PINNED_LOGO_PATCH.is_file():
         raise SystemExit("MISSING_PINNED_ARTWORK_SOURCE")
     out.mkdir(parents=True, exist_ok=False)
     a = out / "A_original-M.png"
@@ -56,12 +58,16 @@ def main() -> None:
     verify(a, "A")
     with Image.open(a) as image:
         art = image.copy()
-    # Only original 68x68 logo patch is replaced; the rest stays pixel-identical.
-    ImageDraw.Draw(art).rectangle((62, 120, 129, 187), fill="#111318")
-    overlay = Image.open(BytesIO(cairosvg.svg2png(
-        url=str(OFFICIAL_FAVICON), output_width=68, output_height=68
-    ))).convert("RGBA")
-    art.paste(overlay, (62, 120), overlay)
+    # Pinned original B raster logo patch prevents OS-specific SVG renderer drift.
+    # The 68x68 RGB patch comes from the independently verified SHA-256 B image.
+    patch_text = PINNED_LOGO_PATCH.read_bytes().replace(b"\r\n", b"\n")
+    patch_sha = hashlib.sha256(patch_text).hexdigest()
+    if patch_sha != "460c771122d0edf3b815e3fc1444cfede2915271b8275ede9c037dbd004fb7ba":
+        raise SystemExit("PINNED_B_PATCH_CHECKSUM_DRIFT")
+    pixels = zlib.decompress(base64.b64decode(patch_text))
+    if len(pixels) != 68 * 68 * 3:
+        raise SystemExit("INVALID_PINNED_B_PATCH_PIXELS")
+    art.paste(Image.frombytes("RGB", (68, 68), pixels), (62, 120))
     art.save(b, format="PNG", optimize=True)
     verify(b, "B")
     (out / "REVIEW_ONLY.txt").write_text(
