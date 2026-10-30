@@ -37,3 +37,15 @@ No date is authorized for publication yet. The date-review script deliberately f
 6. Open Graph PNG and PR #18 stay separate until design approval and a real image binary. Do not publish broken media URLs or repeat an accepted indexing request solely to accelerate Google.
 
 Evidence: [release gate issue #16](https://github.com/kriswantoro82-sys/mrxpanel-root-redirect/issues/16).
+
+## CMO Gen 8 — safe publication-date preview (30 October 2026)
+
+A new read-only helper, qa/seo-publication-date-preview.cjs, computes exact *hypothetical* date change locations for four substantive-content candidates. It does **not** update files and must never stand in for production approval.
+
+Usage after validating the proposed day with CTO/owner:
+- node qa/seo-publication-date-preview.cjs --date=YYYY-MM-DD (JSON preview only)
+- node qa/seo-publication-date-preview.cjs --self-test (strict negative checks)
+
+Only four sitemap lastmod routes are candidates: homepage, tutorial, apa-itu-panel-smm, and api-panel-smm-reseller. Three corresponding Article dateModified fields are candidates; tutorial visible time and apa-itu-panel-smm visible Indonesian prose are synchronized in memory. Article datePublished is preserved verbatim. Panduan reseller, provider, and calculator dates remain unchanged. Negative tests reject invalid/backdated dates and inconsistent visible date copy.
+
+**Status:** hypothetical mapping ready; no date was published or approved, no file was written, no production change, no permission granted. Owner/CTO decision and exact deployment date D remain required.

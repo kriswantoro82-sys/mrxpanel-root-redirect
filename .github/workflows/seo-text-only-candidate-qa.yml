@@ -21,6 +21,8 @@ jobs:
         run: node qa/seo-text-only-social-qa.cjs
       - name: Verify Article dates and retain separate release approval
         run: node qa/seo-release-date-review.cjs --mode=review
+      - name: Simulate selective publication date changes without writing files
+        run: node qa/seo-publication-date-preview.cjs --self-test
       - name: Verify SEO content, safe legacy auth, favicon and negative cases
         run: |
           node qa/seo-article-calculator-links.cjs
