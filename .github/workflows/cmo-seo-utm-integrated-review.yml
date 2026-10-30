@@ -65,6 +65,7 @@ jobs:
       - name: Validate source and Jekyll exclusion guards offline
         run: |
           node qa/main-safety-baseline.cjs --self-test
+          node qa/seo-postdeploy-live-smoke.cjs --self-test
           node qa/seo-pages-artifact.test.cjs --self-test
       - name: Build GitHub Pages preview artifact only, never deploy
         uses: actions/jekyll-build-pages@v1
