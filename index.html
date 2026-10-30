@@ -2237,6 +2237,25 @@
       }
     }());
   </script>
+  <script id="signup-utm-link-propagation">
+    (function () {
+      'use strict';
+      // Preserve only bounded campaign labels from the landing URL to /signup/.
+      // Never rewrite signin links, arbitrary external URLs, or navigation fragments.
+      var input = new URLSearchParams(window.location.search);
+      var safe = new URLSearchParams();
+      ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content'].forEach(function (key) {
+        var values = input.getAll(key);
+        if (values.length !== 1) return;
+        var value = values[0];
+        if (/^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/.test(value)) safe.set(key, value);
+      });
+      if (!safe.toString()) return;
+      document.querySelectorAll('a[href="/signup/"]').forEach(function (link) {
+        link.setAttribute('href', '/signup/?' + safe.toString());
+      });
+    })();
+  </script>
   <script src="https://mrxpanel-tracker.mrxpanel01.workers.dev/tracker-v1.js" defer></script>
 </body>
 </html>
