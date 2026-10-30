@@ -78,6 +78,21 @@ if (process.argv.includes('--self-test')) {
   assert.equal(validMemberBridge(modern.replace('<a id="member-area-link" href="https://member.mrxpanel.com/">Member</a>',''),'/signup/','postdeploy').pass,false);
   console.log('MEMBER_BRIDGE_POSTDEPLOY_REGRESSION_PASS=13/13');
 
+  // Source-backed regression: the exact candidate HTML must satisfy the
+  // same checker that will be used after an authorized production release.
+  const fs=require('node:fs'),path=require('node:path'),root=path.resolve(__dirname,'..');
+  const signupSource=fs.readFileSync(path.join(root,'signup/index.html'),'utf8');
+  const signinSource=fs.readFileSync(path.join(root,'signin/index.html'),'utf8');
+  assert.ok(validMemberBridge(signupSource,'/signup/','postdeploy').pass,'real PR26 signup source must pass');
+  assert.ok(validMemberBridge(signinSource,'/signin/','postdeploy').pass,'real PR26 signin source must pass');
+  assert.equal(validMemberBridge(signupSource,'/signup/','baseline').pass,false,'PR26 UTM is not legacy baseline');
+  assert.equal(validMemberBridge(signinSource,'/signup/','postdeploy').pass,true,'legacy signin bridge is allowed on signup');
+  assert.equal(validMemberBridge(signupSource.replace('3; url=https://member.mrxpanel.com/','0; url=https://member.mrxpanel.com/'),'/signup/','postdeploy').pass,false,'wrong UTM fallback delay');
+  assert.equal(validMemberBridge(signupSource.replace('if (values.length !== 1) return;','if (values.length !== 2) return;'),'/signup/','postdeploy').pass,false,'missing single-value check');
+  assert.equal(validMemberBridge(signupSource.replace('window.location.replace(destination.href);','window.location.assign(destination.href);'),'/signup/','postdeploy').pass,false,'altered JS transition');
+  assert.equal(validMemberBridge(signinSource.replace('0;url=https://member.mrxpanel.com/','0;url=https://not-member.example/'),'/signin/','postdeploy').pass,false,'wrong signin target');
+  console.log('MEMBER_BRIDGE_SOURCE_BACKED_QA_PASS=8/8');
+
   console.log('PUBLISH_BOUNDARY_SMOKE_NEGATIVE_PASS=3/3');
   process.exit(0);
 }
