@@ -1,13 +1,15 @@
 name: MRXPANEL SEO Text-Only Candidate QA
-# Read-only, review-stage workflow. No deploy, GSC mutation, token write, or merge.
+# Review-only; deliberately scoped to this candidate branch.
+# Must never become a global production release gate or block a later approved OG image.
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
-    branches: [main, seo/cmo-integrated-review-20261025]
+    types: [opened, edited, synchronize, reopened, ready_for_review, converted_to_draft]
+    branches: [main]
 permissions:
   contents: read
 jobs:
   validate-text-only:
+    if: github.event.pull_request.head.ref == 'cmo/gen8-seo-text-only-review-20261030'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

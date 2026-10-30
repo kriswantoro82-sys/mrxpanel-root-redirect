@@ -1,37 +1,39 @@
-# MRXPANEL SEO Text-Only Candidate — CMO Gen 8 (30 Oct 2026)
+# MRXPANEL SEO — independent text-only Draft review (30 October 2026)
 
-**State: LOCAL REVIEW CANDIDATE ONLY.** This is an isolated working copy based on PR #19 HEAD \`10cf4523f9671e1a91113827e0c0af7ad23a0f34\`. The original PR and production \`main\` are untouched.
+**Status: DRAFT / RELEASE HOLD.** [Draft PR #25](https://github.com/kriswantoro82-sys/mrxpanel-root-redirect/pull/25) targets **main** directly and is the single proposed text-only integration path. Its source is the review integration [PR #19](https://github.com/kriswantoro82-sys/mrxpanel-root-redirect/pull/19), which remains separate, unmerged and must not be merged alongside #25. Production branch and live pages were not changed.
 
-## Purpose
-Allow a review of already-prepared on-page SEO improvements **without** the unfinished Open Graph PNG. Seven pages retain OG title/description, canonical, structured data and internal links; seven unapproved \`og:image*\`/\`twitter:image\` meta lines are removed per page and the Twitter card falls back to \`summary\`.
+## Proposed content and scope
 
-## Safeguards
-- Remove the old OG-image-specific Draft workflow, its helper scripts, and the image-choice manifest **only in this local candidate**; their original versions remain in PR #19 history.
-- Add a new non-image-specific QA guard with negative tests and a read-only GitHub Actions workflow. This is no assertion that the real social-image design was approved.
-- Preserve the working favicon.ico, safe legacy login/register bridges and 6 Article JSON-LD declarations.
-- The date review deliberately stays fail-closed. The owner/CTO still must confirm actual significant content edits and actual publication date for applicable routes.
-- Do not merge PR #9/#11/#14/#15 independently if their content is already incorporated by PR #19; verify the latest base and diff first.
-- No automatic GSC re-indexing, DNS changes, Google Pages deploy, money operations or user-account changes.
+- Review diff against production base main: 36 files at original head 19b8bdb, including seven public SEO HTML pages, two legacy auth bridges, favicon.ico, read-only QA/workflows and review documents.
+- All seven public pages retain canonical, OG title/description, robots and existing article JSON-LD. Missing OG image URLs were removed; Twitter cards use the small summary setting.
+- Homepage adds two FAQ entries, email-verification guidance and visible legal operator identity.
+- Relevant articles add context and internal links to the reseller calculator without treating simulated prices as real prices.
+- Legacy auth/login and auth/register gain noindex,follow while retaining their existing bridge to https://member.mrxpanel.com/.
+- No change to wallet, money, orders, payments, Supabase, DNS, hosting, indexing requests, or deployment.
 
-## To review and prepare for release
-1. Verify candidate SHA and full diff against current \`main\`; confirm all changed files are within the known SEO scope and no unexpected wallet/auth/order change.
-2. Re-run the local static suites and GitHub Actions on an isolated Draft PR, if authorized. Reject any live OG image URL missing its PNG.
-3. Have CTO/owner review the **actual** publication dates and authorize production through MASB5 release gate, keeping \`datePublished\` unchanged and changing only necessary \`dateModified\` / visible dates / sitemap \`lastmod\`.
-4. Record pre-deploy main SHA and rollback. Only after production approval, release and re-check 7 HTTPS URLs, sitemap, canonical, login/signup bridges, favicon and link sources.
-5. Let Google crawl normally; no repeated indexing request merely because the report is lagged.
+## Publication-date decision matrix (not yet authorized)
 
-## Verification facts
-- Baseline PR #19 is Draft and unmerged; source HEAD: \`10cf452\` (30 Oct).
-- Locally prepared seven pages, each removing exactly seven missing-image meta tags.
-- Initial isolated candidate local test: text-only QA 7/7, negative 3/3; date-integrity review PASS but publication authorization HOLD.
-- This candidate is not pushed, merged, or deployed. Image selection and social-image rollout remain separate.
+D = the actual day on which changed substantive content becomes public. Do not substitute the Draft commit date or Google crawl date.
 
-## Addendum CMO Gen 8 — hardened validation, 30 Oct 2026
+| Route | Decision for authorized release |
+| --- | --- |
+| / | Review new FAQ/hero as significant; update sitemap lastmod to D if approved |
+| /cara-menggunakan-panel-smm/ | If calculator FAQ significant, align Article dateModified, visible updated time and sitemap lastmod to D; preserve datePublished 2026-10-19 |
+| /apa-itu-panel-smm/ | If calculator paragraph significant, align Article dateModified, visible Indonesian date text and sitemap lastmod to D; preserve datePublished 2026-10-22 |
+| /api-panel-smm-reseller/ | If new calculator paragraph significant, align Article dateModified and sitemap lastmod to D; preserve datePublished 2026-10-24; do not invent a visible date |
+| /panduan-reseller/ | Date label/schema only; preserve historical dates unless reviewer finds a meaningful edit |
+| /memilih-provider-smm/ | Historical date alignment only; preserve historical dates unless reviewer finds a meaningful edit |
+| /kalkulator-harga-jual-reseller-smm/ | No calculator content edit; preserve historical date |
 
-**Actual GitHub review state:** Draft PR #25, stacked on Draft PR #19 (not a main/release PR). Review branch: `cmo/gen8-seo-text-only-review-20261030`.
+No date is authorized for publication yet. The date-review script deliberately fails closed in release mode.
 
-A review of the first candidate found a parser gap: checking for `<meta property="og:image"` only at the start of the tag could miss `<meta content="..." property="og:image"` and single-quoted/unquoted forms. The candidate now parses HTML attribute names and values without depending on their order, rejects all `og:image` / `twitter:image` variants, and checks OG URL equality to canonical.
+## Verification and release safeguards
 
-Expected local QA: **7/7 pages plus 8/8 negative fixtures**, followed by the full static suite and GitHub Actions checks. This hardening changes only a QA script and this review record; it does not approve images, modify page content, deploy or relax the separate owner/CTO and publication-date release gate.
+1. Branch local QA: 11/11 PASS; 7/7 text-only pages and 8/8 negative metadata cases. Verify GitHub Actions on the latest exact commit and base main.
+2. Only the designated PR #25 candidate branch runs its specific GitHub Actions. This candidate-specific workflow is not a global production release gate.
+3. CTO and owner must separately approve significant edits, actual date D, rollback, and production merge/deploy permission. A general continuation request is not explicit release authorization.
+4. Record latest main SHA, inspect the full diff, prevent duplicate merges from PR #9/#11/#14/#15/#19 and run complete QA after any date edits.
+5. After a separately authorized deployment, GET-only smoke test all seven HTTPS pages, sitemap, canonical, dates and calculator links, favicon, legacy auth bridge and tracker; record deploy SHA/time and rollback.
+6. Open Graph PNG and PR #18 stay separate until design approval and a real image binary. Do not publish broken media URLs or repeat an accepted indexing request solely to accelerate Google.
 
-**Release dependency remains:** meaningful-content date reconciliation with the actual release date, documented rollback and explicit production release authorization. Do not change `datePublished` historically or auto-resubmit indexing requests.
+Evidence: [release gate issue #16](https://github.com/kriswantoro82-sys/mrxpanel-root-redirect/issues/16).
