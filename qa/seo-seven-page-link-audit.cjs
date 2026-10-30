@@ -55,7 +55,8 @@ function analyze(overrides=new Map()){
   if(docs.has(adjacent)&&!reached.has(adjacent)){reached.add(adjacent);queue.push(adjacent)}
  }}
  const unreachable=pages.filter(x=>!reached.has(x));
- return {pages:pages.length,totalHref,uniqueInternalTargets:internal.size,
+ const calculatorReferrerRoutes=[...new Set(internal.get('/kalkulator-harga-jual-reseller-smm/')||[])].sort();
+ return {pages:pages.length,totalHref,uniqueInternalTargets:internal.size,calculatorReferrerRoutes,
   externalTargets:[...external].map(([url,count])=>({url,count})),
   missingFiles:missing,missingAnchors:errors,unreachable};
 }
@@ -64,6 +65,8 @@ function check(report){
  assert.equal(report.missingFiles.length,0,'missing route target');
  assert.equal(report.missingAnchors.length,0,'missing target anchor or malformed URL');
  assert.equal(report.unreachable.length,0,'orphan SEO page from homepage');
+ assert.deepEqual(report.calculatorReferrerRoutes,pages.filter(x=>x!=='/kalkulator-harga-jual-reseller-smm/').sort(),
+  'calculator inbound SEO routes changed');
  assert.ok(report.externalTargets.some(x=>x.url==='https://member.mrxpanel.com/'),'Member Area not linked');
  assert.ok(report.externalTargets.some(x=>x.url==='https://member.mrxpanel.com/api/'),'API docs not linked');
 }
@@ -77,11 +80,13 @@ try{
   };
   assert.throws(()=>check(analyze(inject('/api-panel-smm-reseller/',
     'href="/kalkulator-harga-jual-reseller-smm/"','href="/seo-missing-test-route/"'))),/missing route target/);
+  assert.throws(()=>check(analyze(inject('/api-panel-smm-reseller/',
+    'href="/kalkulator-harga-jual-reseller-smm/"','href="/"'))),/calculator inbound SEO routes changed/);
   const overwrite=new Map();
   for(const [route,html] of source)overwrite.set(route,html.replace(/href="\/apa-itu-panel-smm\/"/g,'href="/"'));
   assert.throws(()=>check(analyze(overwrite)),/orphan SEO page/);
   assert.throws(()=>check(analyze(inject('/','href="/"','href="#missing-anchor-test"'))),/missing target anchor/);
-  console.log('MRXPANEL_SEO_LINK_NEGATIVE_QA_PASS=3/3');
+  console.log('MRXPANEL_SEO_LINK_NEGATIVE_QA_PASS=4/4');
  }
  console.log('MRXPANEL_SEO_LINK_QA_PASS='+JSON.stringify(report));
 }catch(e){console.error('MRXPANEL_SEO_LINK_QA_FAIL|'+e.message);process.exitCode=2}
