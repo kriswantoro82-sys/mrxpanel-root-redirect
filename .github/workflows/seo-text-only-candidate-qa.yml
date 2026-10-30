@@ -21,6 +21,8 @@ jobs:
         run: node qa/seo-text-only-social-qa.cjs
       - name: Verify Article dates and retain separate release approval
         run: node qa/seo-release-date-review.cjs --mode=review
+      - name: Audit all seven SEO pages for broken and unreachable internal links
+        run: node qa/seo-seven-page-link-audit.cjs --self-test
       - name: Simulate selective publication date changes without writing files
         run: node qa/seo-publication-date-preview.cjs --self-test
       - name: Verify SEO content, safe legacy auth, favicon and negative cases

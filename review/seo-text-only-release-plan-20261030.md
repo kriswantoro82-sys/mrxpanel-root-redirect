@@ -49,3 +49,11 @@ Usage after validating the proposed day with CTO/owner:
 Only four sitemap lastmod routes are candidates: homepage, tutorial, apa-itu-panel-smm, and api-panel-smm-reseller. Three corresponding Article dateModified fields are candidates; tutorial visible time and apa-itu-panel-smm visible Indonesian prose are synchronized in memory. Article datePublished is preserved verbatim. Panduan reseller, provider, and calculator dates remain unchanged. Negative tests reject invalid/backdated dates and inconsistent visible date copy.
 
 **Status:** hypothetical mapping ready; no date was published or approved, no file was written, no production change, no permission granted. Owner/CTO decision and exact deployment date D remain required.
+
+## CMO Gen 8 — link graph verification (30 October 2026)
+
+Added a deterministic, read-only QA script, qa/seo-seven-page-link-audit.cjs, to the **Draft PR #25-only** workflow. It parses 101 hyperlinks across the seven SEO pages, checks all nine distinct mrxpanel.com local destinations exist, verifies in-page anchor targets and verifies every SEO route is reachable from the homepage. Results: 7/7 routes reachable, 0 missing local destinations, 0 broken local anchors. Three negative fixtures intentionally inject a nonexistent local route, isolate a sitemap article from the home link graph, and inject a nonexistent anchor; all are correctly rejected.
+
+The only two external website destinations in these page links are https://member.mrxpanel.com/ and https://member.mrxpanel.com/api/. Both were independently verified with unauthenticated GET to respond HTTP 200. The new CI test remains **static only**, with no HTTP dependence and no network mutations.
+
+No live SEO HTML was changed. This does not establish release consent or Google indexing status; Draft and release-date approval remain on hold.
