@@ -7,7 +7,16 @@ const vm = require('node:vm');
 const qaFile = path.join(__dirname, 'seo-release-date-review.cjs');
 const qaScript = fs.readFileSync(qaFile, 'utf8');
 const targetSuffix = path.join('apa-itu-panel-smm', 'index.html');
-const originalDate = 'Diterbitkan 22 Oktober 2026; diperbarui 24 Oktober 2026';
+const months=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const formatDate=iso=>{const [y,m,d]=iso.split('-').map(Number);return d+' '+months[m-1]+' '+y};
+const sourceHtml=fs.readFileSync(path.join(__dirname,'..',targetSuffix),'utf8');
+const article=[...sourceHtml.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)]
+  .map(m=>JSON.parse(m[1])).find(x=>x && x['@type']==='Article');
+assert.ok(article,'Article fixture required');
+assert.equal(article.datePublished,'2026-10-22','Preserve historical publication date');
+const originalDate='Diterbitkan '+formatDate(article.datePublished)+'; diperbarui '+formatDate(article.dateModified);
+const oldIso=new Date(Date.parse(article.dateModified+'T00:00:00Z')-86400000).toISOString().slice(0,10);
+const staleDate='Diterbitkan '+formatDate(article.datePublished)+'; diperbarui '+formatDate(oldIso);
 
 function executeWithHtmlTransform(transform) {
   let replaced = false;
@@ -45,7 +54,7 @@ console.log('PASS baseline draft dates consistent, including prose');
 const stale = executeWithHtmlTransform(x => {
   assert.equal(x.split(originalDate).length - 1, 1, 'Exact source prose fixture');
   return x.replace(originalDate,
-    'Diterbitkan 22 Oktober 2026; diperbarui 23 Oktober 2026');
+    staleDate);
 });
 assert.ok(stale.replaced, 'Stale date fixture must actually change in memory');
 assert.equal(stale.exitCode, 2, 'Stale user-visible prose must fail closed');
