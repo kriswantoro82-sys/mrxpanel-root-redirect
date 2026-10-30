@@ -25,3 +25,13 @@ Allow a review of already-prepared on-page SEO improvements **without** the unfi
 - Locally prepared seven pages, each removing exactly seven missing-image meta tags.
 - Initial isolated candidate local test: text-only QA 7/7, negative 3/3; date-integrity review PASS but publication authorization HOLD.
 - This candidate is not pushed, merged, or deployed. Image selection and social-image rollout remain separate.
+
+## Addendum CMO Gen 8 — hardened validation, 30 Oct 2026
+
+**Actual GitHub review state:** Draft PR #25, stacked on Draft PR #19 (not a main/release PR). Review branch: `cmo/gen8-seo-text-only-review-20261030`.
+
+A review of the first candidate found a parser gap: checking for `<meta property="og:image"` only at the start of the tag could miss `<meta content="..." property="og:image"` and single-quoted/unquoted forms. The candidate now parses HTML attribute names and values without depending on their order, rejects all `og:image` / `twitter:image` variants, and checks OG URL equality to canonical.
+
+Expected local QA: **7/7 pages plus 8/8 negative fixtures**, followed by the full static suite and GitHub Actions checks. This hardening changes only a QA script and this review record; it does not approve images, modify page content, deploy or relax the separate owner/CTO and publication-date release gate.
+
+**Release dependency remains:** meaningful-content date reconciliation with the actual release date, documented rollback and explicit production release authorization. Do not change `datePublished` historically or auto-resubmit indexing requests.
