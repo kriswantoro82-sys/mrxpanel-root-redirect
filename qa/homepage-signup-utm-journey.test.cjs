@@ -32,7 +32,9 @@ async function close(){await new Promise(resolve=>server.close(resolve));}
   ];
   for(const item of cases){
    const context=await browser.newContext({javaScriptEnabled:item.js,serviceWorkers:'block'});
-   let outgoingToReal=0, memberRequests=0;
+   const trackerUrl='https://mrxpanel-tracker.mrxpanel01.workers.dev/tracker-v1.js';
+   let trackerIntercepted=0, memberRequests=0;
+   const unauthorizedHosts=[];
    await context.route('**/*',route=>{
     const uri=new URL(route.request().url());
     if(uri.hostname==='127.0.0.1' && uri.port===String(port)) return route.continue();
@@ -40,8 +42,14 @@ async function close(){await new Promise(resolve=>server.close(resolve));}
      memberRequests++;
      return route.fulfill({status:200,contentType:'text/html',body:'<!doctype html><title>ISOLATED_MEMBER_MOCK</title>'});
     }
-    outgoingToReal++;
-    return route.fulfill({status:200,contentType:'application/javascript',body:''});
+    // Only the known MRXPANEL tracker may be mocked. Unknown third-party requests
+    // must fail the review instead of being silently treated as successful scripts.
+    if(uri.href===trackerUrl && route.request().resourceType()==='script'){
+     trackerIntercepted++;
+     return route.fulfill({status:200,contentType:'application/javascript',body:''});
+    }
+    unauthorizedHosts.push(uri.origin);
+    return route.abort('blockedbyclient');
    });
    const page=await context.newPage();
    await page.goto('http://127.0.0.1:'+port+'/'+item.query,{waitUntil:'domcontentloaded',timeout:12000});
@@ -54,8 +62,10 @@ async function close(){await new Promise(resolve=>server.close(resolve));}
    assert.equal(page.url(),'https://member.mrxpanel.com/'+(item.js?item.expectQuery:''),item.name+': destination');
    assert.equal(await page.title(),'ISOLATED_MEMBER_MOCK',item.name+': mock loaded');
    assert.equal(memberRequests,1,item.name+': one Member navigation');
+   assert.deepEqual(unauthorizedHosts,[],item.name+': unexpected third-party host blocked');
+   assert.equal(trackerIntercepted,item.js?1:0,item.name+': expected only the known tracker script');
    await context.close();
-   console.log('HOME_SIGNUP_MEMBER_CASE_PASS='+item.name+'|EXTERNAL_REQUESTS_INTERCEPTED='+outgoingToReal);
+   console.log('HOME_SIGNUP_MEMBER_CASE_PASS='+item.name+'|TRACKER_INTERCEPTED='+trackerIntercepted+'|UNKNOWN_HOSTS='+unauthorizedHosts.length);
   }
   console.log('HOME_SIGNUP_MEMBER_ISOLATED_QA_PASS='+cases.length+'/'+cases.length+'|REAL_MEMBER_REQUESTS=0');
  }finally{if(browser)await browser.close();await close();}
