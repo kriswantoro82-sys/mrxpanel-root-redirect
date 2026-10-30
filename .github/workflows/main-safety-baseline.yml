@@ -1,0 +1,23 @@
+name: MRXPANEL Main Safety Baseline
+# A universal, read-only and stable check for later branch protection.
+# Required-check rules must be explicitly configured by authorized repository owner.
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize, edited, ready_for_review, converted_to_draft]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  main-safety-baseline:
+    name: main-safety-baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout source for static QA
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify canonical, sitemap, links, dates, and local OG image assets
+        run: node qa/main-safety-baseline.cjs --self-test
