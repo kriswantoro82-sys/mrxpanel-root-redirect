@@ -29,6 +29,17 @@ function read(rootPath,relative,overrides){
  const override=overrides.get(relative);
  return override===undefined?fs.readFileSync(path.join(rootPath,relative),'utf8'):override;
 }
+function verifyPublishingBoundary(overrides=new Map()){
+ assert.ok(!fs.existsSync(path.join(root,'.nojekyll')),'GitHub Pages Jekyll must not be disabled');
+ const cfg=read(root,'_config.yml',overrides);
+ assert.match(cfg,/^exclude:\s*$/m,'missing explicit Jekyll exclude configuration');
+ const excluded=new Set([...cfg.matchAll(/^\s+-\s+([A-Za-z0-9._/-]+)\s*$/gm)].map(m=>m[1]));
+ for(const folder of ['qa','review','scripts']){
+  assert.ok(excluded.has(folder),'GitHub Pages excludes missing internal folder: '+folder);
+  assert.ok(fs.statSync(path.join(root,folder)).isDirectory(),'expected internal directory: '+folder);
+ }
+ return {excludedInternalFolders:3};
+}
 function targetFile(url){
  if(url.protocol!=='https:'||url.host!=='mrxpanel.com'||url.search||url.hash)throw Error('non-canonical sitemap URL: '+url);
  const pathname=decodeURIComponent(url.pathname);
@@ -41,6 +52,7 @@ function hasLocalFile(relative){
  return fs.existsSync(f)&&fs.statSync(f).isFile();
 }
 function analyze(overrides=new Map()){
+ const publishing=verifyPublishingBoundary(overrides);
  const map=read(root,'sitemap.xml',overrides);
  const matches=[...map.matchAll(/<url>\s*<loc>([^<]+)<\/loc>\s*<lastmod>([^<]+)<\/lastmod>\s*<\/url>/gi)];
  assert.ok(matches.length>=7,'fewer than 7 existing SEO routes in sitemap');
@@ -122,7 +134,8 @@ function analyze(overrides=new Map()){
   assert.ok(b.length>=22&&b[0]===0&&b[1]===0&&b[2]===1&&b[3]===0,'invalid ICO signature');
  }
  return {sitemapRoutes:routes.size,articleSchemas:articleCount,linksChecked:anchorCount,
-  metadataImagesChecked:imageCount,reachableSeoRoutes:reachable.size,networkCalls:0,filesWritten:0};
+  metadataImagesChecked:imageCount,reachableSeoRoutes:reachable.size,
+  excludedInternalFolders:publishing.excludedInternalFolders,networkCalls:0,filesWritten:0};
 }
 try{
  const report=analyze();
@@ -138,7 +151,11 @@ try{
   assert.throws(()=>analyze(new Map([['sitemap.xml',
    fs.readFileSync(path.join(root,'sitemap.xml'),'utf8').replace('<lastmod>2026-10-24</lastmod>',
    '<lastmod>2026-02-30</lastmod>')]])),/invalid lastmod/);
-  console.log('MAIN_SAFETY_BASELINE_NEGATIVE_PASS=3/3');
+  const cfg=fs.readFileSync(path.join(root,'_config.yml'),'utf8');
+  assert.ok(cfg.includes('  - review\n'),'expected Jekyll publishing exclusion fixture');
+  assert.throws(()=>analyze(new Map([['_config.yml',cfg.replace('  - review\n','')]])),
+   /excludes missing internal folder: review/);
+  console.log('MAIN_SAFETY_BASELINE_NEGATIVE_PASS=4/4');
  }
  console.log('MAIN_SAFETY_BASELINE_PASS='+JSON.stringify(report));
 }catch(e){console.error('MAIN_SAFETY_BASELINE_FAIL|'+e.message);process.exitCode=2}

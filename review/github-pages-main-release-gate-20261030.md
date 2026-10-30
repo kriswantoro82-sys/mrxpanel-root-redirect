@@ -30,3 +30,11 @@
 - Google can take time to recrawl; no repeated indexing requests or sitemap submission unless independently justified.
 
 **Status: REVIEW_READY | PRODUCTION_RELEASE_HOLD.** No live deployment, branch-policy mutation, review approval, payment, or GSC mutation performed.
+
+## Site publishing boundary found during CTO technical pre-review (30 October 2026)
+
+**Finding:** GitHub Pages is configured to publish the repository root through Jekyll. PR #25 introduces non-website QA scripts and review notes in ordinary top-level folders `qa/`, `review/`, and `scripts/`. Jekyll by default can copy non-underscore, non-dot source folders into the published site, resulting in unnecessary public site artifacts and SEO crawl pollution.
+
+**Candidate-only correction:** Add root `_config.yml` with `exclude` entries for `qa`, `review`, `scripts` plus Jekyll v3 traditional defaults (`Gemfile`, `Gemfile.lock`, `node_modules`, `vendor`). Do not disable Jekyll with `.nojekyll`. Extend universal `qa/main-safety-baseline.cjs` to require the publishing exclusions and deliberately reject missing `review` exclusion. Targeted local test PASS; negative checks 4/4. This correction does not remove files from the public GitHub **repository**, only requests exclusion from the generated **website**.
+
+**Verification limitation:** No local Jekyll runtime was installed on Office. After an authorized release, verify the actual GitHub Pages build and GET that public website paths under `/qa/`, `/review/`, `/scripts/` return 404 while all seven SEO routes, `sitemap.xml`, `CNAME` behavior and `robots.txt` remain intact. Never assert production isolation based solely on static config check.
