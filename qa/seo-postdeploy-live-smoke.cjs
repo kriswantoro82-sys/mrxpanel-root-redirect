@@ -36,7 +36,8 @@ function validMemberBridge(html, route, mode) {
   if(mode==='baseline'&&utm)return {pass:false,reason:'UTM_NOT_BASELINE',utm};
   const seconds=mode==='postdeploy'&&route==='/signup/'&&utm?3:0;
   const expected=String(seconds)+'; url=https://member.mrxpanel.com/';
-  if(content!==expected)return {pass:false,reason:'REFRESH_DESTINATION_OR_DELAY',utm,content};
+  const normalized=content.trim().replace(/\s*;\s*url\s*=\s*/i,'; url=');
+  if(normalized!==expected)return {pass:false,reason:'REFRESH_DESTINATION_OR_DELAY',utm,content};
   if(!/<a\b[^>]*href=["']https:\/\/member\.mrxpanel\.com\/["']/i.test(html))
     return {pass:false,reason:'MISSING_OFFICIAL_FALLBACK_LINK',utm};
   if(utm) {
@@ -65,6 +66,7 @@ if (process.argv.includes('--self-test')) {
   assert.ok(validMemberBridge(legacy,'/signup/','baseline').pass);
   assert.ok(validMemberBridge(legacy,'/signup/','postdeploy').pass);
   assert.ok(validMemberBridge(legacy,'/signin/','postdeploy').pass);
+  assert.ok(validMemberBridge(legacy.replace('0; url=','0;url='),'/signin/','postdeploy').pass);
   assert.ok(validMemberBridge(modern,'/signup/','postdeploy').pass);
   assert.equal(validMemberBridge(modern,'/signup/','baseline').pass,false);
   assert.equal(validMemberBridge(modern,'/signin/','postdeploy').pass,false);
@@ -74,7 +76,7 @@ if (process.argv.includes('--self-test')) {
   assert.equal(validMemberBridge(modern.replace('values.length !== 1','values.length === 0'),'/signup/','postdeploy').pass,false);
   assert.equal(validMemberBridge(modern.replace('window.location.replace(destination.href);',''),'/signup/','postdeploy').pass,false);
   assert.equal(validMemberBridge(modern.replace('<a id="member-area-link" href="https://member.mrxpanel.com/">Member</a>',''),'/signup/','postdeploy').pass,false);
-  console.log('MEMBER_BRIDGE_POSTDEPLOY_REGRESSION_PASS=12/12');
+  console.log('MEMBER_BRIDGE_POSTDEPLOY_REGRESSION_PASS=13/13');
 
   console.log('PUBLISH_BOUNDARY_SMOKE_NEGATIVE_PASS=3/3');
   process.exit(0);
