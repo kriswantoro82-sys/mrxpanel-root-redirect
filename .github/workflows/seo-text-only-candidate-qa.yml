@@ -5,11 +5,15 @@ on:
   pull_request:
     types: [opened, edited, synchronize, reopened, ready_for_review, converted_to_draft]
     branches: [main]
+  push:
+    branches: [cmo/gen8-seo-text-only-review-20261030]
 permissions:
   contents: read
 jobs:
   validate-text-only:
-    if: github.event.pull_request.head.ref == 'cmo/gen8-seo-text-only-review-20261030'
+    if: >-
+      (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'cmo/gen8-seo-text-only-review-20261030') ||
+      (github.event_name == 'push' && github.ref_name == 'cmo/gen8-seo-text-only-review-20261030')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
