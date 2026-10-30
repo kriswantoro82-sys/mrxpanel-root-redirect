@@ -82,17 +82,25 @@ function simulate(date,overrides={}){
 }
 try{
  if(process.argv.includes('--self-test')){
-  const v=simulate('2026-10-30');
+  const sourceSitemap=fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');
+  const knownDates=[...sourceSitemap.matchAll(/<lastmod>(\d{4}-\d{2}-\d{2})<\/lastmod>/g)].map(m=>m[1]);
+  assert.equal(knownDates.length,7,'Expected seven dated sitemap routes');
+  const latest=knownDates.sort().at(-1);
+  const previewDate=new Date(Date.parse(latest+'T00:00:00Z')+86400000).toISOString().slice(0,10);
+  const v=simulate(previewDate);
   assert.equal(v.changes.length,4);
   assert.equal(v.changes.filter(x=>x.htmlChanged).length,3);
   assert.throws(()=>simulate('2026-02-30'),/VALID_PREVIEW_DATE_REQUIRED/);
   assert.throws(()=>simulate('2026-10-01'),/predates/);
   const file='cara-menggunakan-panel-smm/index.html';
   const original=fs.readFileSync(path.join(root,file),'utf8');
-  assert.throws(()=>simulate('2026-10-30',{[file]:original.replace('Diperbarui 24 Oktober 2026','Diperbarui 23 Oktober 2026')}),/visible time/);
+  const current=articleInfo(original,'/cara-menggunakan-panel-smm/').dateModified;
+  const wrong=new Date(Date.parse(current+'T00:00:00Z')-86400000).toISOString().slice(0,10);
+  const altered=replaceOne(original,'Diperbarui '+idDate(current),'Diperbarui '+idDate(wrong),'visible-date negative fixture');
+  assert.throws(()=>simulate(previewDate,{[file]:altered}),/visible time/);
   assert.equal(articleInfo(fs.readFileSync(path.join(root,'api-panel-smm-reseller/index.html'),'utf8'),
    '/api-panel-smm-reseller/').datePublished,'2026-10-24');
-  console.log('SEO_DATE_PREVIEW_SELF_TEST_PASS|SELECTIVE=4|NEGATIVE=3|FILES_WRITTEN=0');
+  console.log('SEO_DATE_PREVIEW_SELF_TEST_PASS|SELECTIVE=4|NEGATIVE=3|FILES_WRITTEN=0|HYPOTHETICAL_DATE='+previewDate);
  }else{
   const arg=process.argv.find(x=>x.startsWith('--date='));
   assert.ok(arg,'Provide hypothetical --date=YYYY-MM-DD');
