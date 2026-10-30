@@ -56,3 +56,22 @@ Verifikasi HTTP GET read-only, tanpa mengikuti redirect:
 Sitemap XML berada dalam contoh laporan *crawled not indexed* lama; sitemap **bukan halaman konten yang perlu masuk hasil pencarian**, sehingga jangan melakukan perubahan/permintaan indeks khusus untuk sitemap. Laporan GSC dengan "halaman perujuk tidak terdeteksi" tidak meniadakan tautan internal yang bisa dibuktikan dengan GET HTML (3 sumber live, 6 sumber kandidat Draft).
 
 **Kesimpulan tindakan:** Tidak ada dasar untuk mengubah aturan redirect, canonical, robots, atau menebak tanggal pembaruan. Satu-satunya langkah yang berpotensi berdampak pada kalkulator saat ini ialah memublikasikan konten + internal link yang sudah ada di Draft PR #25 sesudah persetujuan rilis, lalu memantau inspeksi; Google tidak menjamin index. No merge, deploy, resubmit sitemap, validation, or indexing request.
+
+## Verifikasi GSC pada masing-masing dari tujuh URL utama — 30 Oktober 2026
+
+Lima URL berikut diverifikasi ulang **langsung lewat fitur URL Inspection** di browser Google Search Console Office, menggunakan ikon "Periksa URL" pada baris daftar URL terindeks. Semua halaman cocok dengan URL yang diminta, memperlihatkan status "URL ada di Google" / "Halaman diindeks":
+1. https://mrxpanel.com/
+2. https://mrxpanel.com/panduan-reseller/
+3. https://mrxpanel.com/cara-menggunakan-panel-smm/
+4. https://mrxpanel.com/memilih-provider-smm/
+5. https://mrxpanel.com/api-panel-smm-reseller/
+
+Hasil dua inspeksi langsung sebelumnya pada tanggal yang sama tetap berlaku:
+6. https://mrxpanel.com/apa-itu-panel-smm/ — **INDEXED**, HTTPS valid dan Breadcrumb valid.
+7. https://mrxpanel.com/kalkulator-harga-jual-reseller-smm/ — **NOT_INDEXED**, klasifikasi *Di-crawl - saat ini tidak diindeks*, Googlebot berhasil mengambil halaman 26 Oktober 2026 19:22:03 dan pengindeksan diizinkan.
+
+**Ringkasan tepat untuk tujuh URL utama: 6 terindeks / 1 belum terindeks.** Ini bukan klaim bahwa seluruh properti Search Console memiliki enam URL total; angka laporan agregat 7 terindeks / 21 tidak terindeks terakhir diperbarui 23 Oktober dan mungkin tertunda. Tidak perlu memperbaiki ulang lima halaman yang sudah terindeks.
+
+Prioritas praktis satu-satunya di tujuh URL saat ini: kalkulator. Pada produksi sudah ada tiga halaman berisi tautan ke kalkulator; kandidat Draft PR #25 menambah tiga tautan yang relevan, menghasilkan enam halaman sumber. Hal tersebut dapat memperjelas konteks internal linking tetapi **tidak menjamin Google memilih untuk mengindeks kalkulator**.
+
+Pemeriksaan bersifat READ-ONLY; tidak ada tombol Minta Pengindeksan, Validasi Perbaikan, Uji URL Aktif, deploy, merge, perubahan sitemap, atau rotasi auth yang dijalankan. Bukti proses inspeksi berada di folder audit Office: gsc_five_remaining_url_inspect_readonly_20261030.cjs; hanya script untuk halaman GSC yang ditemukan dalam indeks yang dipakai. CDP membuka dan menutup tab sementara miliknya sendiri. Tanggal modifikasi konten dan rilis produksi tetap memerlukan otorisasi tersendiri.
