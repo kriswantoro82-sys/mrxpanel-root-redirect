@@ -39,3 +39,20 @@ Audit HTTP GET publik (tanpa auth) atas tujuh halaman SEO, semua HTTP 200, canon
 5. Sesudah rilis berizin, pantau URL Inspection kalkulator serta relevansi tautan internal, bukan hanya nilai agregat GSC yang tertunda.
 
 Dibuat khusus sebagai bukti audit dan catatan QA; tidak ada data sensitif atau tindakan administratif GSC.
+
+## Pemeriksaan lanjutan GSC dan redirect (30 Oktober 2026)
+
+**Jangan menyamakan data laporan 23 Oktober dengan inspeksi URL terbaru.** Daftar indeks agregat bertanggal 23 Oktober 2026 berisi 7 URL terindeks dan 21 URL tidak terindeks. Contoh daftar indeks lama mencantumkan https://mrxpanel.com/ (home), /api-panel-smm-reseller/, /memilih-provider-smm/, /cara-menggunakan-panel-smm/, /panduan-reseller/, http://mrxpanel.com/apa-itu-panel-smm/, dan Member Area. Ini bukan verifikasi baru untuk setiap URL.
+
+Dua inspeksi langsung (terbaru) berhasil: HTTPS /apa-itu-panel-smm/ terindeks, sementara /kalkulator-harga-jual-reseller-smm/ belum. Upaya menginspeksi tujuh URL melalui input toolbar GSC tidak berhasil menjaga fokus input, sehingga **tidak boleh diklaim tujuh URL telah diverifikasi langsung**. Pemeriksaan lain dapat memakai ikon Inspeksi URL pada baris laporan yang valid, tanpa klik Minta Pengindeksan.
+
+Verifikasi HTTP GET read-only, tanpa mengikuti redirect:
+- http://mrxpanel.com/apa-itu-panel-smm/ → **301** ke https://mrxpanel.com/apa-itu-panel-smm/.
+- http://mrxpanel.com/kalkulator-harga-jual-reseller-smm/ → **301** ke https://mrxpanel.com/kalkulator-harga-jual-reseller-smm/.
+- https://www.mrxpanel.com/apa-itu-panel-smm/ → **301** ke https://mrxpanel.com/apa-itu-panel-smm/.
+- https://mrxpanel.com/sitemap.xml → **200** (application/xml).
+- https://mrxpanel.com/robots.txt → **200** (text/plain).
+
+Sitemap XML berada dalam contoh laporan *crawled not indexed* lama; sitemap **bukan halaman konten yang perlu masuk hasil pencarian**, sehingga jangan melakukan perubahan/permintaan indeks khusus untuk sitemap. Laporan GSC dengan "halaman perujuk tidak terdeteksi" tidak meniadakan tautan internal yang bisa dibuktikan dengan GET HTML (3 sumber live, 6 sumber kandidat Draft).
+
+**Kesimpulan tindakan:** Tidak ada dasar untuk mengubah aturan redirect, canonical, robots, atau menebak tanggal pembaruan. Satu-satunya langkah yang berpotensi berdampak pada kalkulator saat ini ialah memublikasikan konten + internal link yang sudah ada di Draft PR #25 sesudah persetujuan rilis, lalu memantau inspeksi; Google tidak menjamin index. No merge, deploy, resubmit sitemap, validation, or indexing request.
