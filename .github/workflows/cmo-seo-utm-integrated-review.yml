@@ -1,22 +1,15 @@
 name: MRXPANEL PR26 SEO + UTM isolated integration
+# Candidate-only checks: PR26 -> PR25 review, or final PR25 -> main.
+# Job guards below prevent candidate-specific requirements on unrelated main PRs.
 on:
   pull_request:
-    branches: [cmo/gen8-seo-text-only-review-20261030]
-    paths:
-      - 'index.html'
-      - 'signup/index.html'
-      - 'qa/signup-utm-bridge-review.test.cjs'
-      - 'qa/signup-utm-bridge-browser.test.cjs'
-      - 'qa/homepage-signup-utm-journey.test.cjs'
-      - 'scripts/seo_review_check.py'
-      - '_config.yml'
-      - 'qa/seo-pages-artifact.test.cjs'
-      - 'qa/main-safety-baseline.cjs'
-      - '.github/workflows/cmo-seo-utm-integrated-review.yml'
+    types: [opened, reopened, synchronize, edited, ready_for_review]
+    branches: [main, cmo/gen8-seo-text-only-review-20261030]
 permissions:
   contents: read
 jobs:
   static-and-source-pins:
+    if: github.event.pull_request.base.ref == 'cmo/gen8-seo-text-only-review-20261030' || github.event.pull_request.head.ref == 'cmo/gen8-seo-text-only-review-20261030'
     runs-on: ubuntu-24.04
     timeout-minutes: 6
     steps:
@@ -27,6 +20,7 @@ jobs:
         with:
           node-version: '22'
       - name: Confirm exact unchanged SEO PR25 base before integration
+        if: github.event.pull_request.base.ref == 'cmo/gen8-seo-text-only-review-20261030'
         shell: bash
         run: |
           set -euo pipefail
@@ -37,6 +31,7 @@ jobs:
           python3 scripts/seo_review_check.py
           node qa/signup-utm-bridge-review.test.cjs
   mock-only-browser-integration:
+    if: github.event.pull_request.base.ref == 'cmo/gen8-seo-text-only-review-20261030' || github.event.pull_request.head.ref == 'cmo/gen8-seo-text-only-review-20261030'
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
@@ -57,6 +52,7 @@ jobs:
 
   pages-output-boundary:
     name: pages-output-boundary
+    if: github.event.pull_request.base.ref == 'cmo/gen8-seo-text-only-review-20261030' || github.event.pull_request.head.ref == 'cmo/gen8-seo-text-only-review-20261030'
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     permissions:
