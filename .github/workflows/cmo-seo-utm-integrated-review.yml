@@ -1,0 +1,53 @@
+name: MRXPANEL PR26 SEO + UTM isolated integration
+on:
+  pull_request:
+    branches: [cmo/gen8-seo-text-only-review-20261030]
+    paths:
+      - 'index.html'
+      - 'signup/index.html'
+      - 'qa/signup-utm-bridge-review.test.cjs'
+      - 'qa/signup-utm-bridge-browser.test.cjs'
+      - 'qa/homepage-signup-utm-journey.test.cjs'
+      - 'scripts/seo_review_check.py'
+      - '.github/workflows/cmo-seo-utm-integrated-review.yml'
+permissions:
+  contents: read
+jobs:
+  static-and-source-pins:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm exact unchanged SEO PR25 base before integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin refs/heads/cmo/gen8-seo-text-only-review-20261030
+          test "$(git rev-parse FETCH_HEAD)" = "3923395cba9ea758947963d3a87b5f1414afb4da"
+      - name: Check exact static SEO and signup safety assertions
+        run: |
+          python3 scripts/seo_review_check.py
+          node qa/signup-utm-bridge-review.test.cjs
+  mock-only-browser-integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Chromium QA dependency
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Verify browser redirect and JS-disabled fallback with intercepted Member
+        run: node qa/signup-utm-bridge-browser.test.cjs
+      - name: Verify exact combined homepage CTA through signup to isolated Member
+        run: node qa/homepage-signup-utm-journey.test.cjs
