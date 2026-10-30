@@ -1,0 +1,37 @@
+name: MRXPANEL OG7 Draft Review Integrity
+# PR27 review-only: success never authorizes deploying the asset.
+on:
+  push:
+    branches:
+      - review/og7-on-pr25-unapproved-20261031
+  pull_request:
+    branches:
+      - cmo/gen8-seo-text-only-review-20261030
+permissions:
+  contents: read
+jobs:
+  review-only-gate:
+    if: >-
+      (github.event_name == 'push' && github.ref_name == 'review/og7-on-pr25-unapproved-20261031') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'review/og7-on-pr25-unapproved-20261031')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout without persisted credentials, include exact PR25 baseline
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify seven pages and explicit HOLD flags
+        run: node qa/og-seven-pr27-gate.cjs --mode=review
+      - name: Ensure production release gate fails closed on unapproved artwork
+        shell: bash
+        run: |
+          set -euo pipefail
+          if node qa/og-seven-pr27-gate.cjs --mode=release > /tmp/release-gate.log 2>&1; then
+            echo "ERROR: unapproved OG7 was accepted for production"; exit 1
+          fi
+          if ! grep -q 'OG7_GATE_FAIL:RELEASE_HOLD_OWNER_APPROVAL_MISSING' /tmp/release-gate.log; then
+            echo "ERROR: release gate failed for unexpected reason"; cat /tmp/release-gate.log; exit 1
+          fi
+          echo 'OG7_REVIEW_QA=PASS; OG7_PRODUCTION_RELEASE=HOLD; NO_DEPLOY'
