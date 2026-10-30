@@ -104,14 +104,36 @@ def audit_registration_bridge() -> None:
     assert '<meta name="robots" content="noindex,follow">' in signup, (
         "Signup: preserve noindex for the bridge"
     )
-    assert '<meta http-equiv="refresh" content="0; url=' + member_root + '">' in signup, (
-        "Signup: meta refresh must target the currently supported Member Area root"
+    # The approved PR22 bridge allows JS to forward bounded campaign labels;
+    # when JS is disabled, a 3-second meta-refresh still targets the fixed root.
+    assert signup.count('<meta http-equiv="refresh" content="3; url=' + member_root + '">') == 1, (
+        "Signup: JS-disabled fallback must refresh after 3 seconds to the fixed Member Area root"
     )
-    assert 'window.location.replace("' + member_root + '")' in signup, (
-        "Signup: JS redirect must match the supported Member Area root"
+    # The JS redirect may add only bounded UTM fields, never a custom target,
+    # auth token, recovery path, or arbitrary destination from the query string.
+    assert signup.count('<script id="signup-utm-bridge">') == 1 and signup.count("<script") == 1, (
+        "Signup: expected exactly one pinned UTM bridge script"
     )
-    assert '<a href="' + member_root + '">Buka Member Area MRXPANEL</a>' in signup, (
-        "Signup: accessible manual fallback link missing or mismatched"
+    assert signup.count("new URL('https://member.mrxpanel.com/')") == 1, (
+        "Signup: JavaScript destination must be the fixed Member Area root"
+    )
+    assert signup.count("window.location.replace(destination.href)") == 1, (
+        "Signup: JavaScript redirect must use the bounded destination"
+    )
+    assert "['utm_source', 'utm_medium', 'utm_campaign', 'utm_content']" in signup, (
+        "Signup: campaign field allowlist changed"
+    )
+    assert "values.length !== 1" in signup and "/^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/" in signup, (
+        "Signup: duplicate and oversized campaign values must remain rejected"
+    )
+    assert "destination.searchParams.set(key, value)" in signup, (
+        "Signup: bounded campaign labels must be set on the fixed URL"
+    )
+    assert "document.getElementById('member-area-link').href = destination.href;" in signup, (
+        "Signup: JS-updated manual fallback destination must match redirect"
+    )
+    assert '<a id="member-area-link" href="' + member_root + '">Buka Member Area MRXPANEL</a>' in signup, (
+        "Signup: accessible no-JS manual fallback must use the fixed Member root"
     )
     assert "Daftar Akun Baru" in signup, (
         "Signup: tell customers where to find the real registration form"
@@ -145,7 +167,7 @@ def audit_registration_bridge() -> None:
     )
     print("EMAIL_CONFIRMATION_HELP_DRAFT_QA_PASS|FAQ=1|SUPPORTED_MEMBER_ROOT=1")
 
-    print("SIGNUP_BRIDGE_DRAFT_QA_PASS|NOINDEX=1|URL_CONSISTENT=3|DEEP_LINK=HOLD")
+    print("SIGNUP_BRIDGE_DRAFT_QA_PASS|NOINDEX=1|UTM_ALLOWLIST=4|NOJS_ROOT=1|DEEP_LINK=HOLD")
 
 
 def audit() -> None:
