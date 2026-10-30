@@ -23,11 +23,59 @@ const internalSourcePaths = [
 ];
 const isMissingPublicSource = (status, finalUrl, expectedUrl) =>
   status === 404 && finalUrl === expectedUrl;
+
+// Check either approved bridge shape, but never mistake a 3-second timeout alone
+// for a working bounded-UTM handoff. Source-only PR26 changes are not live proof.
+function validMemberBridge(html, route, mode) {
+  const refresh = [...html.matchAll(/<meta\b[^>]*http-equiv=["']refresh["'][^>]*>/gi)];
+  if(refresh.length!==1)return {pass:false,reason:'REFRESH_COUNT',utm:false};
+  const content = refresh[0][0].match(/\bcontent=["']([^"']+)["']/i)?.[1]||'';
+  const utmScripts=[...html.matchAll(/<script\b[^>]*id=["']signup-utm-bridge["'][^>]*>/gi)];
+  const utm=utmScripts.length===1;
+  if(utmScripts.length>1 || (route!=='/signup/'&&utm))return {pass:false,reason:'UNEXPECTED_UTM_SCRIPT',utm};
+  if(mode==='baseline'&&utm)return {pass:false,reason:'UTM_NOT_BASELINE',utm};
+  const seconds=mode==='postdeploy'&&route==='/signup/'&&utm?3:0;
+  const expected=String(seconds)+'; url=https://member.mrxpanel.com/';
+  if(content!==expected)return {pass:false,reason:'REFRESH_DESTINATION_OR_DELAY',utm,content};
+  if(!/<a\b[^>]*href=["']https:\/\/member\.mrxpanel\.com\/["']/i.test(html))
+    return {pass:false,reason:'MISSING_OFFICIAL_FALLBACK_LINK',utm};
+  if(utm) {
+    const requirements=[
+      "new URL('https://member.mrxpanel.com/')",
+      "['utm_source', 'utm_medium', 'utm_campaign', 'utm_content']",
+      'values.length !== 1',
+      'window.location.replace(destination.href)',
+      "document.getElementById('member-area-link').href = destination.href;"
+    ];
+    if(!requirements.every(x=>html.includes(x)))
+      return {pass:false,reason:'UTM_BRIDGE_SOURCE_SAFETY_MISSING',utm};
+    if(!/\/\^\[A-Za-z0-9\]\[A-Za-z0-9_.-\]\{0,127\}\$\//.test(html))
+      return {pass:false,reason:'UTM_LENGTH_AND_CHAR_GUARD_MISSING',utm};
+  }
+  return {pass:true,reason:'PINNED_OFFICIAL_MEMBER_BRIDGE',utm,delaySeconds:seconds};
+}
+
 if (process.argv.includes('--self-test')) {
   assert.ok(isMissingPublicSource(404,base+'/qa/main-safety-baseline.cjs',base+'/qa/main-safety-baseline.cjs'));
   assert.equal(isMissingPublicSource(200,base+'/qa/main-safety-baseline.cjs',base+'/qa/main-safety-baseline.cjs'),false);
   assert.equal(isMissingPublicSource(403,base+'/qa/main-safety-baseline.cjs',base+'/qa/main-safety-baseline.cjs'),false);
   assert.equal(isMissingPublicSource(404,base+'/unexpected/',base+'/qa/main-safety-baseline.cjs'),false);
+  const legacy='<meta http-equiv="refresh" content="0; url=https://member.mrxpanel.com/"><a href="https://member.mrxpanel.com/">Member</a>';
+  const modern='<meta http-equiv="refresh" content="3; url=https://member.mrxpanel.com/"><a id="member-area-link" href="https://member.mrxpanel.com/">Member</a><script id="signup-utm-bridge">var destination = new URL(\'https://member.mrxpanel.com/\'); [\'utm_source\', \'utm_medium\', \'utm_campaign\', \'utm_content\']; values.length !== 1; /^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/; document.getElementById(\'member-area-link\').href = destination.href; window.location.replace(destination.href);</script>';
+  assert.ok(validMemberBridge(legacy,'/signup/','baseline').pass);
+  assert.ok(validMemberBridge(legacy,'/signup/','postdeploy').pass);
+  assert.ok(validMemberBridge(legacy,'/signin/','postdeploy').pass);
+  assert.ok(validMemberBridge(modern,'/signup/','postdeploy').pass);
+  assert.equal(validMemberBridge(modern,'/signup/','baseline').pass,false);
+  assert.equal(validMemberBridge(modern,'/signin/','postdeploy').pass,false);
+  assert.equal(validMemberBridge(modern.replace('3; url=', '0; url='),'/signup/','postdeploy').pass,false);
+  assert.equal(validMemberBridge(legacy.replace('0; url=', '3; url='),'/signup/','postdeploy').pass,false);
+  assert.equal(validMemberBridge(modern.replace('member.mrxpanel.com/','example.invalid/'),'/signup/','postdeploy').pass,false);
+  assert.equal(validMemberBridge(modern.replace('values.length !== 1','values.length === 0'),'/signup/','postdeploy').pass,false);
+  assert.equal(validMemberBridge(modern.replace('window.location.replace(destination.href);',''),'/signup/','postdeploy').pass,false);
+  assert.equal(validMemberBridge(modern.replace('<a id="member-area-link" href="https://member.mrxpanel.com/">Member</a>',''),'/signup/','postdeploy').pass,false);
+  console.log('MEMBER_BRIDGE_POSTDEPLOY_REGRESSION_PASS=12/12');
+
   console.log('PUBLISH_BOUNDARY_SMOKE_NEGATIVE_PASS=3/3');
   process.exit(0);
 }
@@ -93,9 +141,9 @@ async function get(url) {
   for(const route of ['/signup/','/signin/']){
     try{
       const p=await get(base+route);
-      const hasMetaRefresh=/<meta\s+http-equiv="refresh"\s+content="0;\s*url=https:\/\/member\.mrxpanel\.com\/"/i.test(p.body);
-      record('member bridge '+route,p.status===200&&p.url===base+route&&hasMetaRefresh,
-        {status:p.status,finalUrl:p.url,hasMetaRefresh});
+      const bridge=validMemberBridge(p.body,route,mode);
+      record('member bridge '+route,p.status===200&&p.url===base+route&&bridge.pass,
+        {status:p.status,finalUrl:p.url,...bridge});
     }catch(e){record('member bridge '+route,false,{error:e.message})}
   }
   if(mode==='postdeploy'){
