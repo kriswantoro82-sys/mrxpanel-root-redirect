@@ -29,6 +29,9 @@ jobs:
       - name: Check exact static SEO and signup safety assertions
         run: |
           python3 scripts/seo_review_check.py
+          node qa/seo-publication-date-preview.cjs --self-test
+          node qa/seo-visible-prose-date-negative.test.cjs
+          node qa/seo-schema-only-date-negative.test.cjs
           node qa/signup-utm-bridge-review.test.cjs
   mock-only-browser-integration:
     if: github.event.pull_request.base.ref == 'cmo/gen8-seo-text-only-review-20261030' || github.event.pull_request.head.ref == 'cmo/gen8-seo-text-only-review-20261030'
