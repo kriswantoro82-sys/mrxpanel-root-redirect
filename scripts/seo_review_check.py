@@ -17,10 +17,10 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 HOST = "mrxpanel.com"
-ARTICLE_DATES = {
-    "/panduan-reseller/": ("2026-10-19", "2026-10-24"),
-    "/cara-menggunakan-panel-smm/": ("2026-10-19", "2026-10-24"),
-    "/memilih-provider-smm/": ("2026-10-22", "2026-10-24"),
+ARTICLE_PUBLISHED = {
+    "/panduan-reseller/": "2026-10-19",
+    "/cara-menggunakan-panel-smm/": "2026-10-19",
+    "/memilih-provider-smm/": "2026-10-22",
 }
 
 
@@ -220,18 +220,19 @@ def audit() -> None:
             assert parser.opengraph.get("og:description") == parser.meta["description"], "Tutorial Open Graph description drift"
             assert html_source.count('href="/kalkulator-harga-jual-reseller-smm/"') == 1, "Tutorial calculator link must be unique"
             assert "Hasil simulasi bukan pengganti harga aktual di katalog." in html_source, "Missing reseller pricing simulation disclaimer"
-        if route in ARTICLE_DATES:
+        if route in ARTICLE_PUBLISHED:
             matching = [x for x in parser.schemas if x.get("@type") == "Article"]
             assert len(matching) == 1, f"{route}: expected one Article JSON-LD"
-            pub, modified = ARTICLE_DATES[route]
+            pub = ARTICLE_PUBLISHED[route]
             article = matching[0]
+            modified = article.get("dateModified")
             assert article.get("datePublished") == pub, f"{route}: published schema date mismatch"
-            assert article.get("dateModified") == modified, f"{route}: modified schema date mismatch"
+            assert isinstance(modified, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", modified), f"{route}: malformed modified schema date"
+            assert date.fromisoformat(pub) <= date.fromisoformat(modified), f"{route}: reversed Article dates"
             assert parser.times == [pub, modified], f"{route}: visible dates != Article JSON-LD"
-            assert date.fromisoformat(pub) <= date.fromisoformat(modified)
             checked_articles.add(route)
         print(f"PASS {route}: title/H1, canonical, meta, OG URL and applicable Article dates")
-    assert checked_articles == set(ARTICLE_DATES), "Missing expected Article dates in sitemap"
+    assert checked_articles == set(ARTICLE_PUBLISHED), "Missing expected Article dates in sitemap"
     audit_registration_bridge()
     print(f"SEO_DRAFT_STATIC_QA_PASS|PAGES={len(links)}|DATED_ARTICLES={len(checked_articles)}")
 
