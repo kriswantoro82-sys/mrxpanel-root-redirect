@@ -151,8 +151,10 @@ try{
   assert.throws(()=>analyze(new Map([['sitemap.xml',
    fs.readFileSync(path.join(root,'sitemap.xml'),'utf8').replace('<lastmod>2026-10-24</lastmod>',
    '<lastmod>2026-02-30</lastmod>')]])),/invalid lastmod/);
-  const cfg=fs.readFileSync(path.join(root,'_config.yml'),'utf8');
+  const cfg=fs.readFileSync(path.join(root,'_config.yml'),'utf8').replace(/\r\n/g,'\n');
   assert.ok(cfg.includes('  - review\n'),'expected Jekyll publishing exclusion fixture');
+  assert.doesNotThrow(()=>analyze(new Map([['_config.yml',cfg.replace(/\n/g,'\r\n')]])),'CRLF publishing exclusion should be valid');
+  console.log('MAIN_SAFETY_BASELINE_CRLF_POSITIVE_PASS=1/1');
   assert.throws(()=>analyze(new Map([['_config.yml',cfg.replace('  - review\n','')]])),
    /excludes missing internal folder: review/);
   console.log('MAIN_SAFETY_BASELINE_NEGATIVE_PASS=4/4');
