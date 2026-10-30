@@ -50,8 +50,9 @@ assert.equal(m.base_pr,25);
 assert.equal(m.image_path,pngPath);
 if(m.production_authorized===true&&m.owner_visual_approved!==true)fail("PROD_FLAG_WITHOUT_VISUAL_APPROVAL");
 for(const path of paths){
- const live=fs.readFileSync(path,"utf8");
- const baseline=cp.execFileSync("git",["show",base+":"+path],{encoding:"utf8",maxBuffer:2*1024*1024});
+ const normalizeEol=s=>s.replace(/\r\n/g,"\n");
+ const live=normalizeEol(fs.readFileSync(path,"utf8"));
+ const baseline=normalizeEol(cp.execFileSync("git",["show",base+":"+path],{encoding:"utf8",maxBuffer:2*1024*1024}));
  if(body(live)!==body(baseline))fail("BODY_MODIFIED:"+path);
  if(JSON.stringify(keyHead(live))!==JSON.stringify(keyHead(baseline)))fail("CANONICAL_TITLE_JSONLD_H1_CHANGED:"+path);
  for(const k of kinds){
