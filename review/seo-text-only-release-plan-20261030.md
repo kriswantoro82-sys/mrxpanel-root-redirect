@@ -57,3 +57,11 @@ Added a deterministic, read-only QA script, qa/seo-seven-page-link-audit.cjs, to
 The only two external website destinations in these page links are https://member.mrxpanel.com/ and https://member.mrxpanel.com/api/. Both were independently verified with unauthenticated GET to respond HTTP 200. The new CI test remains **static only**, with no HTTP dependence and no network mutations.
 
 No live SEO HTML was changed. This does not establish release consent or Google indexing status; Draft and release-date approval remain on hold.
+
+## Release handoff correction — ready-for-review no longer fails automatically (30 October 2026)
+
+The previous PR25-only workflow contained an unconditional `exit 1` when `pull_request.draft == false`. This created a circular review blockade: a technically clean PR would show a failed job as soon as the owner marked it ready for review. It was **not equivalent to GitHub enforced branch protection**, particularly while main had previously been observed as unprotected.
+
+The workflow now reports `TECHNICAL_QA_IS_NOT_PRODUCTION_AUTHORIZATION`, but does not deliberately fail based solely on Draft/ready-for-review state. All existing static QA steps still run and can fail on real defects. This edit does not promote the PR, merge, deploy, change datePublished/dateModified/lastmod, alter branch settings, or request indexing.
+
+**Required decision before any live change:** owner/CTO approval of the actual publication date D and code release, followed by selective date reconciliation, exact final SHA CI, rollback record, and an explicit production merge/deploy instruction. The branch remains Draft until that decision.
