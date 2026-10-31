@@ -39,3 +39,27 @@ jobs:
             echo "ERROR: release gate failed for unexpected reason"; cat /tmp/release-gate.log; exit 1
           fi
           echo 'OG7_REVIEW_QA=PASS; OG7_PRODUCTION_RELEASE=HOLD; NO_DEPLOY'
+
+  synthetic-approved-staging-gate:
+    name: synthetic-approved-staging-gate
+    if: >-
+      (github.event_name == 'push' && github.ref_name == 'review/og7-on-pr25-unapproved-20261031') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'review/og7-on-pr25-unapproved-20261031')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout complete history (no push credentials)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Use pinned Python runtime
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install reproducible image fixture dependency
+        run: python -m pip install "Pillow==12.3.0"
+      - name: Test both selected-artwork states in disposable worktree
+        run: python qa/og-seven-staged-synthetic-qa.py
