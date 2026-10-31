@@ -8,8 +8,8 @@
 const fs=require("node:fs"),cp=require("node:child_process"),crypto=require("node:crypto");
 const assert=require("node:assert/strict");
 const mode=process.argv[2]||"--mode=review";
-const review=mode==="--mode=review", release=mode==="--mode=release";
-if(!review&&!release)throw Error("MODE_MUST_BE_REVIEW_OR_RELEASE");
+const review=mode==="--mode=review", staged=mode==="--mode=approved-artwork-review", release=mode==="--mode=release";
+if(!review&&!staged&&!release)throw Error("MODE_MUST_BE_REVIEW_STAGED_OR_RELEASE");
 const manifestPath="review/og-seven-on-pr25-20261031/REVIEW_ONLY_RELEASE_GATE.json";
 const m=JSON.parse(fs.readFileSync(manifestPath,"utf8"));
 const base="462b3c7e8d09864b307fc69096c51d1df2a0edaa";
@@ -76,14 +76,29 @@ if(review){
  console.log("OG7_PRODUCTION_RELEASE=HOLD");
  process.exit(0);
 }
-if(m.owner_visual_approved!==true||m.production_authorized!==true||m.release_blocked!==false)
- fail("RELEASE_HOLD_OWNER_APPROVAL_MISSING");
-if(!["A","B"].includes(m.selected_candidate))fail("RELEASE_HOLD_CHOICE_MISSING");
+// A staged, owner-approved image is still NOT a production release.
+// Validate both images and metadata BEFORE any deployment authorization is granted.
+if(staged){
+ if(m.owner_visual_approved!==true||m.production_authorized!==false
+   ||m.release_blocked!==true||m.asset_included!==true||m.asset_live!==false)
+   fail("STAGED_REVIEW_FLAG_MISMATCH");
+}else{
+ if(m.owner_visual_approved!==true||m.production_authorized!==true
+   ||m.release_blocked!==false||m.asset_included!==true||m.asset_live!==false)
+   fail("RELEASE_HOLD_OWNER_APPROVAL_MISSING");
+}
+if(!["A","B"].includes(m.selected_candidate))fail("ARTWORK_CHOICE_MISSING");
 const selected=m["candidate_"+m.selected_candidate+"_sha256"];
-if(!/^[0-9a-f]{64}$/.test(selected))fail("RELEASE_HOLD_HASH_MISSING");
-if(!fs.existsSync(pngPath))fail("RELEASE_HOLD_PNG_MISSING");
+if(!/^[0-9a-f]{64}$/.test(selected))fail("ARTWORK_HASH_MISSING");
+if(!fs.existsSync(pngPath))fail("ARTWORK_PNG_MISSING");
 const bytes=fs.readFileSync(pngPath);
 if(bytes.subarray(0,8).toString("hex")!=="89504e470d0a1a0a")fail("BAD_PNG_HEADER");
 if(bytes.readUInt32BE(16)!==1200||bytes.readUInt32BE(20)!==630)fail("PNG_DIMENSIONS");
 if(crypto.createHash("sha256").update(bytes).digest("hex")!==selected)fail("PNG_HASH_NOT_APPROVED");
+if(staged){
+ console.log("OG7_STAGED_ARTWORK_REVIEW_PASS=7/7|CANDIDATE="+m.selected_candidate);
+ console.log("OWNER_ARTWORK_APPROVED_BUT_PRODUCTION_AUTHORIZED=FALSE");
+ console.log("OG7_PRODUCTION_RELEASE=HOLD");
+ process.exit(0);
+}
 console.log("OG7_RELEASE_ARTIFACT_GATE=PASS");

@@ -22,9 +22,13 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Verify seven pages and explicit HOLD flags
-        run: node qa/og-seven-pr27-gate.cjs --mode=review
-      - name: Ensure production release gate fails closed on unapproved artwork
+      - name: Verify seven pages in unapproved or approved-but-held staging state
+        shell: bash
+        run: |
+          set -euo pipefail
+          mode=$(node -e 'const m=require("./review/og-seven-on-pr25-20261031/REVIEW_ONLY_RELEASE_GATE.json"); if(m.owner_visual_approved===false)process.stdout.write("review"); else if(m.owner_visual_approved===true)process.stdout.write("approved-artwork-review"); else process.exit(1)')
+          node qa/og-seven-pr27-gate.cjs "--mode=$mode"
+      - name: Ensure production gate fails closed without separate deployment authorization
         shell: bash
         run: |
           set -euo pipefail
