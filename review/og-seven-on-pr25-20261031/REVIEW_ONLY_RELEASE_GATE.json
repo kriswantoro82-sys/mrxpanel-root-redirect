@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "kind": "MRXPANEL_OG7_ON_PR25_REVIEW_ONLY",
+  "base_pr": 25,
+  "base_commit": "462b3c7e8d09864b307fc69096c51d1df2a0edaa",
+  "og_source_pr": 18,
+  "og_reference_commit": "57b164a7103a24778e89ca2c4c9f5b4393b67c55",
+  "owner_visual_approved": false,
+  "production_authorized": false,
+  "release_blocked": true,
+  "asset_included": false,
+  "asset_live": false,
+  "image_path": "assets/mrxpanel-og-1200x630.png",
+  "candidate_A_sha256": "ea2c611f2c5302561cd93afe15d0679f66926015d4d31c71bdb1b1b68d7ce929",
+  "candidate_B_sha256": "1508d09e5c99850457e5dd05501f7bd22bdc398d21c415592351267bf3ca74c8",
+  "blockers": [
+    "Owner must explicitly choose exact artwork A or B and approve",
+    "CTO review of approved PNG SHA256, 1200x630 and 7 HTML changes",
+    "Append exact PNG to authorized review branch and run full CI",
+    "Owner explicit separate permission to deploy"
+  ],
+  "warning": "This draft deliberately references an image not yet included or published. Never merge as-is."
+}

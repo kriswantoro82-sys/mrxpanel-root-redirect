@@ -1,0 +1,65 @@
+name: MRXPANEL OG7 Draft Review Integrity
+# PR27 review-only: success never authorizes deploying the asset.
+on:
+  push:
+    branches:
+      - review/og7-on-pr25-unapproved-20261031
+  pull_request:
+    branches:
+      - cmo/gen8-seo-text-only-review-20261030
+permissions:
+  contents: read
+jobs:
+  review-only-gate:
+    if: >-
+      (github.event_name == 'push' && github.ref_name == 'review/og7-on-pr25-unapproved-20261031') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'review/og7-on-pr25-unapproved-20261031')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout without persisted credentials, include exact PR25 baseline
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify seven pages in unapproved or approved-but-held staging state
+        shell: bash
+        run: |
+          set -euo pipefail
+          mode=$(node -e 'const m=require("./review/og-seven-on-pr25-20261031/REVIEW_ONLY_RELEASE_GATE.json"); if(m.owner_visual_approved===false)process.stdout.write("review"); else if(m.owner_visual_approved===true)process.stdout.write("approved-artwork-review"); else process.exit(1)')
+          node qa/og-seven-pr27-gate.cjs "--mode=$mode"
+      - name: Ensure production gate fails closed without separate deployment authorization
+        shell: bash
+        run: |
+          set -euo pipefail
+          if node qa/og-seven-pr27-gate.cjs --mode=release > /tmp/release-gate.log 2>&1; then
+            echo "ERROR: unapproved OG7 was accepted for production"; exit 1
+          fi
+          if ! grep -q 'OG7_GATE_FAIL:RELEASE_HOLD_OWNER_APPROVAL_MISSING' /tmp/release-gate.log; then
+            echo "ERROR: release gate failed for unexpected reason"; cat /tmp/release-gate.log; exit 1
+          fi
+          echo 'OG7_REVIEW_QA=PASS; OG7_PRODUCTION_RELEASE=HOLD; NO_DEPLOY'
+
+  synthetic-approved-staging-gate:
+    name: synthetic-approved-staging-gate
+    if: >-
+      (github.event_name == 'push' && github.ref_name == 'review/og7-on-pr25-unapproved-20261031') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'review/og7-on-pr25-unapproved-20261031')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout complete history (no push credentials)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Use pinned Python runtime
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install reproducible image fixture dependency
+        run: python -m pip install "Pillow==12.3.0"
+      - name: Test both selected-artwork states in disposable worktree
+        run: python qa/og-seven-staged-synthetic-qa.py
