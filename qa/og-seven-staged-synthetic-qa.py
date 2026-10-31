@@ -18,8 +18,8 @@ def run(command, cwd, require_success=True, expected_failure=None):
                        stderr=subprocess.STDOUT, check=False)
     if require_success and p.returncode != 0:
         raise AssertionError(f"Unexpected failure {command}: {p.stdout}")
-    if not require_success and (p.returncode == 0 or
-                                (expected_failure and expected_failure not in p.stdout)):
+    if not require_success and expected_failure is not None and (
+            p.returncode == 0 or expected_failure not in p.stdout):
         raise AssertionError(f"Expected failure {expected_failure}: {p.stdout}")
     return p.stdout
 
