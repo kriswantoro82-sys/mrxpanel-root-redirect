@@ -8,7 +8,7 @@
   "owner_visual_approved": true,
   "production_authorized": false,
   "release_blocked": true,
-  "asset_included": false,
+  "asset_included": true,
   "asset_live": false,
   "image_path": "assets/mrxpanel-og-1200x630.png",
   "candidate_A_sha256": "ea2c611f2c5302561cd93afe15d0679f66926015d4d31c71bdb1b1b68d7ce929",
@@ -18,6 +18,6 @@
     "Verify final review SHA with all CI; no production permission yet",
     "Owner must separately and explicitly authorize any production merge/deploy"
   ],
-  "warning": "Owner approved visual B only. Until exact PNG is staged and CTO reviews, PR27 remains DRAFT; production is not authorized.",
+  "warning": "Approved B image staged in PR27 review only; no production authorization.",
   "selected_candidate": "B"
 }
