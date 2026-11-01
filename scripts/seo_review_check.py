@@ -85,33 +85,33 @@ class AuditHTML(HTMLParser):
 
 
 def audit_registration_bridge() -> None:
-    """Keep signup CTAs safe until the Member Web deep link is deployed.
+    """Verify the now-live direct registration route and safe legacy bridges.
 
-    Production currently ignores ?auth=register and opens the login screen.
-    This is a draft-only guard, not a live auth or registration test.
+    Member Web accepted ?auth=register in production on 1 Nov 2026;
+    live smoke 14/14 passed. This is still a static QA check, not a deploy.
     """
     homepage = (ROOT / "index.html").read_text(encoding="utf-8-sig")
     signup = (ROOT / "signup" / "index.html").read_text(encoding="utf-8-sig")
     member_root = "https://member.mrxpanel.com/"
-    unsupported = "https://member.mrxpanel.com/?auth=register"
+    register_url = "https://member.mrxpanel.com/?auth=register"
 
     assert homepage.count('href="/signup/"') >= 1, (
         "Homepage: signup CTA missing or bypassing the approved bridge"
     )
-    assert unsupported not in homepage and unsupported not in signup, (
-        "Unreleased register deep link must not be used by homepage or signup bridge"
+    assert register_url in signup, (
+        "Approved live register deep link must appear in signup bridge"
     )
     assert '<meta name="robots" content="noindex,follow">' in signup, (
         "Signup: preserve noindex for the bridge"
     )
-    assert '<meta http-equiv="refresh" content="0; url=' + member_root + '">' in signup, (
-        "Signup: meta refresh must target the currently supported Member Area root"
+    assert '<meta http-equiv="refresh" content="0; url=' + register_url + '">' in signup, (
+        "Signup: meta refresh must open direct registration"
     )
-    assert 'window.location.replace("' + member_root + '")' in signup, (
-        "Signup: JS redirect must match the supported Member Area root"
+    assert 'window.location.replace("' + register_url + '")' in signup, (
+        "Signup: JS redirect must open direct registration"
     )
-    assert '<a href="' + member_root + '">Buka Member Area MRXPANEL</a>' in signup, (
-        "Signup: accessible manual fallback link missing or mismatched"
+    assert '<a href="' + register_url + '">Buka Formulir Daftar MRXPANEL</a>' in signup, (
+        "Signup: accessible manual direct registration fallback missing or mismatched"
     )
     assert "Daftar Akun Baru" in signup, (
         "Signup: tell customers where to find the real registration form"
@@ -145,7 +145,7 @@ def audit_registration_bridge() -> None:
     )
     print("EMAIL_CONFIRMATION_HELP_DRAFT_QA_PASS|FAQ=1|SUPPORTED_MEMBER_ROOT=1")
 
-    print("SIGNUP_BRIDGE_DRAFT_QA_PASS|NOINDEX=1|URL_CONSISTENT=3|DEEP_LINK=HOLD")
+    print("SIGNUP_BRIDGE_STATIC_QA_PASS|NOINDEX=1|URL_CONSISTENT=3|DEEP_LINK=LIVE_VERIFIED")
 
 
 def audit() -> None:
