@@ -12,7 +12,7 @@ const review=mode==="--mode=review", staged=mode==="--mode=approved-artwork-revi
 if(!review&&!staged&&!release)throw Error("MODE_MUST_BE_REVIEW_STAGED_OR_RELEASE");
 const manifestPath="review/og-seven-on-pr25-20261031/REVIEW_ONLY_RELEASE_GATE.json";
 const m=JSON.parse(fs.readFileSync(manifestPath,"utf8"));
-const base="462b3c7e8d09864b307fc69096c51d1df2a0edaa";
+const base="112e5ea6278106e57183d437cdfc92b91c29e849";
 const pngPath="assets/mrxpanel-og-1200x630.png";
 const url="https://mrxpanel.com/"+pngPath;
 const paths=[

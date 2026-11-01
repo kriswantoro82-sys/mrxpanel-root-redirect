@@ -2,7 +2,7 @@
   "schema_version": 1,
   "kind": "MRXPANEL_OG7_ON_PR25_REVIEW_ONLY",
   "base_pr": 25,
-  "base_commit": "462b3c7e8d09864b307fc69096c51d1df2a0edaa",
+  "base_commit": "112e5ea6278106e57183d437cdfc92b91c29e849",
   "og_source_pr": 18,
   "og_reference_commit": "57b164a7103a24778e89ca2c4c9f5b4393b67c55",
   "owner_visual_approved": true,
