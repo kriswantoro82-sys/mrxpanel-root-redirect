@@ -1,0 +1,82 @@
+name: MRXPANEL one-time approved B staging, draft only
+on:
+  push:
+    branches: [review/og7-on-pr25-unapproved-20261031]
+    paths: [review/og-seven-on-pr25-20261031/REVIEW_ONLY_RELEASE_GATE.json]
+permissions:
+  contents: write
+concurrency:
+  group: cmo-og27-owner-b-stage-only
+  cancel-in-progress: false
+jobs:
+  stage-exact-b:
+    if: github.event.head_commit.message == 'chore(cmo): record owner approval B for PR27 draft staging'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact review branch push
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Confirm safe branch and owner approval only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/review/og7-on-pr25-unapproved-20261031"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test ! -e assets/mrxpanel-og-1200x630.png
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          m=json.loads(Path("review/og-seven-on-pr25-20261031/REVIEW_ONLY_RELEASE_GATE.json").read_text())
+          assert m["owner_visual_approved"] is True and m["selected_candidate"] == "B"
+          assert m["asset_included"] is False and m["asset_live"] is False
+          assert m["production_authorized"] is False and m["release_blocked"] is True
+          assert m["candidate_B_sha256"] == "1508d09e5c99850457e5dd05501f7bd22bdc398d21c415592351267bf3ca74c8"
+          PY
+      - name: Setup pinned Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned renderer
+        run: python -m pip install "Pillow==12.3.0"
+      - name: Build exact B from preapproval source and validate staged gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git cat-file -e "a37bf4b0aa54feaa7c8c5c0518df9d0c020f176f^{commit}"
+          git worktree add --detach "$RUNNER_TEMP/og27-preapproved-source" "a37bf4b0aa54feaa7c8c5c0518df9d0c020f176f"
+          python "$RUNNER_TEMP/og27-preapproved-source/review/og-seven-on-pr25-20261031/generate-review-A-B.py" "$RUNNER_TEMP/og27-owner-b-images"
+          git worktree remove --force "$RUNNER_TEMP/og27-preapproved-source"
+          test "$(sha256sum "$RUNNER_TEMP/og27-owner-b-images/B_circular-MRX.png" | cut -d' ' -f1)" = "1508d09e5c99850457e5dd05501f7bd22bdc398d21c415592351267bf3ca74c8"
+          mkdir -p assets
+          cp "$RUNNER_TEMP/og27-owner-b-images/B_circular-MRX.png" assets/mrxpanel-og-1200x630.png
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("review/og-seven-on-pr25-20261031/REVIEW_ONLY_RELEASE_GATE.json")
+          m=json.loads(p.read_text())
+          assert m["owner_visual_approved"] and m["selected_candidate"]=="B"
+          assert not m["asset_included"] and not m["asset_live"]
+          assert not m["production_authorized"] and m["release_blocked"]
+          m["asset_included"]=True
+          m["warning"]="Approved B image staged in PR27 review only; no production authorization."
+          p.write_text(json.dumps(m,indent=2)+"\n")
+          PY
+          node qa/og-seven-pr27-gate.cjs --mode=approved-artwork-review
+          if node qa/og-seven-pr27-gate.cjs --mode=release >/tmp/og-release-attempt.log 2>&1; then
+            echo "FORBIDDEN_RELEASE_GATE_PASSED"; exit 1
+          fi
+          grep -q "RELEASE_HOLD_OWNER_APPROVAL_MISSING" /tmp/og-release-attempt.log
+      - name: Commit only image and manifest to draft review branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git add -- assets/mrxpanel-og-1200x630.png review/og-seven-on-pr25-20261031/REVIEW_ONLY_RELEASE_GATE.json
+          git -c user.name='MAYA_CMO Review Staging' -c user.email='github-actions[bot]@users.noreply.github.com' commit -m "chore(cmo): stage approved B PNG in PR27 review branch only"
+          git push origin "HEAD:refs/heads/review/og7-on-pr25-unapproved-20261031"
+          echo "OWNER_APPROVED_B_STAGED_IN_DRAFT=TRUE"
+          echo "NO_PRODUCTION_MERGE_OR_DEPLOY=TRUE"
