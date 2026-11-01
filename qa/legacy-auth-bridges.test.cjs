@@ -7,17 +7,22 @@ const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const ROOT = path.resolve(__dirname, '..');
-const destination = 'https://member.mrxpanel.com/';
+const memberRoot = 'https://member.mrxpanel.com/';
+const registerUrl = 'https://member.mrxpanel.com/?auth=register';
 for (const route of ['auth/login', 'auth/register']) {
   const html = fs.readFileSync(path.join(ROOT, route, 'index.html'), 'utf8');
+  const destination = route === 'auth/register' ? registerUrl : memberRoot;
   assert.match(html, /<html lang="id">/, route + ': lang id');
   assert.equal((html.match(/<meta name="robots" content="noindex,follow">/g) || []).length, 1,
     route + ': exactly one noindex,follow tag');
   assert.ok(html.includes('<meta http-equiv="refresh" content="0; url=' + destination + '">'),
-    route + ': keep existing Member Area redirect');
+    route + ': point to the approved Member Area destination');
   assert.ok(html.includes('<a href="' + destination + '">'), route + ': fallback link');
-  assert.ok(!/https:\/\/member\.mrxpanel\.com\/\?auth=register/i.test(html),
-    route + ': do not redirect to inactive registration deep link');
+  if (route === 'auth/login') {
+    assert.ok(!html.includes(registerUrl), route + ': login bridge must not become signup');
+  } else {
+    assert.ok(html.includes(registerUrl), route + ': direct registration must be available');
+  }
   assert.ok(!/<form\b|type=["']password["']/i.test(html),
     route + ': no fake login/register form');
   console.log('PASS ' + route + ': noindex, existing redirect, fallback, no auth form');
