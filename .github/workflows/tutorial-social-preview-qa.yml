@@ -1,0 +1,24 @@
+name: MRXPANEL Tutorial Social Preview Review
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cara-menggunakan-panel-smm/index.html'
+      - 'qa/tutorial-social-preview.test.cjs'
+      - '.github/workflows/tutorial-social-preview-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  social-meta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout draft article
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate metadata and Open Graph consistency offline
+        run: node qa/tutorial-social-preview.test.cjs

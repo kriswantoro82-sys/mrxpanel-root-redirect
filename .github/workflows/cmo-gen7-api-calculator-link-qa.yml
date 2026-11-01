@@ -1,0 +1,19 @@
+name: CMO Gen 7 API Calculator Link Review QA
+on:
+  pull_request:
+    paths:
+      - 'api-panel-smm-reseller/index.html'
+      - 'qa/cmo-gen7-api-calculator-link.test.cjs'
+      - '.github/workflows/cmo-gen7-api-calculator-link-qa.yml'
+permissions:
+  contents: read
+jobs:
+  static-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout for static review only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate calculator link, SEO metadata, disclaimer, negative cases
+        run: node qa/cmo-gen7-api-calculator-link.test.cjs

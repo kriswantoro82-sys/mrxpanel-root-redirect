@@ -1,0 +1,45 @@
+name: MRXPANEL Legacy Redirect and Favicon SEO QA
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'auth/login/index.html'
+      - 'auth/register/index.html'
+      - 'qa/legacy-auth-bridges.test.cjs'
+      - 'favicon.ico'
+      - 'favicon-mrx.svg'
+      - 'qa/favicon-ico.test.cjs'
+      - 'qa/legacy-auth-favicon-live-smoke.cjs'
+      - '.github/workflows/legacy-auth-bridges-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  legacy-bridges:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Read-only checkout of proposed changes
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify legacy redirect SEO safeguards
+        run: node qa/legacy-auth-bridges.test.cjs
+      - name: Verify MRXPANEL favicon at default browser path
+        run: node qa/favicon-ico.test.cjs
+      - name: Validate manual-only read-only public smoke script syntax
+        run: node --check qa/legacy-auth-favicon-live-smoke.cjs
+
+      - name: Verify exact reviewed ICO bytes before archival
+        run: |
+          test "$(git hash-object favicon.ico)" = "4db26c351c07812093558c0a6f022dd345414330"
+          test "$(sha256sum favicon.ico | awk '{print $1}')" = "d665d7c54f9af6c016be108b43be2d2de3965581326d377fc3f5a7b6795b2d07"
+      - name: Attach original ICO for independent review (not deploy)
+        uses: actions/upload-artifact@v4
+        with:
+          name: mrxpanel-pr21-favicon-ico-review
+          path: favicon.ico
+          if-no-files-found: error
+          retention-days: 7

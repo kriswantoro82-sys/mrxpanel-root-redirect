@@ -1,0 +1,36 @@
+name: MRXPANEL GitHub Pages Artifact Boundary QA
+# PR-only build preview. NEVER deploys or uploads generated website files.
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '_config.yml'
+      - '.github/workflows/seo-pages-artifact-qa.yml'
+      - 'qa/seo-pages-artifact.test.cjs'
+      - '**/index.html'
+      - 'sitemap.xml'
+      - 'CNAME'
+      - 'robots.txt'
+permissions:
+  contents: read
+jobs:
+  pages-output-qa:
+    name: pages-output-qa
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout proposed source only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate preview test and source boundary
+        run: |
+          node qa/main-safety-baseline.cjs --self-test
+          node qa/seo-pages-artifact.test.cjs --self-test
+      - name: Build preview with official GitHub Pages Jekyll tool
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+      - name: Reject internal source exposure in generated site
+        run: node qa/seo-pages-artifact.test.cjs --path=./_site

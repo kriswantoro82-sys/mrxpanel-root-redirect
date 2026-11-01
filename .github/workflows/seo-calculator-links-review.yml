@@ -1,0 +1,27 @@
+name: MRXPANEL Article Calculator Link QA
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apa-itu-panel-smm/index.html'
+      - 'cara-menggunakan-panel-smm/index.html'
+      - 'kalkulator-harga-jual-reseller-smm/index.html'
+      - 'sitemap.xml'
+      - 'qa/seo-article-calculator-links.cjs'
+      - '.github/workflows/seo-calculator-links-review.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contextual-links:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout review branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate article-to-calculator links offline
+        run: node qa/seo-article-calculator-links.cjs

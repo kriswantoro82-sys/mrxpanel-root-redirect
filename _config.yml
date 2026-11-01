@@ -1,0 +1,11 @@
+# GitHub Pages Jekyll: publish website files; do not expose internal QA/review scripts.
+# This config changes only the site's published output, not GitHub repository visibility.
+# Retain traditional Jekyll 3 default exclusions when defining an explicit list.
+exclude:
+  - qa
+  - review
+  - scripts
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
