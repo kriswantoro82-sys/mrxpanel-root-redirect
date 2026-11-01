@@ -35,7 +35,7 @@ jobs:
           if node qa/og-seven-pr27-gate.cjs --mode=release > /tmp/release-gate.log 2>&1; then
             echo "ERROR: unapproved OG7 was accepted for production"; exit 1
           fi
-          if ! grep -q 'OG7_GATE_FAIL:RELEASE_HOLD_OWNER_APPROVAL_MISSING' /tmp/release-gate.log; then
+          if ! grep -q 'OG7_GATE_FAIL:RELEASE_HOLD_EXTERNAL_REVIEW_AND_OWNER_AUTH_REQUIRED' /tmp/release-gate.log; then
             echo "ERROR: release gate failed for unexpected reason"; cat /tmp/release-gate.log; exit 1
           fi
           echo 'OG7_REVIEW_QA=PASS; OG7_PRODUCTION_RELEASE=HOLD; NO_DEPLOY'

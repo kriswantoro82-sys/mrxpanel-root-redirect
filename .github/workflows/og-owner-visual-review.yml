@@ -38,9 +38,29 @@ jobs:
           path: ${{ runner.temp }}/mrxpanel-og-owner-review-AB/*
           if-no-files-found: error
           retention-days: 7
-      - name: Report non-production gate
+      - name: Verify exact owner-approved B already staged in review branch
+        if: steps.state.outputs.review_only == 'false'
+        shell: bash
         run: |
-          echo "DESIGN_A_AND_B=REPRODUCIBLE"
-          echo "OWNER_VISUAL_REVIEW_ONLY=${{ steps.state.outputs.review_only }}"
+          set -euo pipefail
+          expected="1508d09e5c99850457e5dd05501f7bd22bdc398d21c415592351267bf3ca74c8"
+          actual=$(sha256sum assets/mrxpanel-og-1200x630.png | cut -d' ' -f1)
+          test "$actual" = "$expected"
+          python - <<'PY'
+          from PIL import Image
+          with Image.open("assets/mrxpanel-og-1200x630.png") as im:
+              assert im.size == (1200,630) and im.mode == "RGB"
+          PY
+          echo "APPROVED_B_EXISTING_ASSET_VERIFIED=TRUE"
+      - name: Report non-production gate accurately
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ steps.state.outputs.review_only }}" = "true" ]; then
+            echo "PREAPPROVAL_A_B_PREVIEW_REGENERATED=TRUE"
+          else
+            echo "PREAPPROVAL_A_B_PREVIEW_REGENERATION=SKIPPED"
+            echo "APPROVED_B_EXISTING_ASSET=CHECKSUM_VERIFIED"
+          fi
           echo "PRODUCTION_RELEASE=HOLD"
           echo "NO_SITE_DEPLOY_NO_GIT_WRITE"

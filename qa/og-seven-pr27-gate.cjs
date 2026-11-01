@@ -77,19 +77,20 @@ if(review){
  process.exit(0);
 }
 // A staged, owner-approved image is still NOT a production release.
-// Validate both images and metadata BEFORE any deployment authorization is granted.
+// Design B is the ONLY owner-approved release candidate; A is PRE-APPROVAL REVIEW ARTWORK.
+// The offline gate must NEVER authorize a deployment from editable manifest flags.
 if(staged){
  if(m.owner_visual_approved!==true||m.production_authorized!==false
    ||m.release_blocked!==true||m.asset_included!==true||m.asset_live!==false)
    fail("STAGED_REVIEW_FLAG_MISMATCH");
 }else{
- if(m.owner_visual_approved!==true||m.production_authorized!==true
-   ||m.release_blocked!==false||m.asset_included!==true||m.asset_live!==false)
-   fail("RELEASE_HOLD_OWNER_APPROVAL_MISSING");
+ // Independent GitHub reviewer identity and separate owner production permission
+ // cannot be verified by this offline manifest. Release always fails closed here.
+ fail("RELEASE_HOLD_EXTERNAL_REVIEW_AND_OWNER_AUTH_REQUIRED");
 }
-if(!["A","B"].includes(m.selected_candidate))fail("ARTWORK_CHOICE_MISSING");
-const selected=m["candidate_"+m.selected_candidate+"_sha256"];
-if(!/^[0-9a-f]{64}$/.test(selected))fail("ARTWORK_HASH_MISSING");
+if(m.selected_candidate!=="B")fail("ARTWORK_OWNER_SELECTED_B_ONLY");
+const selected="1508d09e5c99850457e5dd05501f7bd22bdc398d21c415592351267bf3ca74c8";
+if(m.candidate_B_sha256!==selected)fail("ARTWORK_B_MANIFEST_HASH_DRIFT");
 if(!fs.existsSync(pngPath))fail("ARTWORK_PNG_MISSING");
 const bytes=fs.readFileSync(pngPath);
 if(bytes.subarray(0,8).toString("hex")!=="89504e470d0a1a0a")fail("BAD_PNG_HEADER");

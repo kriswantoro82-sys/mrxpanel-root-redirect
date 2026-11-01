@@ -61,10 +61,25 @@ def main():
                 manifest_file.write_text(json.dumps(staged, indent=2) + "\n", encoding="utf-8")
                 asset_file.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(sources[label], asset_file)
+                if label == "A":
+                    test_gate(sandbox, "approved-artwork-review", "ARTWORK_OWNER_SELECTED_B_ONLY")
+                    checks += 1
+                    test_gate(sandbox, "release", "RELEASE_HOLD_EXTERNAL_REVIEW_AND_OWNER_AUTH_REQUIRED")
+                    checks += 1
+                    print("ARTWORK_A_REJECTED_AFTER_OWNER_B_APPROVAL=TRUE")
+                    continue
                 test_gate(sandbox, "approved-artwork-review")
                 checks += 1
-                test_gate(sandbox, "release", "RELEASE_HOLD_OWNER_APPROVAL_MISSING")
+                test_gate(sandbox, "release", "RELEASE_HOLD_EXTERNAL_REVIEW_AND_OWNER_AUTH_REQUIRED")
                 checks += 1
+
+                # Even toggled production flags cannot satisfy independent review.
+                release_flags = dict(staged)
+                release_flags.update(production_authorized=True, release_blocked=False)
+                manifest_file.write_text(json.dumps(release_flags, indent=2) + "\n", encoding="utf-8")
+                test_gate(sandbox, "release", "RELEASE_HOLD_EXTERNAL_REVIEW_AND_OWNER_AUTH_REQUIRED")
+                checks += 1
+                manifest_file.write_text(json.dumps(staged, indent=2) + "\n", encoding="utf-8")
 
                 # Wrong-but-valid image, wrong dimensions, and missing image must fail closed.
                 other = "B" if label == "A" else "A"
@@ -79,6 +94,14 @@ def main():
                 test_gate(sandbox, "approved-artwork-review", "ARTWORK_PNG_MISSING")
                 checks += 1
                 shutil.copyfile(sources[label], asset_file)
+
+                # A changed manifest checksum cannot override the code-pinned B SHA.
+                staged["candidate_B_sha256"] = "0" * 64
+                manifest_file.write_text(json.dumps(staged, indent=2) + "\n", encoding="utf-8")
+                test_gate(sandbox, "approved-artwork-review", "ARTWORK_B_MANIFEST_HASH_DRIFT")
+                checks += 1
+                staged["candidate_B_sha256"] = original["candidate_B_sha256"]
+                manifest_file.write_text(json.dumps(staged, indent=2) + "\n", encoding="utf-8")
 
                 # Staging never accepts production authorization or a claim of a live asset.
                 staged["production_authorized"] = True
