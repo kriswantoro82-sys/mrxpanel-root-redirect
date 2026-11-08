@@ -1,0 +1,26 @@
+name: MRXPANEL API reseller signup UTM review
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    branches: [main, cmo-gen12-api-signup-cta-review-20261107]
+    paths:
+      - 'api-panel-smm-reseller/index.html'
+      - 'signup/index.html'
+      - 'qa/api-reseller-signup-utm.test.cjs'
+      - '.github/workflows/api-reseller-signup-utm-review.yml'
+permissions:
+  contents: read
+jobs:
+  utm-static-review:
+    name: Offline UTM handoff regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify fixed registration host and bounded UTM handoff
+        run: node qa/api-reseller-signup-utm.test.cjs
