@@ -119,6 +119,23 @@
 <p class="muted">Disusun oleh MRXPANEL · 24 Oktober 2026. Informasi teknis mengikuti Pusat API resmi dan dapat berubah mengikuti versi layanan. Panduan ini tidak menjamin hasil layanan, keuntungan reseller, atau keberhasilan integrasi dengan setiap software.</p>
 </main>
 <footer><a href="/">&larr; Kembali ke beranda MRXPANEL</a> &middot; &copy; MRXPANEL</footer>
+<script id="api-reseller-signup-utm-v1">
+(function () {
+  'use strict';
+  // Forward bounded marketing labels only; never copy arbitrary or duplicate params.
+  var source = new URLSearchParams(window.location.search);
+  var safe = new URLSearchParams();
+  ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content'].forEach(function (key) {
+    var values = source.getAll(key);
+    if (values.length !== 1) return;
+    var value = values[0];
+    if (/^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/.test(value)) safe.set(key, value);
+  });
+  if (!safe.toString()) return;
+  var link = document.querySelector('a[href="/signup/"]');
+  if (link) link.setAttribute('href', '/signup/?' + safe.toString());
+})();
+</script>
 <script src="https://mrxpanel-tracker.mrxpanel01.workers.dev/tracker-v1.js" defer></script>
 </body>
 </html>
