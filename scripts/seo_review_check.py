@@ -104,15 +104,36 @@ def audit_registration_bridge() -> None:
     assert '<meta name="robots" content="noindex,follow">' in signup, (
         "Signup: preserve noindex for the bridge"
     )
-    assert '<meta http-equiv="refresh" content="0; url=' + register_url + '">' in signup, (
-        "Signup: meta refresh must open direct registration"
-    )
-    assert 'window.location.replace("' + register_url + '")' in signup, (
-        "Signup: JS redirect must open direct registration"
-    )
-    assert '<a href="' + register_url + '">Buka Formulir Daftar MRXPANEL</a>' in signup, (
-        "Signup: accessible manual direct registration fallback missing or mismatched"
-    )
+    # Both strictly gated variants open the same fixed, already-supported register URL.
+    # UTM-enabled variant delays *only the no-JS fallback* to let the allowlisted
+    # script redirect first; do not accept arbitrary delays or destinations.
+    utm_enabled = '<script id="signup-utm-direct-register-v1">' in signup
+    if utm_enabled:
+        assert signup.count('id="signup-utm-direct-register-v1"') == 1, (
+            "Signup: duplicate UTM bridge scripts"
+        )
+        assert '<meta http-equiv="refresh" content="3; url=' + register_url + '">' in signup, (
+            "Signup UTM: exact 3-second fixed-register no-JS fallback required"
+        )
+        assert "new URL('" + register_url + "')" in signup, (
+            "Signup UTM: pinned direct register destination missing"
+        )
+        assert "window.location.replace(destination.href);" in signup, (
+            "Signup UTM: one bounded redirect to pinned destination required"
+        )
+        assert '<a id="member-register-link" href="' + register_url + '">Buka Formulir Daftar MRXPANEL</a>' in signup, (
+            "Signup UTM: direct register manual fallback missing"
+        )
+    else:
+        assert '<meta http-equiv="refresh" content="0; url=' + register_url + '">' in signup, (
+            "Signup: meta refresh must open direct registration"
+        )
+        assert 'window.location.replace("' + register_url + '")' in signup, (
+            "Signup: JS redirect must open direct registration"
+        )
+        assert '<a href="' + register_url + '">Buka Formulir Daftar MRXPANEL</a>' in signup, (
+            "Signup: accessible manual direct registration fallback missing or mismatched"
+        )
     assert "Daftar Akun Baru" in signup, (
         "Signup: tell customers where to find the real registration form"
     )
