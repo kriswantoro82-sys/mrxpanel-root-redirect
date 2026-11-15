@@ -1,0 +1,28 @@
+name: MRXPANEL homepage signup UTM review
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    branches: [cmo-gen12-api-signup-utm-chain-review-20261108]
+    paths:
+      - 'index.html'
+      - 'signup/index.html'
+      - 'qa/homepage-signup-utm.test.cjs'
+      - '.github/workflows/homepage-signup-utm-review.yml'
+permissions:
+  contents: read
+jobs:
+  homepage-utm-review:
+    name: Read-only homepage UTM tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate homepage CTA and existing signup UTM bridge
+        run: node qa/homepage-signup-utm.test.cjs
+      - name: Preserve upstream API article UTM regression checks
+        run: node qa/api-reseller-signup-utm.test.cjs
